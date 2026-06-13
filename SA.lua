@@ -535,16 +535,12 @@ if isMobile then
             end
         end
     end)
-
-    close.MouseButton1Click:Connect(function()
-        main.Visible = false
-    end)
-else
-    close.MouseButton1Click:Connect(function()
-        gui:Destroy()
-        getgenv()[TRAP_UI_ID] = nil
-    end)
 end
+
+close.MouseButton1Click:Connect(function()
+    gui:Destroy()
+    getgenv()[TRAP_UI_ID] = nil
+end)
 
 local pcon = Instance.new("Frame")
 pcon.Name = "PCon"
@@ -1159,6 +1155,8 @@ local function CreateCardButton(parent, text, callback)
     return bttn
 end
 
+local ActiveToggles = {}
+
 local function CreateToggle(parent, text, defaultVal, saveKey, callback, colorPickers)
     local togFr = Instance.new("Frame")
     togFr.Size = UDim2.new(1, 0, 0, 32)
@@ -1258,8 +1256,13 @@ local function CreateToggle(parent, text, defaultVal, saveKey, callback, colorPi
         switchBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
 
-    local function doToggle()
-        toggled = not toggled
+    local function doToggle(forceFalse)
+        if forceFalse then
+            if not toggled then return end
+            toggled = false
+        else
+            toggled = not toggled
+        end
         if saveKey ~= nil and type(saveKey) == "string" then
             Config.Toggles[saveKey] = toggled
             SaveConfig()
@@ -1267,16 +1270,17 @@ local function CreateToggle(parent, text, defaultVal, saveKey, callback, colorPi
         if toggled then
             tws:Create(swcir, TweenInfo.new(0.2), { Position = UDim2.new(1, -14, 0.5, -6) }):Play()
             tws:Create(switchBg, TweenInfo.new(0.2), { BackgroundColor3 = SharedThemeColor }):Play()
-            Notify("Toggle Enabled", text .. " has been enabled.", 2)
+            if not forceFalse then Notify("Toggle Enabled", text .. " has been enabled.", 2) end
         else
             tws:Create(swcir, TweenInfo.new(0.2), { Position = UDim2.new(0, 2, 0.5, -6) }):Play()
             tws:Create(switchBg, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(40, 40, 40) }):Play()
-            Notify("Toggle Disabled", text .. " has been disabled.", 2)
+            if not forceFalse then Notify("Toggle Disabled", text .. " has been disabled.", 2) end
         end
-        if callback then callback(toggled) end
+        if callback then pcall(callback, toggled) end
     end
+    table.insert(ActiveToggles, doToggle)
 
-    switchBg.MouseButton1Click:Connect(doToggle)
+    switchBg.MouseButton1Click:Connect(function() doToggle() end)
 
     local waitingForKey = false
     keybtn.MouseButton1Click:Connect(function()
@@ -3785,3 +3789,11 @@ ApplyTheme()
 if tabs["Main"] then
     tabs["Main"].open()
 end
+
+gui.Destroying:Connect(function()
+    for _, fn in ipairs(ActiveToggles) do
+        pcall(fn, true)
+    end
+    if FOV_CIRCLE then pcall(function() FOV_CIRCLE:Remove() end) end
+    if ESP_HOLDER then pcall(function() ESP_HOLDER:Destroy() end) end
+end)
