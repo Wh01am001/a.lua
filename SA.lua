@@ -73,7 +73,11 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "TRAPUI"
 gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = pgui
+gui.DisplayOrder = 2147483647
+gui.IgnoreGuiInset = true
+
+local success, cg = pcall(function() return game:GetService("CoreGui") end)
+gui.Parent = (success and cg) and cg or pgui
 
 getgenv()[TRAP_UI_ID] = gui
 
@@ -656,10 +660,13 @@ local function ApplyTheme()
     end
 end
 
+local notifWidth = isMobile and 220 or 300
+local notifOffset = notifWidth + 20
+
 local NotifContainer = Instance.new("Frame")
 NotifContainer.Name = "NotifContainer"
-NotifContainer.Size = UDim2.new(0, 300, 1, -40)
-NotifContainer.Position = UDim2.new(1, -320, 0, 20)
+NotifContainer.Size = UDim2.new(0, notifWidth, 1, -40)
+NotifContainer.Position = UDim2.new(1, -notifOffset, 0, 20)
 NotifContainer.BackgroundTransparency = 1
 NotifContainer.ZIndex = 100
 NotifContainer.Parent = gui
@@ -672,13 +679,13 @@ UIListLayoutNotif.Parent = NotifContainer
 
 local function UpdateNotifPosition(pos)
     if pos == "Bottom Right" then
-        NotifContainer.Position = UDim2.new(1, -320, 0, 20)
+        NotifContainer.Position = UDim2.new(1, -notifOffset, 0, 20)
         UIListLayoutNotif.VerticalAlignment = Enum.VerticalAlignment.Bottom
     elseif pos == "Bottom Left" then
         NotifContainer.Position = UDim2.new(0, 20, 0, 20)
         UIListLayoutNotif.VerticalAlignment = Enum.VerticalAlignment.Bottom
     elseif pos == "Top Right" then
-        NotifContainer.Position = UDim2.new(1, -320, 0, 20)
+        NotifContainer.Position = UDim2.new(1, -notifOffset, 0, 20)
         UIListLayoutNotif.VerticalAlignment = Enum.VerticalAlignment.Top
     elseif pos == "Top Left" then
         NotifContainer.Position = UDim2.new(0, 20, 0, 20)
@@ -692,7 +699,7 @@ local function Notify(title, text, duration)
     duration = duration or 3
 
     local Notif = Instance.new("Frame")
-    Notif.Size = UDim2.new(1, 0, 0, 60)
+    Notif.Size = UDim2.new(1, 0, 0, isMobile and 45 or 60)
     Notif.BackgroundTransparency = 1
     Notif.Parent = NotifContainer
 
@@ -713,25 +720,27 @@ local function Notify(title, text, duration)
     nStroke.Parent = Content
 
     local nTitle = Instance.new("TextLabel")
-    nTitle.Size = UDim2.new(1, -20, 0, 20)
-    nTitle.Position = UDim2.new(0, 10, 0, 10)
+    nTitle.Size = UDim2.new(1, -20, 0, isMobile and 16 or 20)
+    nTitle.Position = UDim2.new(0, 10, 0, isMobile and 6 or 10)
     nTitle.BackgroundTransparency = 1
     nTitle.Font = SharedThemeFont or Enum.Font.GothamBold
     nTitle.Text = title
     nTitle.TextColor3 = SharedThemeColor or Color3.fromRGB(255, 120, 50)
-    nTitle.TextSize = 14
+    nTitle.TextSize = isMobile and 12 or 14
     nTitle.TextXAlignment = Enum.TextXAlignment.Left
+    nTitle.TextTruncate = Enum.TextTruncate.AtEnd
     nTitle.Parent = Content
 
     local nText = Instance.new("TextLabel")
-    nText.Size = UDim2.new(1, -20, 0, 20)
-    nText.Position = UDim2.new(0, 10, 0, 30)
+    nText.Size = UDim2.new(1, -20, 0, isMobile and 16 or 20)
+    nText.Position = UDim2.new(0, 10, 0, isMobile and 22 or 30)
     nText.BackgroundTransparency = 1
     nText.Font = SharedThemeFont or Enum.Font.Gotham
     nText.Text = text
     nText.TextColor3 = Color3.fromRGB(200, 200, 200)
-    nText.TextSize = 12
+    nText.TextSize = isMobile and 11 or 12
     nText.TextXAlignment = Enum.TextXAlignment.Left
+    nText.TextTruncate = Enum.TextTruncate.AtEnd
     nText.Parent = Content
 
     local inTween = tws:Create(Content, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
