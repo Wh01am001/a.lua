@@ -1,7 +1,8 @@
 if not getgenv().AntiCheatBypassExecuted then
     getgenv().AntiCheatBypassExecuted = true
     pcall(function()
-        loadstring(game:HttpGet("https://gist.githubusercontent.com/Wh01am001/b1096ae2280a45f52a7310f6ae8df69f/raw/e7ff2b7bec35701a7ea280aadb1b3c6cb6455b61/Anti.lua"))()
+        loadstring(game:HttpGet(
+            "https://gist.githubusercontent.com/Wh01am001/b1096ae2280a45f52a7310f6ae8df69f/raw/e7ff2b7bec35701a7ea280aadb1b3c6cb6455b61/Anti.lua"))()
     end) --anti cheat bypass
 end
 
@@ -315,7 +316,7 @@ if isfile and isfile(ConfigPath) then
     end)
 end
 
-if isMobile and Config.SizeX > 500 then
+if isMobile and Config.SizeX == 640 then
     Config.SizeX = 450
     Config.SizeY = 280
 end
@@ -1152,7 +1153,6 @@ local function CreateCardButton(parent, text, callback)
     end)
 
     bttn.MouseButton1Click:Connect(function()
-        Notify("Action", text .. " activated.", 2)
         if callback then callback() end
     end)
 
@@ -1272,7 +1272,7 @@ local function CreateToggle(parent, text, defaultVal, saveKey, callback, colorPi
         else
             toggled = not toggled
         end
-        if saveKey ~= nil and type(saveKey) == "string" then
+        if saveKey ~= nil and type(saveKey) == "string" and not forceFalse then
             Config.Toggles[saveKey] = toggled
             SaveConfig()
         end
@@ -3711,6 +3711,10 @@ local togBg = CreateToggle(ccif, "Enable Custom Image", false, "EnableImage", fu
     SaveConfig()
 end)
 togBg.Keybind.Visible = false
+if Config.Toggles and Config.Toggles["EnableImage"] ~= nil then
+    bgImg.Visible = Config.Toggles["EnableImage"]
+    Config.EnableImage = Config.Toggles["EnableImage"]
+end
 
 local sldTrans = CreateSlider(ccif, "Interface Transparency", 0, 100, 50, "Transparency", function(val)
     Config.Transparency = val
@@ -3765,6 +3769,9 @@ local togNotif = CreateToggle(cnotif, "Enable Notifications", true, "Notificatio
     SaveConfig()
 end)
 togNotif.Keybind.Visible = false
+if Config.Toggles and Config.Toggles["NotificationsEnabled"] ~= nil then
+    Config.NotificationsEnabled = Config.Toggles["NotificationsEnabled"]
+end
 
 local notifPosOptions = {
     { Name = "Bottom Right", Value = "Bottom Right" },
