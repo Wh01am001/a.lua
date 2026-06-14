@@ -2120,8 +2120,10 @@ UserInputService.InputChanged:Connect(function(input)
     if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local currentMousePos = Vector2.new(input.Position.X, input.Position.Y)
         local delta = currentMousePos - startMousePos
-        local newWidth = math.clamp(startSize.X + delta.X, 480, 900)
-        local newHeight = math.clamp(startSize.Y + delta.Y, 350, 650)
+        local minWidth = isMobile and 300 or 480
+        local minHeight = isMobile and 220 or 350
+        local newWidth = math.clamp(startSize.X + delta.X, minWidth, 900)
+        local newHeight = math.clamp(startSize.Y + delta.Y, minHeight, 650)
         MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
     end
 end)
