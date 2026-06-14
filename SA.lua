@@ -1373,7 +1373,6 @@ local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYPos)
     Card.Name = name .. "Card"
     Card.BackgroundColor3 = Theme.CardBackground
     Card.BackgroundTransparency = 0.15
-    Card.ClipsDescendants = true
     if isMobile then
         local yPos = mobileYPos or 4
         Card.Size = UDim2.new(1, -8, 0, 250)
@@ -1408,12 +1407,13 @@ Card1Title.ZIndex = 5
 Card1Title.Parent = CustomInterfaceCard
 addDualIcons(Card1Title, "108407980345110")
 local BgToggleLabel = Instance.new("TextLabel")
-BgToggleLabel.Size = UDim2.new(0, 150, 0, 18)
+BgToggleLabel.Size = UDim2.new(1, -75, 0, 18)
 BgToggleLabel.Position = UDim2.new(0, 12, 0, 36)
 BgToggleLabel.BackgroundTransparency = 1
 BgToggleLabel.Text = "Enable Custom Image"
 BgToggleLabel.TextColor3 = Theme.MutedText
 BgToggleLabel.TextSize = 12
+BgToggleLabel.TextTruncate = Enum.TextTruncate.AtEnd
 BgToggleLabel.Font = Enum.Font.GothamMedium
 BgToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 BgToggleLabel.ZIndex = 5
@@ -2188,12 +2188,13 @@ UiControlsTitle.ZIndex = 5
 UiControlsTitle.Parent = UiControlsCard
 addDualIcons(UiControlsTitle, "110988172427562")
 local KeybindLabel = Instance.new("TextLabel")
-KeybindLabel.Size = UDim2.new(0, 150, 0, 18)
+KeybindLabel.Size = UDim2.new(1, -90, 0, 18)
 KeybindLabel.Position = UDim2.new(0, 12, 0, 45)
 KeybindLabel.BackgroundTransparency = 1
 KeybindLabel.Text = isMobile and "Show Floating Toggle" or "Hide UI Keybind"
 KeybindLabel.TextColor3 = Theme.MutedText
 KeybindLabel.TextSize = 12
+KeybindLabel.TextTruncate = Enum.TextTruncate.AtEnd
 KeybindLabel.Font = Enum.Font.GothamMedium
 KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
 KeybindLabel.ZIndex = 5
