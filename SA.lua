@@ -1,4 +1,4 @@
-local CoreGui = game:GetService("CoreGui")
+local CoreGui = game:GetService("CoreGui") --v1
 local DynamicHighlightElements = {}
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
