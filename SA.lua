@@ -177,8 +177,13 @@ local BackgroundCorner = MainCorner:Clone()
 BackgroundCorner.Parent = MainBackgroundImage
 local TabContainer = Instance.new("Frame")
 TabContainer.Name = "TabContainer"
-TabContainer.Size = UDim2.new(0, 180, 0, 40)
-TabContainer.Position = UDim2.new(0, 15, 0, -48)
+if isMobile then
+    TabContainer.Size = UDim2.new(0, 40, 0, 150)
+    TabContainer.Position = UDim2.new(0, -48, 0, 15)
+else
+    TabContainer.Size = UDim2.new(0, 180, 0, 40)
+    TabContainer.Position = UDim2.new(0, 15, 0, -48)
+end
 TabContainer.BackgroundColor3 = Theme.Background
 TabContainer.BackgroundTransparency = MainFrame.BackgroundTransparency
 TabContainer.ZIndex = 3
@@ -191,7 +196,7 @@ TabContainerStroke.Color = Theme.Stroke
 TabContainerStroke.Thickness = 1
 TabContainerStroke.Parent = TabContainer
 local TabList = Instance.new("UIListLayout")
-TabList.FillDirection = Enum.FillDirection.Horizontal
+TabList.FillDirection = isMobile and Enum.FillDirection.Vertical or Enum.FillDirection.Horizontal
 TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 TabList.VerticalAlignment = Enum.VerticalAlignment.Center
 TabList.SortOrder = Enum.SortOrder.LayoutOrder
