@@ -1368,13 +1368,13 @@ InstructionsText.TextYAlignment = Enum.TextYAlignment.Top
 InstructionsText.TextWrapped = true
 InstructionsText.ZIndex = 6
 InstructionsText.Parent = InstructionsBox
-local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYIndex)
+local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYPos)
     local Card = Instance.new("Frame")
     Card.Name = name .. "Card"
     Card.BackgroundColor3 = Theme.CardBackground
     Card.BackgroundTransparency = 0.15
     if isMobile then
-        local yPos = 4 + (mobileYIndex or 0) * 260
+        local yPos = mobileYPos or 4
         Card.Size = UDim2.new(1, -8, 0, 250)
         Card.Position = UDim2.new(0, 4, 0, yPos)
     else
@@ -1393,7 +1393,7 @@ local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYIndex
     CardStroke.Parent = Card
     return Card
 end
-local CustomInterfaceCard = createAdaptiveFixedCard("CustomInterface", 0, 0, 0)
+local CustomInterfaceCard = createAdaptiveFixedCard("CustomInterface", 0, 0, 4)
 local Card1Title = Instance.new("TextLabel")
 Card1Title.Size = UDim2.new(1, 0, 0, 22)
 Card1Title.Position = UDim2.new(0, 0, 0, 10)
@@ -1615,7 +1615,7 @@ UserInputService.InputChanged:Connect(function(input)
         updateSlider(input)
     end
 end)
-local UiSettingsCard = createAdaptiveFixedCard("UiSettings", 0.5, 0, 1)
+local UiSettingsCard = createAdaptiveFixedCard("UiSettings", 0.5, 0, 264)
 local ToggleTitle = Instance.new("TextLabel")
 ToggleTitle.Size = UDim2.new(1, 0, 0, 22)
 ToggleTitle.Position = UDim2.new(0, 0, 0, 10)
@@ -2002,7 +2002,8 @@ ToggleBtn.InputBegan:Connect(function(input)
 end)
 
 ;(function()
-local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 1, 2)
+local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 1, 524)
+NotificationsCard.Size = UDim2.new(isMobile and 1 or 0.5, -8, 0, 130)
 local NotifCardTitle = Instance.new("TextLabel")
 NotifCardTitle.Size = UDim2.new(1, 0, 0, 22)
 NotifCardTitle.Position = UDim2.new(0, 0, 0, 10)
@@ -2096,10 +2097,18 @@ local posDropOpen = false
 for i, opt in ipairs(posOptions) do
     local Item = Instance.new("TextButton")
     Item.Size = UDim2.new(1, 0, 0, 32); Item.BackgroundTransparency = 1; Item.Text = opt
+    Item.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Item.TextColor3 = (opt == SavedData.NotifsPosition) and Theme.Highlight or Theme.MutedText
     Item.TextSize = 11; Item.Font = Enum.Font.GothamMedium; Item.TextXAlignment = Enum.TextXAlignment.Left
     Item.ZIndex = 21; Item.AutoButtonColor = false; Item.Parent = PosDropList
     local ItemPad = Instance.new("UIPadding"); ItemPad.PaddingLeft = UDim.new(0, 10); ItemPad.Parent = Item
+    
+    Item.MouseEnter:Connect(function()
+        TweenService:Create(Item, TweenInfo.new(0.15), {BackgroundTransparency = 0.93}):Play()
+    end)
+    Item.MouseLeave:Connect(function()
+        TweenService:Create(Item, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play()
+    end)
     
     Item.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -2152,9 +2161,8 @@ PosDropBtn.InputBegan:Connect(function(input)
 end)
 end)()
 
-local UiControlsCard = createAdaptiveFixedCard("UiControls", 0, 1, 3)
-UiControlsCard.Size = UDim2.new(0.5, -8, 0, 130)
-UiControlsCard.Position = UDim2.new(0, 4, 0, 262)
+local UiControlsCard = createAdaptiveFixedCard("UiControls", 0, 1, 664)
+UiControlsCard.Size = UDim2.new(isMobile and 1 or 0.5, -8, 0, 130)
 local UiControlsTitle = Instance.new("TextLabel")
 UiControlsTitle.Size = UDim2.new(1, 0, 0, 22)
 UiControlsTitle.Position = UDim2.new(0, 0, 0, 10)
