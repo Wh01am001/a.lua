@@ -1,4 +1,4 @@
-local CoreGui = game:GetService("CoreGui") --v2
+local CoreGui = game:GetService("CoreGui") --v3
 local DynamicHighlightElements = {}
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -123,8 +123,8 @@ end
 local isMobile = UserInputService.TouchEnabled and (not UserInputService.KeyboardEnabled or workspace.CurrentCamera.ViewportSize.X < 800)
 if isMobile then
     local vp = workspace.CurrentCamera.ViewportSize
-    SavedData.SizeX = math.min(SavedData.SizeX, vp.X * 0.85, 380)
-    SavedData.SizeY = math.min(SavedData.SizeY, vp.Y * 0.85, 290)
+    SavedData.SizeX = math.clamp(SavedData.SizeX, 460, math.max(460, vp.X * 0.9))
+    SavedData.SizeY = math.clamp(SavedData.SizeY, 320, math.max(320, vp.Y * 0.9))
 end
 
 local function saveConfig()
@@ -2349,8 +2349,8 @@ UserInputService.InputChanged:Connect(function(input)
     if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local currentMousePos = Vector2.new(input.Position.X, input.Position.Y)
         local delta = currentMousePos - startMousePos
-        local minWidth = isMobile and 300 or 480
-        local minHeight = isMobile and 220 or 350
+        local minWidth = isMobile and 460 or 480
+        local minHeight = isMobile and 320 or 350
         local newWidth = math.clamp(startSize.X + delta.X, minWidth, 900)
         local newHeight = math.clamp(startSize.Y + delta.Y, minHeight, 650)
         MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
