@@ -1373,15 +1373,9 @@ local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYPos)
     Card.Name = name .. "Card"
     Card.BackgroundColor3 = Theme.CardBackground
     Card.BackgroundTransparency = 0.15
-    if isMobile then
-        local yPos = mobileYPos or 4
-        Card.Size = UDim2.new(1, -8, 0, 250)
-        Card.Position = UDim2.new(0, 4, 0, yPos)
-    else
-        local yPos = 4 + (yIndex or 0) * 260
-        Card.Size = UDim2.new(0.5, -8, 0, 250)
-        Card.Position = UDim2.new(positionScale, 4, 0, yPos)
-    end
+    local yPos = 4 + (yIndex or 0) * 260
+    Card.Size = UDim2.new(0.5, -8, 0, 250)
+    Card.Position = UDim2.new(positionScale, 4, 0, yPos)
     Card.ZIndex = 4
     Card.Parent = SettingsScroll
     local CardCorner = Instance.new("UICorner")
