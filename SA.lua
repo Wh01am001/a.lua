@@ -111,6 +111,14 @@ if readfile and isfile and isfile("Rose/NoirUI_Config.json") then
         end
     end)
 end
+
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+if isMobile then
+    local vp = workspace.CurrentCamera.ViewportSize
+    SavedData.SizeX = math.min(SavedData.SizeX, vp.X * 0.85, 380)
+    SavedData.SizeY = math.min(SavedData.SizeY, vp.Y * 0.85, 290)
+end
+
 local function saveConfig()
     if writefile and isfolder and isfolder("Rose") then
         pcall(function()
@@ -286,10 +294,25 @@ local function ST_BYPASS_TP(targetPos)
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChildOfClass("Humanoid")
+    
     if hum and hum.SeatPart then
         hum.Sit = false; task.wait(0.05)
     end
-    if hrp then hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0)) end
+    
+    local head = char:FindFirstChild("Head")
+    if head then
+        head.CanCollide = false
+    end
+    
+    if hrp then 
+        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0)) 
+    end
+    
+    task.delay(0.5, function()
+        if head then
+            head.CanCollide = true
+        end
+    end)
 end
 local TP_LOCS = {
     { name = "💰 Dealer", pos = Vector3.new(1614.38, 576.81, -437.72) },
@@ -1142,8 +1165,10 @@ showNotif = function(title, message)
 end
 local function turnOffInfMoney()
     infMoneyOn = false
-    TweenService:Create(InfMoneyCircle, TweenInfo.new(0.18), { Position = UDim2.new(0, 3, 0.5, -7) }):Play()
-    TweenService:Create(InfMoneyBtn, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(45, 43, 50) }):Play()
+    TweenService:Create(InfMoneyCircle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        { Position = UDim2.new(0, 3, 0.5, -7) }):Play()
+    TweenService:Create(InfMoneyBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        { BackgroundColor3 = Color3.fromRGB(45, 43, 50) }):Play()
 end
 local function runInfMoney()
     local LP = game:GetService("Players").LocalPlayer
@@ -1497,8 +1522,10 @@ local function handleBgToggle()
     saveConfig()
     local targetPos = SavedData.UseCustomBackground and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
     local targetColor = SavedData.UseCustomBackground and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-    TweenService:Create(BgToggleCircle, TweenInfo.new(0.15), { Position = targetPos }):Play()
-    TweenService:Create(BgToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = targetColor }):Play()
+    TweenService:Create(BgToggleCircle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        { Position = targetPos }):Play()
+    TweenService:Create(BgToggleBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        { BackgroundColor3 = targetColor }):Play()
     if SavedData.UseCustomBackground then
         MainBackgroundImage.Visible = true
         TweenService:Create(MainBackgroundImage, TweenInfo.new(0.2),
@@ -1528,8 +1555,12 @@ local function updateSlider(inputObject)
         inputLocation = UserInputService:GetMouseLocation()
     end
     local percentage = math.clamp((inputLocation.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
-    SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-    SliderThumb.Position = UDim2.new(percentage, -7, 0.5, -7)
+    TweenService:Create(SliderFill, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+        Size = UDim2.new(percentage, 0, 1, 0)
+    }):Play()
+    TweenService:Create(SliderThumb, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+        Position = UDim2.new(percentage, -7, 0.5, -7)
+    }):Play()
     local transparencyValue = math.round(percentage * 100)
     SliderValueLabel.Text = tostring(transparencyValue)
     local finalTransparency = (transparencyValue / 100)
@@ -1570,7 +1601,7 @@ ToggleTitle.ZIndex = 5
 ToggleTitle.Parent = UiSettingsCard
 addDualIcons(ToggleTitle, "108407980345110")
 local ToggleLabel = Instance.new("TextLabel")
-ToggleLabel.Size = UDim2.new(0, 150, 0, 18)
+ToggleLabel.Size = UDim2.new(1, -75, 0, 18)
 ToggleLabel.Position = UDim2.new(0, 12, 0, 36)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "UI Border Highlight"
@@ -1721,7 +1752,7 @@ for i, color in pairs(colorPalette) do
     end)
 end
 local RoseRainLabel = Instance.new("TextLabel")
-RoseRainLabel.Size = UDim2.new(0, 150, 0, 18)
+RoseRainLabel.Size = UDim2.new(1, -75, 0, 18)
 RoseRainLabel.Position = UDim2.new(0, 12, 0, 80)
 RoseRainLabel.BackgroundTransparency = 1
 RoseRainLabel.Text = "Enable Rose Rain"
@@ -1818,8 +1849,10 @@ local function handleRoseRainToggle()
     roseRainOn = not roseRainOn
     local targetPos = roseRainOn and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
     local targetColor = roseRainOn and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-    TweenService:Create(RoseRainCircle, TweenInfo.new(0.18), { Position = targetPos }):Play()
-    TweenService:Create(RoseRainBtn, TweenInfo.new(0.18), { BackgroundColor3 = targetColor }):Play()
+    TweenService:Create(RoseRainCircle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        { Position = targetPos }):Play()
+    TweenService:Create(RoseRainBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        { BackgroundColor3 = targetColor }):Play()
     if roseRainOn then
         startRoseRain()
     else
@@ -1844,7 +1877,7 @@ AntiNwBtn.Parent = UiSettingsCard
 
 do
     local AntiNwLabel = Instance.new("TextLabel")
-    AntiNwLabel.Size = UDim2.new(0, 150, 0, 18)
+    AntiNwLabel.Size = UDim2.new(1, -75, 0, 18)
     AntiNwLabel.Position = UDim2.new(0, 12, 0, 110)
     AntiNwLabel.BackgroundTransparency = 1
     AntiNwLabel.Text = "Anti Network Pause"
@@ -1876,8 +1909,10 @@ do
         antiNwOn = not antiNwOn
         local targetPos = antiNwOn and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
         local targetColor = antiNwOn and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-        TweenService:Create(AntiNwCircle, TweenInfo.new(0.18), { Position = targetPos }):Play()
-        TweenService:Create(AntiNwBtn, TweenInfo.new(0.18), { BackgroundColor3 = targetColor }):Play()
+        TweenService:Create(AntiNwCircle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            { Position = targetPos }):Play()
+        TweenService:Create(AntiNwBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+            { BackgroundColor3 = targetColor }):Play()
 
         if antiNwOn then
             pcall(function()
@@ -1911,8 +1946,10 @@ local function handleBorderToggle()
     local targetPos = strokeOn and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
     local targetColor = strokeOn and Theme.Highlight or Color3.fromRGB(45, 43, 50)
     local targetStrokeColor = strokeOn and Theme.Highlight or Color3.fromRGB(60, 60, 65)
-    TweenService:Create(ToggleCircle, TweenInfo.new(0.18), { Position = targetPos }):Play()
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.18), { BackgroundColor3 = targetColor }):Play()
+    TweenService:Create(ToggleCircle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        { Position = targetPos }):Play()
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        { BackgroundColor3 = targetColor }):Play()
     TweenService:Create(MainStroke, TweenInfo.new(0.18), { Color = targetStrokeColor }):Play()
     TweenService:Create(TpDropListStroke, TweenInfo.new(0.18), { Color = targetStrokeColor }):Play()
     TweenService:Create(D1.LS, TweenInfo.new(0.18), { Color = targetStrokeColor }):Play()
@@ -2116,8 +2153,8 @@ local function MakeDraggable(gui)
         end
     end)
 end
-MakeDraggable(MainFrame)
-do
+MakeDraggable(MainFrame);
+(function()
     local BottomDragHandle = Instance.new("Frame")
     BottomDragHandle.Name = "BottomDragHandle"
     BottomDragHandle.Size = UDim2.new(0, 240, 0, 34)
@@ -2175,7 +2212,8 @@ do
                 { Position = targetPos }):Play()
         end
     end)
-end
+end)()
+
 if SavedData.RoseRainOn then
     startRoseRain()
 end
@@ -2546,7 +2584,7 @@ local function InitVisualsUI()
     ColorPickerModal.Position = UDim2.new(0.5, -100, 0.5, -110)
     ColorPickerModal.BackgroundColor3 = Theme.CardBackground
     ColorPickerModal.BackgroundTransparency = 0.05
-    ColorPickerModal.ZIndex = 200
+    ColorPickerModal.ZIndex = 100
     ColorPickerModal.Visible = false
     ColorPickerModal.Parent = MainFrame
     local PickerCorner = Instance.new("UICorner")
@@ -2699,7 +2737,7 @@ local function InitVisualsUI()
         FRM.ZIndex = 5
         FRM.Parent = parent
         local Lbl = Instance.new("TextLabel")
-        Lbl.Size = UDim2.new(0, 120, 1, 0)
+        Lbl.Size = UDim2.new(1, -65, 1, 0)
         Lbl.Position = UDim2.new(0, 5, 0, 0)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = text
@@ -2734,8 +2772,10 @@ local function InitVisualsUI()
                 state = not state
                 local tPos = state and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
                 local tCol = state and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-                TweenService:Create(Circ, TweenInfo.new(0.18), { Position = tPos }):Play()
-                TweenService:Create(Btn, TweenInfo.new(0.18), { BackgroundColor3 = tCol }):Play()
+                TweenService:Create(Circ, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                    { Position = tPos }):Play()
+                TweenService:Create(Btn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                    { BackgroundColor3 = tCol }):Play()
                 callback(state)
             end
         end)
@@ -2772,7 +2812,7 @@ local function InitVisualsUI()
         FRM.ZIndex = 5
         FRM.Parent = parent
         local Lbl = Instance.new("TextLabel")
-        Lbl.Size = UDim2.new(0, 150, 0, 14)
+        Lbl.Size = UDim2.new(1, -70, 0, 14)
         Lbl.Position = UDim2.new(0, 5, 0, 0)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = text
@@ -2823,7 +2863,9 @@ local function InitVisualsUI()
             local pos = input.Position.X
             if input.UserInputType == Enum.UserInputType.Touch then pos = input.Position.X end
             local pct = math.clamp((pos - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
-            Fill.Size = UDim2.new(pct, 0, 1, 0)
+            TweenService:Create(Fill, TweenInfo.new(0.12, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = UDim2.new(pct, 0, 1, 0)
+            }):Play()
             local val = math.floor(min + (max - min) * pct)
             ValLbl.Text = tostring(val)
             callback(val)
