@@ -70,7 +70,7 @@ local function addDualIcons(titleLabel, iconId, customSize)
     local padding = 6
     local iconSize = customSize or 18
     local offset = (bounds.X / 2) + padding
-    local maxOffset = 120
+    local maxOffset = 85
     offset = math.min(offset, maxOffset)
 
     local leftIcon = Instance.new("ImageLabel")
@@ -120,7 +120,7 @@ if readfile and isfile and isfile("Rose/NoirUI_Config.json") then
     end)
 end
 
-local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local isMobile = UserInputService.TouchEnabled and (not UserInputService.KeyboardEnabled or workspace.CurrentCamera.ViewportSize.X < 800)
 if isMobile then
     local vp = workspace.CurrentCamera.ViewportSize
     SavedData.SizeX = math.min(SavedData.SizeX, vp.X * 0.85, 380)
@@ -1373,9 +1373,16 @@ local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYPos)
     Card.Name = name .. "Card"
     Card.BackgroundColor3 = Theme.CardBackground
     Card.BackgroundTransparency = 0.15
-    local yPos = 4 + (yIndex or 0) * 260
-    Card.Size = UDim2.new(0.5, -8, 0, 250)
-    Card.Position = UDim2.new(positionScale, 4, 0, yPos)
+    Card.ClipsDescendants = true
+    if isMobile then
+        local yPos = mobileYPos or 4
+        Card.Size = UDim2.new(1, -8, 0, 250)
+        Card.Position = UDim2.new(0, 4, 0, yPos)
+    else
+        local yPos = 4 + (yIndex or 0) * 260
+        Card.Size = UDim2.new(0.5, -8, 0, 250)
+        Card.Position = UDim2.new(positionScale, 4, 0, yPos)
+    end
     Card.ZIndex = 4
     Card.Parent = SettingsScroll
     local CardCorner = Instance.new("UICorner")
@@ -1392,7 +1399,7 @@ local Card1Title = Instance.new("TextLabel")
 Card1Title.Size = UDim2.new(1, 0, 0, 22)
 Card1Title.Position = UDim2.new(0, 0, 0, 10)
 Card1Title.BackgroundTransparency = 1
-Card1Title.Text = "Interface"
+Card1Title.Text = "Custom Interface"
 Card1Title.TextColor3 = Theme.Text
 Card1Title.TextSize = 14
 Card1Title.Font = Enum.Font.GothamBold
@@ -1995,164 +2002,175 @@ ToggleBtn.InputBegan:Connect(function(input)
     end
 end)
 
-;(function()
-local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 1, 524)
-NotificationsCard.Size = UDim2.new(isMobile and 1 or 0.5, -8, 0, 130)
-local NotifCardTitle = Instance.new("TextLabel")
-NotifCardTitle.Size = UDim2.new(1, 0, 0, 22)
-NotifCardTitle.Position = UDim2.new(0, 0, 0, 10)
-NotifCardTitle.BackgroundTransparency = 1
-NotifCardTitle.Text = "Notifications"
-NotifCardTitle.TextColor3 = Theme.Text
-NotifCardTitle.TextSize = 14
-NotifCardTitle.Font = Enum.Font.GothamBold
-NotifCardTitle.TextXAlignment = Enum.TextXAlignment.Center
-NotifCardTitle.ZIndex = 5
-NotifCardTitle.Parent = NotificationsCard
-addDualIcons(NotifCardTitle, "108407980345110")
+; (function()
+    local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 1, 524)
+    NotificationsCard.Size = UDim2.new(isMobile and 1 or 0.5, -8, 0, 130)
+    local NotifCardTitle = Instance.new("TextLabel")
+    NotifCardTitle.Size = UDim2.new(1, 0, 0, 22)
+    NotifCardTitle.Position = UDim2.new(0, 0, 0, 10)
+    NotifCardTitle.BackgroundTransparency = 1
+    NotifCardTitle.Text = "Notifications"
+    NotifCardTitle.TextColor3 = Theme.Text
+    NotifCardTitle.TextSize = 14
+    NotifCardTitle.Font = Enum.Font.GothamBold
+    NotifCardTitle.TextXAlignment = Enum.TextXAlignment.Center
+    NotifCardTitle.ZIndex = 5
+    NotifCardTitle.Parent = NotificationsCard
+    addDualIcons(NotifCardTitle, "108407980345110")
 
-local EnNotifLabel = Instance.new("TextLabel")
-EnNotifLabel.Size = UDim2.new(1, -75, 0, 18)
-EnNotifLabel.Position = UDim2.new(0, 12, 0, 45)
-EnNotifLabel.BackgroundTransparency = 1
-EnNotifLabel.Text = "Enable Notifications"
-EnNotifLabel.TextColor3 = Theme.MutedText
-EnNotifLabel.TextSize = 12
-EnNotifLabel.TextTruncate = Enum.TextTruncate.AtEnd
-EnNotifLabel.Font = Enum.Font.GothamMedium
-EnNotifLabel.TextXAlignment = Enum.TextXAlignment.Left
-EnNotifLabel.ZIndex = 5
-EnNotifLabel.Parent = NotificationsCard
+    local EnNotifLabel = Instance.new("TextLabel")
+    EnNotifLabel.Size = UDim2.new(1, -75, 0, 18)
+    EnNotifLabel.Position = UDim2.new(0, 12, 0, 45)
+    EnNotifLabel.BackgroundTransparency = 1
+    EnNotifLabel.Text = "Enable Notifications"
+    EnNotifLabel.TextColor3 = Theme.MutedText
+    EnNotifLabel.TextSize = 12
+    EnNotifLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    EnNotifLabel.Font = Enum.Font.GothamMedium
+    EnNotifLabel.TextXAlignment = Enum.TextXAlignment.Left
+    EnNotifLabel.ZIndex = 5
+    EnNotifLabel.Parent = NotificationsCard
 
-local EnNotifBtn = Instance.new("TextButton")
-EnNotifBtn.Size = UDim2.new(0, 42, 0, 20)
-EnNotifBtn.Position = UDim2.new(1, -54, 0, 44)
-EnNotifBtn.BackgroundColor3 = SavedData.NotifsEnabled and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-EnNotifBtn.Text = ""
-EnNotifBtn.ZIndex = 5
-EnNotifBtn.Parent = NotificationsCard
-local ENB_Corner = Instance.new("UICorner")
-ENB_Corner.CornerRadius = UDim.new(1, 0)
-ENB_Corner.Parent = EnNotifBtn
-local ENB_Circle = Instance.new("Frame")
-ENB_Circle.Size = UDim2.new(0, 14, 0, 14)
-ENB_Circle.Position = SavedData.NotifsEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-ENB_Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ENB_Circle.ZIndex = 6
-ENB_Circle.Parent = EnNotifBtn
-local ENB_CircleCorner = Instance.new("UICorner")
-ENB_CircleCorner.CornerRadius = UDim.new(1, 0)
-ENB_CircleCorner.Parent = ENB_Circle
+    local EnNotifBtn = Instance.new("TextButton")
+    EnNotifBtn.Size = UDim2.new(0, 42, 0, 20)
+    EnNotifBtn.Position = UDim2.new(1, -54, 0, 44)
+    EnNotifBtn.BackgroundColor3 = SavedData.NotifsEnabled and Theme.Highlight or Color3.fromRGB(45, 43, 50)
+    EnNotifBtn.Text = ""
+    EnNotifBtn.ZIndex = 5
+    EnNotifBtn.Parent = NotificationsCard
+    local ENB_Corner = Instance.new("UICorner")
+    ENB_Corner.CornerRadius = UDim.new(1, 0)
+    ENB_Corner.Parent = EnNotifBtn
+    local ENB_Circle = Instance.new("Frame")
+    ENB_Circle.Size = UDim2.new(0, 14, 0, 14)
+    ENB_Circle.Position = SavedData.NotifsEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+    ENB_Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ENB_Circle.ZIndex = 6
+    ENB_Circle.Parent = EnNotifBtn
+    local ENB_CircleCorner = Instance.new("UICorner")
+    ENB_CircleCorner.CornerRadius = UDim.new(1, 0)
+    ENB_CircleCorner.Parent = ENB_Circle
 
-EnNotifBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        SavedData.NotifsEnabled = not SavedData.NotifsEnabled
-        saveConfig()
-        local tPos = SavedData.NotifsEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-        local tCol = SavedData.NotifsEnabled and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-        TweenService:Create(ENB_Circle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position=tPos}):Play()
-        TweenService:Create(EnNotifBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {BackgroundColor3=tCol}):Play()
-    end
-end)
-
-local PosDropBtn = Instance.new("TextButton")
-PosDropBtn.Size = UDim2.new(1, -24, 0, 28)
-PosDropBtn.Position = UDim2.new(0, 12, 0, 85)
-PosDropBtn.BackgroundColor3 = Color3.fromRGB(13, 12, 15)
-PosDropBtn.Text = ""
-PosDropBtn.ZIndex = 5
-PosDropBtn.Parent = NotificationsCard
-local PosDropCorner = Instance.new("UICorner"); PosDropCorner.CornerRadius = UDim.new(0, 6); PosDropCorner.Parent = PosDropBtn
-local PosDropStroke = Instance.new("UIStroke"); PosDropStroke.Color = Theme.Stroke; PosDropStroke.Thickness = 1; PosDropStroke.Parent = PosDropBtn
-
-local PosDropLabel = Instance.new("TextLabel")
-PosDropLabel.Size = UDim2.new(1, -30, 1, 0); PosDropLabel.Position = UDim2.new(0, 8, 0, 0)
-PosDropLabel.BackgroundTransparency = 1; PosDropLabel.Text = SavedData.NotifsPosition
-PosDropLabel.TextColor3 = Theme.MutedText; PosDropLabel.TextSize = 11
-PosDropLabel.Font = Enum.Font.GothamMedium; PosDropLabel.TextXAlignment = Enum.TextXAlignment.Left; PosDropLabel.ZIndex = 6; PosDropLabel.Parent = PosDropBtn
-
-local PosDropArr = Instance.new("TextLabel")
-PosDropArr.Size = UDim2.new(0, 20, 1, 0); PosDropArr.Position = UDim2.new(1, -24, 0, 0)
-PosDropArr.BackgroundTransparency = 1; PosDropArr.Text = "v"; PosDropArr.TextColor3 = Theme.MutedText
-PosDropArr.TextSize = 13; PosDropArr.Font = Enum.Font.GothamBold; PosDropArr.ZIndex = 6; PosDropArr.Parent = PosDropBtn
-
-local PosDropList = Instance.new("ScrollingFrame")
-PosDropList.Size = UDim2.new(1, -24, 0, 0); PosDropList.Position = UDim2.new(0, 12, 0, 117)
-PosDropList.BackgroundColor3 = Color3.fromRGB(13, 12, 15); PosDropList.BorderSizePixel = 0
-PosDropList.ClipsDescendants = true; PosDropList.ZIndex = 20; PosDropList.Visible = false
-PosDropList.ScrollBarThickness = 3; PosDropList.ScrollBarImageColor3 = Theme.Highlight
-PosDropList.CanvasSize = UDim2.new(0, 0, 0, 0); PosDropList.AutomaticCanvasSize = Enum.AutomaticSize.Y; PosDropList.Parent = NotificationsCard
-local PDL_Corner = Instance.new("UICorner"); PDL_Corner.CornerRadius = UDim.new(0, 6); PDL_Corner.Parent = PosDropList
-local PDL_Stroke = Instance.new("UIStroke"); PDL_Stroke.Color = Theme.Highlight; PDL_Stroke.Thickness = 1; PDL_Stroke.Parent = PosDropList
-local PDL_Layout = Instance.new("UIListLayout"); PDL_Layout.SortOrder = Enum.SortOrder.LayoutOrder; PDL_Layout.Parent = PosDropList
-
-local posOptions = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"}
-local posDropOpen = false
-for i, opt in ipairs(posOptions) do
-    local Item = Instance.new("TextButton")
-    Item.Size = UDim2.new(1, 0, 0, 32); Item.BackgroundTransparency = 1; Item.Text = opt
-    Item.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Item.TextColor3 = (opt == SavedData.NotifsPosition) and Theme.Highlight or Theme.MutedText
-    Item.TextSize = 11; Item.Font = Enum.Font.GothamMedium; Item.TextXAlignment = Enum.TextXAlignment.Left
-    Item.ZIndex = 21; Item.AutoButtonColor = false; Item.Parent = PosDropList
-    local ItemPad = Instance.new("UIPadding"); ItemPad.PaddingLeft = UDim.new(0, 10); ItemPad.Parent = Item
-    
-    Item.MouseEnter:Connect(function()
-        TweenService:Create(Item, TweenInfo.new(0.15), {BackgroundTransparency = 0.93}):Play()
-    end)
-    Item.MouseLeave:Connect(function()
-        TweenService:Create(Item, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play()
-    end)
-    
-    Item.InputBegan:Connect(function(input)
+    EnNotifBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            SavedData.NotifsPosition = opt; saveConfig()
-            PosDropLabel.Text = opt
-            for _, c in ipairs(PosDropList:GetChildren()) do
-                if c:IsA("TextButton") then c.TextColor3 = Theme.MutedText end
-            end
-            Item.TextColor3 = Theme.Highlight
-            posDropOpen = false; PosDropArr.Text = "v"
-            TweenService:Create(PosDropList, TweenInfo.new(0.18), {Size = UDim2.new(1, -24, 0, 0)}):Play()
-            task.delay(0.18, function() PosDropList.Visible = false end)
-            
-            -- Update NotifContainer position dynamically
-            if NotifContainer then
-                if SavedData.NotifsPosition == "Top Right" then
-                    NotifContainer.Position = UDim2.new(1, -295, 0, 20)
-                    NotifContainer.AnchorPoint = Vector2.new(0, 0)
-                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Top
-                elseif SavedData.NotifsPosition == "Top Left" then
-                    NotifContainer.Position = UDim2.new(0, 15, 0, 20)
-                    NotifContainer.AnchorPoint = Vector2.new(0, 0)
-                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Top
-                elseif SavedData.NotifsPosition == "Bottom Left" then
-                    NotifContainer.Position = UDim2.new(0, 15, 1, -20)
-                    NotifContainer.AnchorPoint = Vector2.new(0, 1)
-                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
-                else -- Bottom Right
-                    NotifContainer.Position = UDim2.new(1, -295, 1, -20)
-                    NotifContainer.AnchorPoint = Vector2.new(0, 1)
-                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+            SavedData.NotifsEnabled = not SavedData.NotifsEnabled
+            saveConfig()
+            local tPos = SavedData.NotifsEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+            local tCol = SavedData.NotifsEnabled and Theme.Highlight or Color3.fromRGB(45, 43, 50)
+            TweenService:Create(ENB_Circle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                { Position = tPos }):Play()
+            TweenService:Create(EnNotifBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                { BackgroundColor3 = tCol }):Play()
+        end
+    end)
+
+    local PosDropBtn = Instance.new("TextButton")
+    PosDropBtn.Size = UDim2.new(1, -24, 0, 28)
+    PosDropBtn.Position = UDim2.new(0, 12, 0, 85)
+    PosDropBtn.BackgroundColor3 = Color3.fromRGB(13, 12, 15)
+    PosDropBtn.Text = ""
+    PosDropBtn.ZIndex = 5
+    PosDropBtn.Parent = NotificationsCard
+    local PosDropCorner = Instance.new("UICorner"); PosDropCorner.CornerRadius = UDim.new(0, 6); PosDropCorner.Parent =
+    PosDropBtn
+    local PosDropStroke = Instance.new("UIStroke"); PosDropStroke.Color = Theme.Stroke; PosDropStroke.Thickness = 1; PosDropStroke.Parent =
+    PosDropBtn
+
+    local PosDropLabel = Instance.new("TextLabel")
+    PosDropLabel.Size = UDim2.new(1, -30, 1, 0); PosDropLabel.Position = UDim2.new(0, 8, 0, 0)
+    PosDropLabel.BackgroundTransparency = 1; PosDropLabel.Text = SavedData.NotifsPosition
+    PosDropLabel.TextColor3 = Theme.MutedText; PosDropLabel.TextSize = 11
+    PosDropLabel.Font = Enum.Font.GothamMedium; PosDropLabel.TextXAlignment = Enum.TextXAlignment.Left; PosDropLabel.ZIndex = 6; PosDropLabel.Parent =
+    PosDropBtn
+
+    local PosDropArr = Instance.new("TextLabel")
+    PosDropArr.Size = UDim2.new(0, 20, 1, 0); PosDropArr.Position = UDim2.new(1, -24, 0, 0)
+    PosDropArr.BackgroundTransparency = 1; PosDropArr.Text = "v"; PosDropArr.TextColor3 = Theme.MutedText
+    PosDropArr.TextSize = 13; PosDropArr.Font = Enum.Font.GothamBold; PosDropArr.ZIndex = 6; PosDropArr.Parent =
+    PosDropBtn
+
+    local PosDropList = Instance.new("ScrollingFrame")
+    PosDropList.Size = UDim2.new(1, -24, 0, 0); PosDropList.Position = UDim2.new(0, 12, 0, 117)
+    PosDropList.BackgroundColor3 = Color3.fromRGB(13, 12, 15); PosDropList.BorderSizePixel = 0
+    PosDropList.ClipsDescendants = true; PosDropList.ZIndex = 20; PosDropList.Visible = false
+    PosDropList.ScrollBarThickness = 3; PosDropList.ScrollBarImageColor3 = Theme.Highlight
+    PosDropList.CanvasSize = UDim2.new(0, 0, 0, 0); PosDropList.AutomaticCanvasSize = Enum.AutomaticSize.Y; PosDropList.Parent =
+    NotificationsCard
+    local PDL_Corner = Instance.new("UICorner"); PDL_Corner.CornerRadius = UDim.new(0, 6); PDL_Corner.Parent =
+    PosDropList
+    local PDL_Stroke = Instance.new("UIStroke"); PDL_Stroke.Color = Theme.Highlight; PDL_Stroke.Thickness = 1; PDL_Stroke.Parent =
+    PosDropList
+    local PDL_Layout = Instance.new("UIListLayout"); PDL_Layout.SortOrder = Enum.SortOrder.LayoutOrder; PDL_Layout.Parent =
+    PosDropList
+
+    local posOptions = { "Top Right", "Top Left", "Bottom Right", "Bottom Left" }
+    local posDropOpen = false
+    for i, opt in ipairs(posOptions) do
+        local Item = Instance.new("TextButton")
+        Item.Size = UDim2.new(1, 0, 0, 32); Item.BackgroundTransparency = 1; Item.Text = opt
+        Item.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Item.TextColor3 = (opt == SavedData.NotifsPosition) and Theme.Highlight or Theme.MutedText
+        Item.TextSize = 11; Item.Font = Enum.Font.GothamMedium; Item.TextXAlignment = Enum.TextXAlignment.Left
+        Item.ZIndex = 21; Item.AutoButtonColor = false; Item.Parent = PosDropList
+        local ItemPad = Instance.new("UIPadding"); ItemPad.PaddingLeft = UDim.new(0, 10); ItemPad.Parent = Item
+
+        Item.MouseEnter:Connect(function()
+            TweenService:Create(Item, TweenInfo.new(0.15), { BackgroundTransparency = 0.93 }):Play()
+        end)
+        Item.MouseLeave:Connect(function()
+            TweenService:Create(Item, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
+        end)
+
+        Item.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                SavedData.NotifsPosition = opt; saveConfig()
+                PosDropLabel.Text = opt
+                for _, c in ipairs(PosDropList:GetChildren()) do
+                    if c:IsA("TextButton") then c.TextColor3 = Theme.MutedText end
+                end
+                Item.TextColor3 = Theme.Highlight
+                posDropOpen = false; PosDropArr.Text = "v"
+                TweenService:Create(PosDropList, TweenInfo.new(0.18), { Size = UDim2.new(1, -24, 0, 0) }):Play()
+                task.delay(0.18, function() PosDropList.Visible = false end)
+
+                -- Update NotifContainer position dynamically
+                if NotifContainer then
+                    if SavedData.NotifsPosition == "Top Right" then
+                        NotifContainer.Position = UDim2.new(1, -295, 0, 20)
+                        NotifContainer.AnchorPoint = Vector2.new(0, 0)
+                        NotifList.VerticalAlignment = Enum.VerticalAlignment.Top
+                    elseif SavedData.NotifsPosition == "Top Left" then
+                        NotifContainer.Position = UDim2.new(0, 15, 0, 20)
+                        NotifContainer.AnchorPoint = Vector2.new(0, 0)
+                        NotifList.VerticalAlignment = Enum.VerticalAlignment.Top
+                    elseif SavedData.NotifsPosition == "Bottom Left" then
+                        NotifContainer.Position = UDim2.new(0, 15, 1, -20)
+                        NotifContainer.AnchorPoint = Vector2.new(0, 1)
+                        NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+                    else -- Bottom Right
+                        NotifContainer.Position = UDim2.new(1, -295, 1, -20)
+                        NotifContainer.AnchorPoint = Vector2.new(0, 1)
+                        NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+                    end
                 end
             end
+        end)
+    end
+
+    PosDropBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            posDropOpen = not posDropOpen
+            if posDropOpen then
+                PosDropList.Visible = true; PosDropArr.Text = "^"
+                TweenService:Create(PosDropList, TweenInfo.new(0.18), { Size = UDim2.new(1, -24, 0, #posOptions * 32) })
+                    :Play()
+            else
+                PosDropArr.Text = "v"
+                TweenService:Create(PosDropList, TweenInfo.new(0.18), { Size = UDim2.new(1, -24, 0, 0) }):Play()
+                task.delay(0.18, function() PosDropList.Visible = false end)
+            end
         end
     end)
-end
-
-PosDropBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        posDropOpen = not posDropOpen
-        if posDropOpen then
-            PosDropList.Visible = true; PosDropArr.Text = "^"
-            TweenService:Create(PosDropList, TweenInfo.new(0.18), {Size = UDim2.new(1, -24, 0, #posOptions*32)}):Play()
-        else
-            PosDropArr.Text = "v"
-            TweenService:Create(PosDropList, TweenInfo.new(0.18), {Size = UDim2.new(1, -24, 0, 0)}):Play()
-            task.delay(0.18, function() PosDropList.Visible = false end)
-        end
-    end
-end)
 end)()
 
 local UiControlsCard = createAdaptiveFixedCard("UiControls", 0, 1, 664)
@@ -2201,15 +2219,17 @@ if isMobile then
     local MTB_CircleCorner = Instance.new("UICorner")
     MTB_CircleCorner.CornerRadius = UDim.new(1, 0)
     MTB_CircleCorner.Parent = MTB_Circle
-    
+
     MobileToggleBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             SavedData.ShowMobileHideBtn = not SavedData.ShowMobileHideBtn
             saveConfig()
             local targetPos = SavedData.ShowMobileHideBtn and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
             local targetColor = SavedData.ShowMobileHideBtn and Theme.Highlight or Color3.fromRGB(45, 43, 50)
-            TweenService:Create(MTB_Circle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = targetPos }):Play()
-            TweenService:Create(MobileToggleBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundColor3 = targetColor }):Play()
+            TweenService:Create(MTB_Circle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                { Position = targetPos }):Play()
+            TweenService:Create(MobileToggleBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                { BackgroundColor3 = targetColor }):Play()
             local mfb = ScreenGui:FindFirstChild("MobileFloatingButton")
             if mfb then mfb.Visible = SavedData.ShowMobileHideBtn end
         end
@@ -2463,7 +2483,7 @@ if isMobile then
     FBIcon.Image = "rbxassetid://108407980345110"
     FBIcon.ImageColor3 = Theme.Text
     FBIcon.Parent = FloatingBtn
-    
+
     local fDrag, fInput, fStart, fPos
     FloatingBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -3313,7 +3333,7 @@ local function InitVisualsUI()
             end
         end)
     end
-    local PlayerVisualsCard, PVC_Scroll = createAdaptiveFixedCard(MiscScroll, "ESP & Chams", 0, 380, nil,
+    local PlayerVisualsCard, PVC_Scroll = createAdaptiveFixedCard(MiscScroll, "Player Visuals", 0, 380, nil,
         "80273926746623")
     ADD_UI_TOGGLE(PVC_Scroll, "Enable ESP", ESP_CFG.Enabled, function(v) ESP_CFG.Enabled = v end, nil, 1)
     ADD_UI_TOGGLE(PVC_Scroll, "Bounding Boxes", ESP_CFG.Boxes.Enabled, function(v) ESP_CFG.Boxes.Enabled = v end,
@@ -3353,7 +3373,7 @@ local function InitVisualsUI()
         CROSSHAIR_CFG.Size = v
         RENDER_CROSSHAIR()
     end, 3)
-    local PVS_Card, PVS_Scroll = createAdaptiveFixedCard(MiscScroll, "Visuals", 0.5, 340, 232,
+    local PVS_Card, PVS_Scroll = createAdaptiveFixedCard(MiscScroll, "Player Visual Settings", 0.5, 340, 232,
         "138144736940989")
     ADD_UI_TOGGLE(PVS_Scroll, "Animated Boxes", ESP_CFG.Boxes.Animated, function(v) ESP_CFG.Boxes.Animated = v end, nil,
         1)
