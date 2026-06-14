@@ -70,7 +70,7 @@ local function addDualIcons(titleLabel, iconId, customSize)
     local padding = 6
     local iconSize = customSize or 18
     local offset = (bounds.X / 2) + padding
-    local maxOffset = isMobile and 55 or 999
+    local maxOffset = 120
     offset = math.min(offset, maxOffset)
 
     local leftIcon = Instance.new("ImageLabel")
@@ -1392,7 +1392,7 @@ local Card1Title = Instance.new("TextLabel")
 Card1Title.Size = UDim2.new(1, 0, 0, 22)
 Card1Title.Position = UDim2.new(0, 0, 0, 10)
 Card1Title.BackgroundTransparency = 1
-Card1Title.Text = "Custom Interface"
+Card1Title.Text = "Interface"
 Card1Title.TextColor3 = Theme.Text
 Card1Title.TextSize = 14
 Card1Title.Font = Enum.Font.GothamBold
@@ -3313,7 +3313,7 @@ local function InitVisualsUI()
             end
         end)
     end
-    local PlayerVisualsCard, PVC_Scroll = createAdaptiveFixedCard(MiscScroll, "Player Visuals", 0, 380, nil,
+    local PlayerVisualsCard, PVC_Scroll = createAdaptiveFixedCard(MiscScroll, "ESP & Chams", 0, 380, nil,
         "80273926746623")
     ADD_UI_TOGGLE(PVC_Scroll, "Enable ESP", ESP_CFG.Enabled, function(v) ESP_CFG.Enabled = v end, nil, 1)
     ADD_UI_TOGGLE(PVC_Scroll, "Bounding Boxes", ESP_CFG.Boxes.Enabled, function(v) ESP_CFG.Boxes.Enabled = v end,
@@ -3353,7 +3353,7 @@ local function InitVisualsUI()
         CROSSHAIR_CFG.Size = v
         RENDER_CROSSHAIR()
     end, 3)
-    local PVS_Card, PVS_Scroll = createAdaptiveFixedCard(MiscScroll, "Player Visual Settings", 0.5, 340, 232,
+    local PVS_Card, PVS_Scroll = createAdaptiveFixedCard(MiscScroll, "Visuals", 0.5, 340, 232,
         "138144736940989")
     ADD_UI_TOGGLE(PVS_Scroll, "Animated Boxes", ESP_CFG.Boxes.Animated, function(v) ESP_CFG.Boxes.Animated = v end, nil,
         1)
