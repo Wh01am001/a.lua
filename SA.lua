@@ -1,4 +1,4 @@
-local CoreGui = game:GetService("CoreGui") --v1
+local CoreGui = game:GetService("CoreGui") --v2
 local DynamicHighlightElements = {}
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -1368,20 +1368,13 @@ InstructionsText.TextYAlignment = Enum.TextYAlignment.Top
 InstructionsText.TextWrapped = true
 InstructionsText.ZIndex = 6
 InstructionsText.Parent = InstructionsBox
-local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYPos)
+local function createAdaptiveFixedCard(name, positionScale, height, yOffset)
     local Card = Instance.new("Frame")
     Card.Name = name .. "Card"
     Card.BackgroundColor3 = Theme.CardBackground
     Card.BackgroundTransparency = 0.15
-    if isMobile then
-        local yPos = mobileYPos or 4
-        Card.Size = UDim2.new(1, -8, 0, 250)
-        Card.Position = UDim2.new(0, 4, 0, yPos)
-    else
-        local yPos = 4 + (yIndex or 0) * 260
-        Card.Size = UDim2.new(0.5, -8, 0, 250)
-        Card.Position = UDim2.new(positionScale, 4, 0, yPos)
-    end
+    Card.Size = UDim2.new(0.5, -8, 0, height or 250)
+    Card.Position = UDim2.new(positionScale, 4, 0, yOffset or 4)
     Card.ZIndex = 4
     Card.Parent = SettingsScroll
     local CardCorner = Instance.new("UICorner")
@@ -1393,7 +1386,7 @@ local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYPos)
     CardStroke.Parent = Card
     return Card
 end
-local CustomInterfaceCard = createAdaptiveFixedCard("CustomInterface", 0, 0, 4)
+local CustomInterfaceCard = createAdaptiveFixedCard("CustomInterface", 0, 210, 4)
 local Card1Title = Instance.new("TextLabel")
 Card1Title.Size = UDim2.new(1, 0, 0, 22)
 Card1Title.Position = UDim2.new(0, 0, 0, 10)
@@ -1616,7 +1609,7 @@ UserInputService.InputChanged:Connect(function(input)
         updateSlider(input)
     end
 end)
-local UiSettingsCard = createAdaptiveFixedCard("UiSettings", 0.5, 0, 264)
+local UiSettingsCard = createAdaptiveFixedCard("UiSettings", 0.5, 220, 4)
 local ToggleTitle = Instance.new("TextLabel")
 ToggleTitle.Size = UDim2.new(1, 0, 0, 22)
 ToggleTitle.Position = UDim2.new(0, 0, 0, 10)
@@ -2003,8 +1996,7 @@ ToggleBtn.InputBegan:Connect(function(input)
 end)
 
 ; (function()
-    local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 1, 524)
-    NotificationsCard.Size = UDim2.new(isMobile and 1 or 0.5, -8, 0, 130)
+    local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 125, 232)
     local NotifCardTitle = Instance.new("TextLabel")
     NotifCardTitle.Size = UDim2.new(1, 0, 0, 22)
     NotifCardTitle.Position = UDim2.new(0, 0, 0, 10)
@@ -2173,8 +2165,7 @@ end)
     end)
 end)()
 
-local UiControlsCard = createAdaptiveFixedCard("UiControls", 0, 1, 664)
-UiControlsCard.Size = UDim2.new(isMobile and 1 or 0.5, -8, 0, 130)
+local UiControlsCard = createAdaptiveFixedCard("UiControls", 0, 125, 222)
 local UiControlsTitle = Instance.new("TextLabel")
 UiControlsTitle.Size = UDim2.new(1, 0, 0, 22)
 UiControlsTitle.Position = UDim2.new(0, 0, 0, 10)
