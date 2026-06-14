@@ -44,7 +44,10 @@ local SavedData = {
     RoseRainOn = false,
     AntiNetworkPause = true,
     InfMoneyUsed = false,
-    HideUIKeybind = nil
+    HideUIKeybind = nil,
+    ShowMobileHideBtn = false,
+    NotifsEnabled = false,
+    NotifsPosition = "Bottom Right"
 }
 if not isfolder("Rose") then
     pcall(function() makefolder("Rose") end)
@@ -67,6 +70,8 @@ local function addDualIcons(titleLabel, iconId, customSize)
     local padding = 6
     local iconSize = customSize or 18
     local offset = (bounds.X / 2) + padding
+    local maxOffset = isMobile and 55 or 999
+    offset = math.min(offset, maxOffset)
 
     local leftIcon = Instance.new("ImageLabel")
     leftIcon.Size = UDim2.new(0, iconSize, 0, iconSize)
@@ -108,6 +113,9 @@ if readfile and isfile and isfile("Rose/NoirUI_Config.json") then
             if decoded.AntiNetworkPause ~= nil then SavedData.AntiNetworkPause = decoded.AntiNetworkPause end
             if decoded.InfMoneyUsed ~= nil then SavedData.InfMoneyUsed = decoded.InfMoneyUsed end
             if decoded.HideUIKeybind then SavedData.HideUIKeybind = decoded.HideUIKeybind end
+            if decoded.ShowMobileHideBtn ~= nil then SavedData.ShowMobileHideBtn = decoded.ShowMobileHideBtn end
+            if decoded.NotifsEnabled ~= nil then SavedData.NotifsEnabled = decoded.NotifsEnabled end
+            if decoded.NotifsPosition then SavedData.NotifsPosition = decoded.NotifsPosition end
         end
     end)
 end
@@ -299,20 +307,20 @@ local function ST_BYPASS_TP(targetPos)
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChildOfClass("Humanoid")
-    
+
     if hum and hum.SeatPart then
         hum.Sit = false; task.wait(0.05)
     end
-    
+
     local head = char:FindFirstChild("Head")
     if head then
         head.CanCollide = false
     end
-    
-    if hrp then 
-        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0)) 
+
+    if hrp then
+        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
     end
-    
+
     task.delay(0.5, function()
         if head then
             head.CanCollide = true
@@ -555,12 +563,13 @@ MGTitle.ZIndex = 5
 MGTitle.Parent = MoneyGenCard
 addDualIcons(MGTitle, "111779063111585")
 local InfMoneyLabel = Instance.new("TextLabel")
-InfMoneyLabel.Size = UDim2.new(0, 150, 0, 18)
+InfMoneyLabel.Size = UDim2.new(1, -75, 0, 18)
 InfMoneyLabel.Position = UDim2.new(0, 12, 0, 40)
 InfMoneyLabel.BackgroundTransparency = 1
 InfMoneyLabel.Text = "Enable Inf Money"
 InfMoneyLabel.TextColor3 = Theme.MutedText
 InfMoneyLabel.TextSize = 12
+InfMoneyLabel.TextTruncate = Enum.TextTruncate.AtEnd
 InfMoneyLabel.Font = Enum.Font.GothamMedium
 InfMoneyLabel.TextXAlignment = Enum.TextXAlignment.Left
 InfMoneyLabel.ZIndex = 5
@@ -1359,13 +1368,20 @@ InstructionsText.TextYAlignment = Enum.TextYAlignment.Top
 InstructionsText.TextWrapped = true
 InstructionsText.ZIndex = 6
 InstructionsText.Parent = InstructionsBox
-local function createAdaptiveFixedCard(name, positionScale)
+local function createAdaptiveFixedCard(name, positionScale, yIndex, mobileYIndex)
     local Card = Instance.new("Frame")
     Card.Name = name .. "Card"
     Card.BackgroundColor3 = Theme.CardBackground
     Card.BackgroundTransparency = 0.15
-    Card.Size = UDim2.new(0.5, -8, 0, 250)
-    Card.Position = UDim2.new(positionScale, 4, 0, 4)
+    if isMobile then
+        local yPos = 4 + (mobileYIndex or 0) * 260
+        Card.Size = UDim2.new(1, -8, 0, 250)
+        Card.Position = UDim2.new(0, 4, 0, yPos)
+    else
+        local yPos = 4 + (yIndex or 0) * 260
+        Card.Size = UDim2.new(0.5, -8, 0, 250)
+        Card.Position = UDim2.new(positionScale, 4, 0, yPos)
+    end
     Card.ZIndex = 4
     Card.Parent = SettingsScroll
     local CardCorner = Instance.new("UICorner")
@@ -1377,7 +1393,7 @@ local function createAdaptiveFixedCard(name, positionScale)
     CardStroke.Parent = Card
     return Card
 end
-local CustomInterfaceCard = createAdaptiveFixedCard("CustomInterface", 0)
+local CustomInterfaceCard = createAdaptiveFixedCard("CustomInterface", 0, 0, 0)
 local Card1Title = Instance.new("TextLabel")
 Card1Title.Size = UDim2.new(1, 0, 0, 22)
 Card1Title.Position = UDim2.new(0, 0, 0, 10)
@@ -1499,8 +1515,15 @@ IdBox.TextColor3 = Color3.fromRGB(180, 180, 185)
 IdBox.Font = Enum.Font.Code
 IdBox.TextSize = 10
 IdBox.ClearTextOnFocus = false
+IdBox.ClipsDescendants = true
+IdBox.TextTruncate = Enum.TextTruncate.AtEnd
+IdBox.TextXAlignment = Enum.TextXAlignment.Left
 IdBox.ZIndex = 5
 IdBox.Parent = CustomInterfaceCard
+local IdBoxPadding = Instance.new("UIPadding")
+IdBoxPadding.PaddingLeft = UDim.new(0, 6)
+IdBoxPadding.PaddingRight = UDim.new(0, 6)
+IdBoxPadding.Parent = IdBox
 local IdBoxCorner = Instance.new("UICorner")
 IdBoxCorner.CornerRadius = UDim.new(0, 6)
 IdBoxCorner.Parent = IdBox
@@ -1592,7 +1615,7 @@ UserInputService.InputChanged:Connect(function(input)
         updateSlider(input)
     end
 end)
-local UiSettingsCard = createAdaptiveFixedCard("UiSettings", 0.5)
+local UiSettingsCard = createAdaptiveFixedCard("UiSettings", 0.5, 0, 1)
 local ToggleTitle = Instance.new("TextLabel")
 ToggleTitle.Size = UDim2.new(1, 0, 0, 22)
 ToggleTitle.Position = UDim2.new(0, 0, 0, 10)
@@ -1971,12 +1994,165 @@ local function handleBorderToggle()
     SavedData.BorderOn = strokeOn
     saveConfig()
 end
+
 ToggleBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         handleBorderToggle()
     end
 end)
-local UiControlsCard = createAdaptiveFixedCard("UiControls", 0)
+
+;(function()
+local NotificationsCard = createAdaptiveFixedCard("Notifications", 0.5, 1, 2)
+local NotifCardTitle = Instance.new("TextLabel")
+NotifCardTitle.Size = UDim2.new(1, 0, 0, 22)
+NotifCardTitle.Position = UDim2.new(0, 0, 0, 10)
+NotifCardTitle.BackgroundTransparency = 1
+NotifCardTitle.Text = "Notifications"
+NotifCardTitle.TextColor3 = Theme.Text
+NotifCardTitle.TextSize = 14
+NotifCardTitle.Font = Enum.Font.GothamBold
+NotifCardTitle.TextXAlignment = Enum.TextXAlignment.Center
+NotifCardTitle.ZIndex = 5
+NotifCardTitle.Parent = NotificationsCard
+addDualIcons(NotifCardTitle, "108407980345110")
+
+local EnNotifLabel = Instance.new("TextLabel")
+EnNotifLabel.Size = UDim2.new(1, -75, 0, 18)
+EnNotifLabel.Position = UDim2.new(0, 12, 0, 45)
+EnNotifLabel.BackgroundTransparency = 1
+EnNotifLabel.Text = "Enable Notifications"
+EnNotifLabel.TextColor3 = Theme.MutedText
+EnNotifLabel.TextSize = 12
+EnNotifLabel.TextTruncate = Enum.TextTruncate.AtEnd
+EnNotifLabel.Font = Enum.Font.GothamMedium
+EnNotifLabel.TextXAlignment = Enum.TextXAlignment.Left
+EnNotifLabel.ZIndex = 5
+EnNotifLabel.Parent = NotificationsCard
+
+local EnNotifBtn = Instance.new("TextButton")
+EnNotifBtn.Size = UDim2.new(0, 42, 0, 20)
+EnNotifBtn.Position = UDim2.new(1, -54, 0, 44)
+EnNotifBtn.BackgroundColor3 = SavedData.NotifsEnabled and Theme.Highlight or Color3.fromRGB(45, 43, 50)
+EnNotifBtn.Text = ""
+EnNotifBtn.ZIndex = 5
+EnNotifBtn.Parent = NotificationsCard
+local ENB_Corner = Instance.new("UICorner")
+ENB_Corner.CornerRadius = UDim.new(1, 0)
+ENB_Corner.Parent = EnNotifBtn
+local ENB_Circle = Instance.new("Frame")
+ENB_Circle.Size = UDim2.new(0, 14, 0, 14)
+ENB_Circle.Position = SavedData.NotifsEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+ENB_Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ENB_Circle.ZIndex = 6
+ENB_Circle.Parent = EnNotifBtn
+local ENB_CircleCorner = Instance.new("UICorner")
+ENB_CircleCorner.CornerRadius = UDim.new(1, 0)
+ENB_CircleCorner.Parent = ENB_Circle
+
+EnNotifBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        SavedData.NotifsEnabled = not SavedData.NotifsEnabled
+        saveConfig()
+        local tPos = SavedData.NotifsEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+        local tCol = SavedData.NotifsEnabled and Theme.Highlight or Color3.fromRGB(45, 43, 50)
+        TweenService:Create(ENB_Circle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position=tPos}):Play()
+        TweenService:Create(EnNotifBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {BackgroundColor3=tCol}):Play()
+    end
+end)
+
+local PosDropBtn = Instance.new("TextButton")
+PosDropBtn.Size = UDim2.new(1, -24, 0, 28)
+PosDropBtn.Position = UDim2.new(0, 12, 0, 85)
+PosDropBtn.BackgroundColor3 = Color3.fromRGB(13, 12, 15)
+PosDropBtn.Text = ""
+PosDropBtn.ZIndex = 5
+PosDropBtn.Parent = NotificationsCard
+local PosDropCorner = Instance.new("UICorner"); PosDropCorner.CornerRadius = UDim.new(0, 6); PosDropCorner.Parent = PosDropBtn
+local PosDropStroke = Instance.new("UIStroke"); PosDropStroke.Color = Theme.Stroke; PosDropStroke.Thickness = 1; PosDropStroke.Parent = PosDropBtn
+
+local PosDropLabel = Instance.new("TextLabel")
+PosDropLabel.Size = UDim2.new(1, -30, 1, 0); PosDropLabel.Position = UDim2.new(0, 8, 0, 0)
+PosDropLabel.BackgroundTransparency = 1; PosDropLabel.Text = SavedData.NotifsPosition
+PosDropLabel.TextColor3 = Theme.MutedText; PosDropLabel.TextSize = 11
+PosDropLabel.Font = Enum.Font.GothamMedium; PosDropLabel.TextXAlignment = Enum.TextXAlignment.Left; PosDropLabel.ZIndex = 6; PosDropLabel.Parent = PosDropBtn
+
+local PosDropArr = Instance.new("TextLabel")
+PosDropArr.Size = UDim2.new(0, 20, 1, 0); PosDropArr.Position = UDim2.new(1, -24, 0, 0)
+PosDropArr.BackgroundTransparency = 1; PosDropArr.Text = "v"; PosDropArr.TextColor3 = Theme.MutedText
+PosDropArr.TextSize = 13; PosDropArr.Font = Enum.Font.GothamBold; PosDropArr.ZIndex = 6; PosDropArr.Parent = PosDropBtn
+
+local PosDropList = Instance.new("ScrollingFrame")
+PosDropList.Size = UDim2.new(1, -24, 0, 0); PosDropList.Position = UDim2.new(0, 12, 0, 117)
+PosDropList.BackgroundColor3 = Color3.fromRGB(13, 12, 15); PosDropList.BorderSizePixel = 0
+PosDropList.ClipsDescendants = true; PosDropList.ZIndex = 20; PosDropList.Visible = false
+PosDropList.ScrollBarThickness = 3; PosDropList.ScrollBarImageColor3 = Theme.Highlight
+PosDropList.CanvasSize = UDim2.new(0, 0, 0, 0); PosDropList.AutomaticCanvasSize = Enum.AutomaticSize.Y; PosDropList.Parent = NotificationsCard
+local PDL_Corner = Instance.new("UICorner"); PDL_Corner.CornerRadius = UDim.new(0, 6); PDL_Corner.Parent = PosDropList
+local PDL_Stroke = Instance.new("UIStroke"); PDL_Stroke.Color = Theme.Highlight; PDL_Stroke.Thickness = 1; PDL_Stroke.Parent = PosDropList
+local PDL_Layout = Instance.new("UIListLayout"); PDL_Layout.SortOrder = Enum.SortOrder.LayoutOrder; PDL_Layout.Parent = PosDropList
+
+local posOptions = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"}
+local posDropOpen = false
+for i, opt in ipairs(posOptions) do
+    local Item = Instance.new("TextButton")
+    Item.Size = UDim2.new(1, 0, 0, 32); Item.BackgroundTransparency = 1; Item.Text = opt
+    Item.TextColor3 = (opt == SavedData.NotifsPosition) and Theme.Highlight or Theme.MutedText
+    Item.TextSize = 11; Item.Font = Enum.Font.GothamMedium; Item.TextXAlignment = Enum.TextXAlignment.Left
+    Item.ZIndex = 21; Item.AutoButtonColor = false; Item.Parent = PosDropList
+    local ItemPad = Instance.new("UIPadding"); ItemPad.PaddingLeft = UDim.new(0, 10); ItemPad.Parent = Item
+    
+    Item.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            SavedData.NotifsPosition = opt; saveConfig()
+            PosDropLabel.Text = opt
+            for _, c in ipairs(PosDropList:GetChildren()) do
+                if c:IsA("TextButton") then c.TextColor3 = Theme.MutedText end
+            end
+            Item.TextColor3 = Theme.Highlight
+            posDropOpen = false; PosDropArr.Text = "v"
+            TweenService:Create(PosDropList, TweenInfo.new(0.18), {Size = UDim2.new(1, -24, 0, 0)}):Play()
+            task.delay(0.18, function() PosDropList.Visible = false end)
+            
+            -- Update NotifContainer position dynamically
+            if NotifContainer then
+                if SavedData.NotifsPosition == "Top Right" then
+                    NotifContainer.Position = UDim2.new(1, -295, 0, 20)
+                    NotifContainer.AnchorPoint = Vector2.new(0, 0)
+                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Top
+                elseif SavedData.NotifsPosition == "Top Left" then
+                    NotifContainer.Position = UDim2.new(0, 15, 0, 20)
+                    NotifContainer.AnchorPoint = Vector2.new(0, 0)
+                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Top
+                elseif SavedData.NotifsPosition == "Bottom Left" then
+                    NotifContainer.Position = UDim2.new(0, 15, 1, -20)
+                    NotifContainer.AnchorPoint = Vector2.new(0, 1)
+                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+                else -- Bottom Right
+                    NotifContainer.Position = UDim2.new(1, -295, 1, -20)
+                    NotifContainer.AnchorPoint = Vector2.new(0, 1)
+                    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+                end
+            end
+        end
+    end)
+end
+
+PosDropBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        posDropOpen = not posDropOpen
+        if posDropOpen then
+            PosDropList.Visible = true; PosDropArr.Text = "^"
+            TweenService:Create(PosDropList, TweenInfo.new(0.18), {Size = UDim2.new(1, -24, 0, #posOptions*32)}):Play()
+        else
+            PosDropArr.Text = "v"
+            TweenService:Create(PosDropList, TweenInfo.new(0.18), {Size = UDim2.new(1, -24, 0, 0)}):Play()
+            task.delay(0.18, function() PosDropList.Visible = false end)
+        end
+    end
+end)
+end)()
+
+local UiControlsCard = createAdaptiveFixedCard("UiControls", 0, 1, 3)
 UiControlsCard.Size = UDim2.new(0.5, -8, 0, 130)
 UiControlsCard.Position = UDim2.new(0, 4, 0, 262)
 local UiControlsTitle = Instance.new("TextLabel")
@@ -1995,49 +2171,85 @@ local KeybindLabel = Instance.new("TextLabel")
 KeybindLabel.Size = UDim2.new(0, 150, 0, 18)
 KeybindLabel.Position = UDim2.new(0, 12, 0, 45)
 KeybindLabel.BackgroundTransparency = 1
-KeybindLabel.Text = "Hide UI Keybind"
+KeybindLabel.Text = isMobile and "Show Floating Toggle" or "Hide UI Keybind"
 KeybindLabel.TextColor3 = Theme.MutedText
 KeybindLabel.TextSize = 12
 KeybindLabel.Font = Enum.Font.GothamMedium
 KeybindLabel.TextXAlignment = Enum.TextXAlignment.Left
 KeybindLabel.ZIndex = 5
 KeybindLabel.Parent = UiControlsCard
-local KeybindBtn = Instance.new("TextButton")
-KeybindBtn.Size = UDim2.new(0, 70, 0, 24)
-KeybindBtn.Position = UDim2.new(1, -82, 0, 42)
-KeybindBtn.BackgroundColor3 = Color3.fromRGB(45, 43, 50)
-KeybindBtn.Text = SavedData.HideUIKeybind or "None"
-KeybindBtn.TextColor3 = Theme.Text
-KeybindBtn.TextSize = 12
-KeybindBtn.Font = Enum.Font.GothamBold
-KeybindBtn.ZIndex = 5
-KeybindBtn.Parent = UiControlsCard
-local KBCorner = Instance.new("UICorner")
-KBCorner.CornerRadius = UDim.new(0, 4)
-KBCorner.Parent = KeybindBtn
-local isBinding = false
-KeybindBtn.InputBegan:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and not isBinding then
-        isBinding = true
-        KeybindBtn.Text = "..."
-        local conn
-        conn = UserInputService.InputBegan:Connect(function(i, gp)
-            if i.UserInputType == Enum.UserInputType.Keyboard then
-                local kName = i.KeyCode.Name
-                if kName == "Escape" or kName == "Unknown" then
-                    SavedData.HideUIKeybind = nil
-                    KeybindBtn.Text = "None"
-                else
-                    SavedData.HideUIKeybind = kName
-                    KeybindBtn.Text = kName
+
+if isMobile then
+    local MobileToggleBtn = Instance.new("TextButton")
+    MobileToggleBtn.Size = UDim2.new(0, 42, 0, 20)
+    MobileToggleBtn.Position = UDim2.new(1, -54, 0, 44)
+    MobileToggleBtn.BackgroundColor3 = SavedData.ShowMobileHideBtn and Theme.Highlight or Color3.fromRGB(45, 43, 50)
+    MobileToggleBtn.Text = ""
+    MobileToggleBtn.ZIndex = 5
+    MobileToggleBtn.Parent = UiControlsCard
+    local MTB_Corner = Instance.new("UICorner")
+    MTB_Corner.CornerRadius = UDim.new(1, 0)
+    MTB_Corner.Parent = MobileToggleBtn
+    local MTB_Circle = Instance.new("Frame")
+    MTB_Circle.Size = UDim2.new(0, 14, 0, 14)
+    MTB_Circle.Position = SavedData.ShowMobileHideBtn and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+    MTB_Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    MTB_Circle.ZIndex = 6
+    MTB_Circle.Parent = MobileToggleBtn
+    local MTB_CircleCorner = Instance.new("UICorner")
+    MTB_CircleCorner.CornerRadius = UDim.new(1, 0)
+    MTB_CircleCorner.Parent = MTB_Circle
+    
+    MobileToggleBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            SavedData.ShowMobileHideBtn = not SavedData.ShowMobileHideBtn
+            saveConfig()
+            local targetPos = SavedData.ShowMobileHideBtn and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+            local targetColor = SavedData.ShowMobileHideBtn and Theme.Highlight or Color3.fromRGB(45, 43, 50)
+            TweenService:Create(MTB_Circle, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = targetPos }):Play()
+            TweenService:Create(MobileToggleBtn, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundColor3 = targetColor }):Play()
+            local mfb = ScreenGui:FindFirstChild("MobileFloatingButton")
+            if mfb then mfb.Visible = SavedData.ShowMobileHideBtn end
+        end
+    end)
+else
+    local KeybindBtn = Instance.new("TextButton")
+    KeybindBtn.Size = UDim2.new(0, 70, 0, 24)
+    KeybindBtn.Position = UDim2.new(1, -82, 0, 42)
+    KeybindBtn.BackgroundColor3 = Color3.fromRGB(45, 43, 50)
+    KeybindBtn.Text = SavedData.HideUIKeybind or "None"
+    KeybindBtn.TextColor3 = Theme.Text
+    KeybindBtn.TextSize = 12
+    KeybindBtn.Font = Enum.Font.GothamBold
+    KeybindBtn.ZIndex = 5
+    KeybindBtn.Parent = UiControlsCard
+    local KBCorner = Instance.new("UICorner")
+    KBCorner.CornerRadius = UDim.new(0, 4)
+    KBCorner.Parent = KeybindBtn
+    local isBinding = false
+    KeybindBtn.InputBegan:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and not isBinding then
+            isBinding = true
+            KeybindBtn.Text = "..."
+            local conn
+            conn = UserInputService.InputBegan:Connect(function(i, gp)
+                if i.UserInputType == Enum.UserInputType.Keyboard then
+                    local kName = i.KeyCode.Name
+                    if kName == "Escape" or kName == "Unknown" then
+                        SavedData.HideUIKeybind = nil
+                        KeybindBtn.Text = "None"
+                    else
+                        SavedData.HideUIKeybind = kName
+                        KeybindBtn.Text = kName
+                    end
+                    saveConfig()
+                    isBinding = false
+                    conn:Disconnect()
                 end
-                saveConfig()
-                isBinding = false
-                conn:Disconnect()
-            end
-        end)
-    end
-end)
+            end)
+        end
+    end)
+end
 local CloseUIBtn = Instance.new("TextButton")
 CloseUIBtn.Size = UDim2.new(1, -24, 0, 28)
 CloseUIBtn.Position = UDim2.new(0, 12, 0, 85)
@@ -2223,6 +2435,67 @@ MakeDraggable(MainFrame);
         end
     end)
 end)()
+
+if isMobile then
+    local FloatingBtn = Instance.new("TextButton")
+    FloatingBtn.Name = "MobileFloatingButton"
+    FloatingBtn.Size = UDim2.new(0, 45, 0, 45)
+    FloatingBtn.Position = UDim2.new(0, 20, 0.5, -22)
+    FloatingBtn.BackgroundColor3 = Theme.CardBackground
+    FloatingBtn.BackgroundTransparency = 0.2
+    FloatingBtn.Text = ""
+    FloatingBtn.Visible = SavedData.ShowMobileHideBtn
+    FloatingBtn.ZIndex = 100
+    FloatingBtn.Parent = ScreenGui
+    local FBCorner = Instance.new("UICorner")
+    FBCorner.CornerRadius = UDim.new(1, 0)
+    FBCorner.Parent = FloatingBtn
+    local FBStroke = Instance.new("UIStroke")
+    FBStroke.Color = Theme.Highlight
+    FBStroke.Thickness = 1.5
+    FBStroke.Parent = FloatingBtn
+    local FBIcon = Instance.new("ImageLabel")
+    FBIcon.Size = UDim2.new(0, 24, 0, 24)
+    FBIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
+    FBIcon.BackgroundTransparency = 1
+    FBIcon.Image = "rbxassetid://108407980345110"
+    FBIcon.ImageColor3 = Theme.Text
+    FBIcon.Parent = FloatingBtn
+    
+    local fDrag, fInput, fStart, fPos
+    FloatingBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            fDrag = true
+            fStart = input.Position
+            fPos = FloatingBtn.Position
+            local clickTime = tick()
+            local conn
+            conn = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    fDrag = false
+                    if tick() - clickTime < 0.25 and (input.Position - fStart).Magnitude < 10 then
+                        MainFrame.Visible = not MainFrame.Visible
+                    end
+                    conn:Disconnect()
+                end
+            end)
+        end
+    end)
+    FloatingBtn.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            fInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == fInput and fDrag then
+            local delta = input.Position - fStart
+            FloatingBtn.Position = UDim2.new(
+                fPos.X.Scale, fPos.X.Offset + delta.X,
+                fPos.Y.Scale, fPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
 
 if SavedData.RoseRainOn then
     startRoseRain()
