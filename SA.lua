@@ -1,3 +1,8 @@
+if not getgenv then
+    local _sharedEnv = {}
+    getgenv = function() return _sharedEnv end
+end
+
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 
@@ -25,8 +30,16 @@ _G.KILLAURA_CFG = _G.KILLAURA_CFG or {
     Enabled = false,
     MaxDist = 300,
     Delay = 100,
-    Wallbang = false
+    Wallbang = false,
+    TeleKill = false
 }
+
+_G.HITBOX_CFG = _G.HITBOX_CFG or {
+    Enabled = false,
+    Size = 10,
+    Part = "head"
+}
+
 
 _G.SILENT_CFG = _G.SILENT_CFG or {
     Enabled = false,
@@ -84,6 +97,10 @@ _G.FUN_CFG = _G.FUN_CFG or {
     InfJump = false,
     Spinbot = false,
     SpinSpeed = 50
+}
+
+_G.PREFERENCES_CFG = _G.PREFERENCES_CFG or {
+    IgnoredPlayers = {}
 }
 -- Smooth Drag setting (initially set at top)
 local UIS = game:GetService("UserInputService")
@@ -181,6 +198,64 @@ local function GetGameGroup(pid)
 end
 
 _G.FLUX_CONNS = _G.FLUX_CONNS or {}
+
+local function NormalizeIgnoredPlayers()
+    local prefs = _G.PREFERENCES_CFG
+    if type(prefs) ~= "table" then
+        prefs = {}
+        _G.PREFERENCES_CFG = prefs
+    end
+
+    local rawIgnored = prefs.IgnoredPlayers
+    local normalized = {}
+    if type(rawIgnored) == "table" then
+        for key, value in pairs(rawIgnored) do
+            if type(key) == "number" then
+                if type(value) == "string" and value ~= "" then
+                    normalized[value] = true
+                end
+            elseif value then
+                normalized[tostring(key)] = true
+            end
+        end
+    end
+
+    prefs.IgnoredPlayers = normalized
+    return normalized
+end
+
+local function IsIgnoredPlayer(playerOrName)
+    if not playerOrName then return false end
+
+    local playerName
+    if typeof(playerOrName) == "Instance" and playerOrName:IsA("Player") then
+        playerName = playerOrName.Name
+    elseif type(playerOrName) == "string" then
+        playerName = playerOrName
+    end
+
+    if not playerName or playerName == "" then
+        return false
+    end
+
+    return NormalizeIgnoredPlayers()[playerName] == true
+end
+
+local function SetIgnoredPlayer(playerName, state)
+    if not playerName or playerName == "" then return end
+
+    local ignored = NormalizeIgnoredPlayers()
+    if state then
+        ignored[playerName] = true
+    else
+        ignored[playerName] = nil
+    end
+end
+
+local function IsIgnoredCharacter(char)
+    local owner = char and Players:GetPlayerFromCharacter(char)
+    return owner and IsIgnoredPlayer(owner) or false
+end
 
 -- Session Control (Kills old loops)
 local MySession = os.clock()
@@ -379,6 +454,7 @@ local function SaveUI()
         bgTrans = _G.CUSTOM_BG_TRANSPARENCY,
         blurActive = blurActive,
         blurVal = blurVal,
+        ignoredPlayers = NormalizeIgnoredPlayers(),
         KillSoundEnabled = _G.WORLD_CFG.KillSoundEnabled,
         KillSoundId = _G.WORLD_CFG.KillSoundId,
         KillSoundVolume = _G.WORLD_CFG.KillSoundVolume
@@ -397,9 +473,13 @@ local function LoadUI()
             if data.bgTrans ~= nil then _G.CUSTOM_BG_TRANSPARENCY = data.bgTrans end
             if data.blurActive ~= nil then blurActive = data.blurActive end
             if data.blurVal ~= nil then blurVal = data.blurVal end
+            if data.ignoredPlayers ~= nil then
+                _G.PREFERENCES_CFG.IgnoredPlayers = data.ignoredPlayers
+            end
             if data.KillSoundEnabled ~= nil then _G.WORLD_CFG.KillSoundEnabled = data.KillSoundEnabled end
             if data.KillSoundId ~= nil then _G.WORLD_CFG.KillSoundId = tostring(data.KillSoundId) end
             if data.KillSoundVolume ~= nil then _G.WORLD_CFG.KillSoundVolume = data.KillSoundVolume end
+            NormalizeIgnoredPlayers()
         end
     end
 end
@@ -1736,6 +1816,42 @@ do
             end)
         end
 
+        local function BuildRollbackDupeCard()
+            local RDCard = NewFrame(page, UDim2.new(0.46, 0, 0, 80), UDim2.new(0, 1, 0, 353), PANEL)
+            Corner(RDCard, 8); Stroke(RDCard, STROKE, 1)
+
+            local RDTitle = NewLabel(RDCard, "Rollback Dupe", 13, TEXT, true)
+            RDTitle.Size = UDim2.new(1, 0, 0, 30); RDTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local RDHolder = NewFrame(RDCard, UDim2.new(1, -16, 0, 40), UDim2.new(0, 8, 0, 32), PANEL, 1)
+            local executeBtn = NewBtn(RDHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(36, 36, 48))
+            Corner(executeBtn, 6); Stroke(executeBtn, STROKE2, 1)
+
+            local executeLbl = NewLabel(executeBtn, "Execute Rollback", 11, TEXT, true, Enum.TextXAlignment.Center)
+            executeLbl.Size = UDim2.new(1, 0, 1, 0)
+
+            executeBtn.MouseButton1Click:Connect(function()
+                pcall(function()
+                    local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
+                        game:GetService("ReplicatedStorage").Events:FindFirstChild("HUD") and
+                        game:GetService("ReplicatedStorage").Events.HUD:FindFirstChild("Settings")
+                    if Event then
+                        Event:FireServer("CrosshairID", "\xED\xBE\x8C", "Crosshair")
+                        NOTIFY("Rollback Dupe", "Rollback event fired!", 3)
+                    else
+                        NOTIFY("Rollback Dupe", "Settings event not found!", 3)
+                    end
+                end)
+            end)
+
+            executeBtn.MouseEnter:Connect(function()
+                Tw(executeBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+            end)
+            executeBtn.MouseLeave:Connect(function()
+                Tw(executeBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+            end)
+        end
+
         local function BuildLocalPlayerCard()
             local yPos = 3
             local LPCardHeight = 160
@@ -2017,6 +2133,7 @@ do
         elseif IsDuelist() then
             BuildEquipEmoteCard()
             BuildKillSoundCard()
+            BuildRollbackDupeCard()
         end
         BuildLocalPlayerCard()
     end
@@ -2724,6 +2841,8 @@ local function SETUP_COLOR_PICKER()
 end
 SETUP_COLOR_PICKER()
 
+local ConfigPreferencesTabPage
+
 -- ══════════════════ CATEGORY CONTENT: OTHERS ══════════════════
 -- ══════════════════ CATEGORY CONTENT: CONFIG ══════════════════
 do
@@ -2744,20 +2863,63 @@ do
             BG, 1
         )
 
-        -- Create a single tab for consistency
-        local tb = NewBtn(TabBar, UDim2.new(0, 82, 1, 0), UDim2.new(0, 18, 0, 0), BG, 1)
-        local tl = NewLabel(tb, "Configs", 13, ACCENT, true)
-        tl.Name = "SectionTitle"
-        tl.Size = UDim2.new(1, 0, 1, 0)
-        tl.TextXAlignment = Enum.TextXAlignment.Center
+        local configTabDefs = {
+            { name = "Configs",     width = 82 },
+            { name = "Preferences", width = 96 }
+        }
+        local configTabBtns = {}
+        local configTabLines = {}
+        local configPages = {}
+        local activeConfigTabIdx = 1
+        local configTx = 18
 
-        local ul = NewFrame(ConfigPage, UDim2.new(0, 82, 0, 2), UDim2.new(0, 18, 0, TAB_H - 2), ACCENT)
-        Corner(ul, 1)
-        table.insert(accentFills, ul)
+        for i, tabData in ipairs(configTabDefs) do
+            local tb = NewBtn(TabBar, UDim2.new(0, tabData.width, 1, 0), UDim2.new(0, configTx, 0, 0), BG, 1)
+            local tl = NewLabel(tb, tabData.name, 13, i == 1 and ACCENT or DIM, i == 1)
+            tl.Size = UDim2.new(1, 0, 1, 0)
+            tl.TextXAlignment = Enum.TextXAlignment.Center
 
-        -- Page Container
-        local page = NewScroll(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-        page.ClipsDescendants = true
+            local ul = NewFrame(ConfigPage, UDim2.new(0, tabData.width, 0, 2), UDim2.new(0, configTx, 0, TAB_H - 2),
+                ACCENT)
+            ul.Visible = i == 1
+            Corner(ul, 1)
+            table.insert(accentFills, ul)
+
+            local subPage = NewScroll(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+            subPage.Visible = i == 1
+            subPage.ClipsDescendants = true
+
+            configTabBtns[i] = { btn = tb, lbl = tl }
+            configTabLines[i] = ul
+            configPages[i] = subPage
+            configTx = configTx + tabData.width + 14
+
+            tb.MouseButton1Click:Connect(function()
+                if activeConfigTabIdx == i then return end
+
+                configTabBtns[activeConfigTabIdx].lbl.TextColor3 = DIM
+                configTabBtns[activeConfigTabIdx].lbl.Font = Enum.Font.Gotham
+                configTabLines[activeConfigTabIdx].Visible = false
+                configPages[activeConfigTabIdx].Visible = false
+
+                activeConfigTabIdx = i
+                tl.TextColor3 = ACCENT
+                tl.Font = Enum.Font.GothamBold
+                ul.Visible = true
+                subPage.Visible = true
+            end)
+        end
+
+        _G.FLUX_CONFIG_TAB_THEME_SYNC = function()
+            for i, ref in ipairs(configTabBtns) do
+                if ref and ref.lbl then
+                    ref.lbl.TextColor3 = (i == activeConfigTabIdx) and ACCENT or DIM
+                end
+            end
+        end
+
+        local page = configPages[1]
+        ConfigPreferencesTabPage = configPages[2]
 
         -- Absolute layout used
         -- Helpers
@@ -3214,6 +3376,238 @@ do
     end
 end
 
+do
+    local PreferencesPage = ConfigPreferencesTabPage or navPages["Preferences"]
+    if PreferencesPage then
+        local isEmbeddedInConfig = PreferencesPage == ConfigPreferencesTabPage
+        local prefScroll
+
+        if isEmbeddedInConfig then
+            prefScroll = NewScroll(PreferencesPage, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+        else
+            local PREF_TAB_H = 44
+            local PrefTabBar = NewFrame(PreferencesPage, UDim2.new(1, 0, 0, PREF_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
+            local PrefTabSep = NewFrame(PreferencesPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, PREF_TAB_H), STROKE)
+
+            local PrefContentRow = NewFrame(PreferencesPage,
+                UDim2.new(1, -20, 1, -(PREF_TAB_H + 3 + 20)),
+                UDim2.new(0, 10, 0, PREF_TAB_H + 3 + 10),
+                BG, 1
+            )
+
+            local prefTabBtn = NewBtn(PrefTabBar, UDim2.new(0, 96, 1, 0), UDim2.new(0, 18, 0, 0), BG, 1)
+            local prefTabLbl = NewLabel(prefTabBtn, "Preferences", 13, ACCENT, true)
+            prefTabLbl.Name = "SectionTitle"
+            prefTabLbl.Size = UDim2.new(1, 0, 1, 0)
+            prefTabLbl.TextXAlignment = Enum.TextXAlignment.Center
+
+            local prefTabLine = NewFrame(PreferencesPage, UDim2.new(0, 96, 0, 2),
+                UDim2.new(0, 18, 0, PREF_TAB_H - 2), ACCENT)
+            Corner(prefTabLine, 1)
+            table.insert(accentFills, prefTabLine)
+
+            prefScroll = NewScroll(PrefContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+        end
+
+        prefScroll.ClipsDescendants = true
+
+        local ignoreCard = NewFrame(prefScroll, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
+        Corner(ignoreCard, 8)
+        Stroke(ignoreCard, STROKE, 1)
+
+        local ignoreTitle = NewLabel(ignoreCard, "Ignore Players", 13, TEXT, true)
+        ignoreTitle.Name = "SectionTitle"
+        ignoreTitle.Size = UDim2.new(1, 0, 0, 30)
+        ignoreTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local ignoreDesc = NewLabel(ignoreCard,
+            "Los jugadores ignorados se excluyen de ESP, aimbot, silent aim, insta kill, kill aura y hitbox expander.",
+            11, DIM)
+        ignoreDesc.Position = UDim2.new(0, 10, 0, 36)
+        ignoreDesc.Size = UDim2.new(1, -20, 0, 32)
+        ignoreDesc.TextWrapped = true
+        ignoreDesc.TextYAlignment = Enum.TextYAlignment.Top
+
+        local ignoredCountLbl = NewLabel(ignoreCard, "Ignored: 0", 11, ACCENT, true, Enum.TextXAlignment.Right)
+        ignoredCountLbl.Name = "SectionTitle"
+        ignoredCountLbl.Position = UDim2.new(0, 10, 0, 70)
+        ignoredCountLbl.Size = UDim2.new(1, -20, 0, 18)
+
+        local searchWrap = NewFrame(ignoreCard, UDim2.new(1, -16, 0, 30), UDim2.new(0, 8, 0, 96),
+            Color3.fromRGB(15, 15, 20))
+        Corner(searchWrap, 5)
+        Stroke(searchWrap, STROKE2, 1)
+
+        local searchBox = Instance.new("TextBox")
+        searchBox.Size = UDim2.new(1, -16, 1, 0)
+        searchBox.Position = UDim2.new(0, 8, 0, 0)
+        searchBox.BackgroundTransparency = 1
+        searchBox.BorderSizePixel = 0
+        searchBox.TextColor3 = TEXT
+        searchBox.PlaceholderColor3 = DIM
+        searchBox.PlaceholderText = "Buscar jugador por nombre o display..."
+        searchBox.Text = ""
+        searchBox.TextSize = 11
+        searchBox.Font = Enum.Font.Gotham
+        searchBox.ClearTextOnFocus = false
+        searchBox.Parent = searchWrap
+
+        local buttonRow = NewFrame(ignoreCard, UDim2.new(1, -16, 0, 32), UDim2.new(0, 8, 0, 132), BG, 1)
+
+        local refreshBtn = NewBtn(buttonRow, UDim2.new(0.5, -4, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
+        Corner(refreshBtn, 6)
+        Stroke(refreshBtn, STROKE2, 1)
+        local refreshLbl = NewLabel(refreshBtn, "Refresh List", 11, TEXT, false, Enum.TextXAlignment.Center)
+        refreshLbl.Size = UDim2.new(1, 0, 1, 0)
+
+        local clearBtn = NewBtn(buttonRow, UDim2.new(0.5, -4, 1, 0), UDim2.new(0.5, 4, 0, 0), Color3.fromRGB(36, 36, 48))
+        Corner(clearBtn, 6)
+        Stroke(clearBtn, STROKE2, 1)
+        local clearLbl = NewLabel(clearBtn, "Clear Ignored", 11, TEXT, false, Enum.TextXAlignment.Center)
+        clearLbl.Size = UDim2.new(1, 0, 1, 0)
+
+        local playersList = NewScroll(ignoreCard, UDim2.new(1, -16, 1, -180), UDim2.new(0, 8, 0, 172),
+            Color3.fromRGB(15, 15, 20))
+        playersList.ScrollBarThickness = 4
+        playersList.ScrollBarImageColor3 = ACCENT
+        Corner(playersList, 6)
+        Stroke(playersList, STROKE2, 1)
+
+        local playersLayout = Instance.new("UIListLayout", playersList)
+        playersLayout.Padding = UDim.new(0, 4)
+        playersLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+        local function RefreshIgnoredCount()
+            local total = 0
+            for _ in pairs(NormalizeIgnoredPlayers()) do
+                total = total + 1
+            end
+            ignoredCountLbl.Text = "Ignored: " .. total
+        end
+
+        local function RefreshIgnorePlayers()
+            if not playersList or not playersList.Parent then return end
+            playersList.ScrollBarImageColor3 = ACCENT
+
+            for _, child in ipairs(playersList:GetChildren()) do
+                if child:IsA("TextButton") or child.Name == "EmptyState" then
+                    child:Destroy()
+                end
+            end
+
+            local query = searchBox.Text:lower()
+            local serverPlayers = Players:GetPlayers()
+            table.sort(serverPlayers, function(a, b)
+                return a.Name:lower() < b.Name:lower()
+            end)
+
+            local shown = 0
+            for _, player in ipairs(serverPlayers) do
+                if player ~= LP then
+                    local haystack = (player.Name .. " " .. player.DisplayName):lower()
+                    if query == "" or string.find(haystack, query, 1, true) then
+                        shown = shown + 1
+
+                        local row = NewBtn(playersList, UDim2.new(1, -8, 0, 40), nil, Color3.fromRGB(32, 32, 42), 1)
+                        row.Name = "PlayerRow"
+                        Corner(row, 5)
+
+                        local ignored = IsIgnoredPlayer(player)
+                        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                            Color3.fromRGB(36, 36, 48))
+                        Corner(cbBg, 3)
+                        Stroke(cbBg, STROKE2, 1)
+
+                        local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                        cbCheck.Size = UDim2.new(1, 0, 1, 0)
+
+                        local nameLbl = NewLabel(row, player.Name, 12, TEXT, true)
+                        nameLbl.Position = UDim2.new(0, 34, 0, 4)
+                        nameLbl.Size = UDim2.new(1, -120, 0, 16)
+
+                        local displayLbl = NewLabel(row, "Display: " .. player.DisplayName, 10, DIM)
+                        displayLbl.Position = UDim2.new(0, 34, 0, 20)
+                        displayLbl.Size = UDim2.new(1, -120, 0, 14)
+
+                        local statusLbl = NewLabel(row, "", 10, DIM, true, Enum.TextXAlignment.Right)
+                        statusLbl.Position = UDim2.new(1, -96, 0, 0)
+                        statusLbl.Size = UDim2.new(0, 84, 1, 0)
+
+                        local function ApplyRowState()
+                            cbCheck.Visible = ignored
+                            statusLbl.Text = ignored and "Ignored" or "Active"
+                            statusLbl.TextColor3 = ignored and ACCENT or DIM
+                            Tw(cbBg, 0.1, "Quad", "Out", {
+                                BackgroundColor3 = ignored and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                            })
+                        end
+
+                        row.MouseButton1Click:Connect(function()
+                            ignored = not ignored
+                            SetIgnoredPlayer(player.Name, ignored)
+                            SaveUI()
+                            RefreshIgnoredCount()
+                            ApplyRowState()
+                        end)
+
+                        row.MouseEnter:Connect(function()
+                            Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 })
+                        end)
+                        row.MouseLeave:Connect(function()
+                            Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 })
+                        end)
+
+                        ApplyRowState()
+                    end
+                end
+            end
+
+            if shown == 0 then
+                local emptyLbl = NewLabel(playersList,
+                    query ~= "" and "No hay jugadores que coincidan." or "No hay otros jugadores en el servidor.",
+                    11, DIM, false, Enum.TextXAlignment.Center)
+                emptyLbl.Name = "EmptyState"
+                emptyLbl.Size = UDim2.new(1, -8, 0, 32)
+            end
+
+            RefreshIgnoredCount()
+        end
+
+        searchBox:GetPropertyChangedSignal("Text"):Connect(RefreshIgnorePlayers)
+
+        refreshBtn.MouseButton1Click:Connect(RefreshIgnorePlayers)
+        refreshBtn.MouseEnter:Connect(function()
+            Tw(refreshBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+        end)
+        refreshBtn.MouseLeave:Connect(function()
+            Tw(refreshBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+        end)
+
+        clearBtn.MouseButton1Click:Connect(function()
+            _G.PREFERENCES_CFG.IgnoredPlayers = {}
+            SaveUI()
+            RefreshIgnorePlayers()
+        end)
+        clearBtn.MouseEnter:Connect(function()
+            Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+        end)
+        clearBtn.MouseLeave:Connect(function()
+            Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+        end)
+
+        table.insert(_G.FLUX_CONNS, Players.PlayerAdded:Connect(RefreshIgnorePlayers))
+        table.insert(_G.FLUX_CONNS, Players.PlayerRemoving:Connect(function(player)
+            if IsIgnoredPlayer(player) then
+                RefreshIgnoredCount()
+            end
+            RefreshIgnorePlayers()
+        end))
+
+        _G.FLUX_PREFERENCES_REFRESH = RefreshIgnorePlayers
+        RefreshIgnorePlayers()
+    end
+end
+
 
 -- Draggable already handled at initialization
 
@@ -3361,6 +3755,7 @@ local function applyUITheme(name)
     if stBtns[activeStIdx] then Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
     for _, ul in ipairs(vsLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
     if vsBtns[activeVsIdx] then Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+    if _G.FLUX_CONFIG_TAB_THEME_SYNC then pcall(_G.FLUX_CONFIG_TAB_THEME_SYNC) end
 
     for _, v in ipairs(SG:GetDescendants()) do
         if v:IsA("TextLabel") and v.Text == "✓" then
@@ -3376,6 +3771,7 @@ local function applyUITheme(name)
     Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
     -- Keybind HUD (lives in separate ScreenGui, must be updated manually)
     if _G.FLUX_KB_HUD_ACCENT_UPDATE then _G.FLUX_KB_HUD_ACCENT_UPDATE() end
+    if _G.FLUX_PREFERENCES_REFRESH then pcall(_G.FLUX_PREFERENCES_REFRESH) end
 end
 
 -- ══════════════════ CATEGORY CONTENT: VISUALS ══════════════════
@@ -3922,7 +4318,7 @@ local function UPD_ESP()
     local hasActiveMatch = (_G.ACTIVE_MATCH_PLAYERS and next(_G.ACTIVE_MATCH_PLAYERS) ~= nil)
     for i = 1, #allPlayers do
         local p = allPlayers[i]
-        if p ~= LP then
+        if p ~= LP and not IsIgnoredPlayer(p) then
             if not hasActiveMatch or _G.ACTIVE_MATCH_PLAYERS[p.Name] then
                 if _G.ESP_CFG and _G.ESP_CFG.IgnoreTeam then
                     local isTeammate = false
@@ -5484,12 +5880,12 @@ do
     (function()
         local KAPage = tabPages[3]
         if IsHitmark() or IsDuelist() then
-            local KCard = NewFrame(KAPage, UDim2.new(0.54, -5, 0, 180), UDim2.new(0, 0, 0, 0), PANEL)
+            local KCard = NewFrame(KAPage, UDim2.new(0.54, -5, 0, 218), UDim2.new(0, 0, 0, 0), PANEL)
             Corner(KCard, 8); Stroke(KCard, STROKE, 1)
             local KTitle = NewLabel(KCard, "Auto Kill Aura", 13, TEXT, true)
             KTitle.Size = UDim2.new(1, 0, 0, 30); KTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            local KHolder = NewFrame(KCard, UDim2.new(1, -16, 0, 130), UDim2.new(0, 8, 0, 32), PANEL, 1)
+            local KHolder = NewFrame(KCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
             Instance.new("UIListLayout", KHolder).Padding = UDim.new(0, 6)
 
             -- Enable Toggle
@@ -5544,6 +5940,76 @@ do
             AddCardSlider(KHolder, "Kill Aura Radius (Studs)", 10, 1000, _G.KILLAURA_CFG.MaxDist, function(val)
                 _G.KILLAURA_CFG.MaxDist = val
             end)
+
+            -- Legit vs Blatant Dropdown
+            _G.KILLAURA_CFG.AuraType = _G.KILLAURA_CFG.AuraType or "Legit"
+            local ddRowType = NewFrame(KHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+            local ddType = AddDropdown(ddRowType, { "Legit", "Blatant", "Tele Kill" }, _G.KILLAURA_CFG.AuraType,
+                function(v)
+                    _G.KILLAURA_CFG.AuraType = v
+                    NOTIFY("Kill Aura", "Type: " .. v, 2)
+                end)
+            ddType.Size = UDim2.new(1, 0, 1, 0)
+
+            if IsDuelist() then
+                local HCard = NewFrame(KAPage, UDim2.new(0.46, -5, 0, 218), UDim2.new(0.54, 5, 0, 0), PANEL)
+                Corner(HCard, 8); Stroke(HCard, STROKE, 1)
+                local HTitle = NewLabel(HCard, "HitBox Expander", 13, TEXT, true)
+                HTitle.Size = UDim2.new(1, 0, 0, 30); HTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local HHolder = NewFrame(HCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local HLayout = Instance.new("UIListLayout", HHolder)
+                HLayout.Padding = UDim.new(0, 6)
+                HLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+                -- 1. Enable Toggle
+                local hrow = NewBtn(HHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                hrow.LayoutOrder = 1
+                Corner(hrow, 5)
+                local hcbBg = NewFrame(hrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                    Color3.fromRGB(36, 36, 48))
+                Corner(hcbBg, 3); Stroke(hcbBg, STROKE2, 1)
+                local hcbCheck = NewLabel(hcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                hcbCheck.Size = UDim2.new(1, 0, 1, 0); hcbCheck.Visible = _G.HITBOX_CFG.Enabled
+                if _G.HITBOX_CFG.Enabled then
+                    hcbBg.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+                end
+                local hrowLbl = NewLabel(hrow, "Enable HitBox Expander", 13, TEXT)
+                hrowLbl.Size = UDim2.new(1, -40, 1, 0); hrowLbl.Position = UDim2.new(0, 35, 0, 0)
+
+                hrow.MouseButton1Click:Connect(function()
+                    _G.HITBOX_CFG.Enabled = not _G.HITBOX_CFG.Enabled
+                    hcbCheck.Visible = _G.HITBOX_CFG.Enabled
+                    Tw(hcbBg, 0.1, "Quad", "Out",
+                        {
+                            BackgroundColor3 = _G.HITBOX_CFG.Enabled and Color3.fromRGB(255, 60, 60) or
+                                Color3.fromRGB(36, 36, 48)
+                        })
+                end)
+                hrow.MouseEnter:Connect(function()
+                    Tw(hrow, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+                end)
+                hrow.MouseLeave:Connect(function()
+                    Tw(hrow, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                end)
+
+                -- 2. Size Slider
+                local sliderRow = AddCardSlider(HHolder, "Hitbox Size", 1, 50, _G.HITBOX_CFG.Size, function(val)
+                    _G.HITBOX_CFG.Size = val
+                end)
+                sliderRow.LayoutOrder = 2
+
+                -- 3. Body Part Dropdown (options: head, uptorso)
+                local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                ddRowPart.LayoutOrder = 3
+                local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, _G.HITBOX_CFG.Part, function(v)
+                    _G.HITBOX_CFG.Part = v
+                    NOTIFY("Hitbox Part", "Part: " .. v, 2)
+                end)
+                ddPart.Size = UDim2.new(1, 0, 1, 0)
+            end
         else
             local msg = NewLabel(KAPage, "Kill Aura not available in this game.", 13, DIM, true,
                 Enum.TextXAlignment.Center)
@@ -6338,6 +6804,7 @@ local function GetTarget()
 
     local function check(char)
         if not char or char == LP.Character then return end
+        if IsIgnoredCharacter(char) then return end
         local targetPartName = _G.AIMBOT_CFG.TargetPart
         local hrp = char:FindFirstChild(targetPartName) or char:FindFirstChild("HumanoidRootPart") or
             char:FindFirstChild("Head")
@@ -6528,6 +6995,9 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
             local p = Players:GetPlayerFromCharacter(char)
             if p then
+                if IsIgnoredPlayer(p) then
+                    return
+                end
                 if IsBronxDuels() or IsDuelist() then
                     -- In Bronx Duels, opponents are in lp.Data.Match.Enemies
                     local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
@@ -6757,7 +7227,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
     setreadonly(mt, true)
 
-    local function GetTargetRootAttachment(target)
+    _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
         local hrp = target:FindFirstChild("HumanoidRootPart")
         if hrp then
@@ -6777,186 +7247,170 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return nil
     end
 
-    local oldFireServer
-    oldFireServer = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
-        if not checkcaller() and typeof(self) == "Instance" then
-            if self.Name == "AD" then
-                return
-            end
-            if self.Name == "VisualizeBullet" then
-                local doWallbang = _G.SILENT_CFG and _G.SILENT_CFG.Enabled and _G.SILENT_CFG.Wallbang
-                if doWallbang then
-                    local args = table.pack(...)
-                    local target = GetCachedTarget()
-                    if target then
-                        local att = GetTargetRootAttachment(target)
-                        if att then
-                            local hitPos = nil
-                            if target:IsA("BasePart") then
-                                hitPos = target.Position
-                            else
-                                local targetPartName = _G.SILENT_CFG.TargetPart or "Head"
-                                if targetPartName == "Random" then
-                                    local parts = { "Head", "UpperTorso", "HumanoidRootPart" }
-                                    targetPartName = parts[math.random(1, #parts)]
-                                end
-                                local tp = target:FindFirstChild(targetPartName) or target:FindFirstChild("Head") or
-                                    target:FindFirstChild("HumanoidRootPart")
-                                if tp then
-                                    hitPos = tp.Position
-                                end
-                            end
+    _G.FLUX_GET_SILENT_TARGET_HIT_POSITION = function(target)
+        if not target then
+            return nil
+        end
 
-                            if hitPos then
-                                local isBlocked = false
-                                local cam = workspace.CurrentCamera
-                                if cam then
-                                    local rayParams = RaycastParams.new()
-                                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                                    rayParams.FilterDescendantsInstances = { LP.Character, target, cam }
-                                    local res = workspace:Raycast(cam.CFrame.Position, (hitPos - cam.CFrame.Position),
-                                        rayParams)
-                                    if res and res.Instance then
-                                        isBlocked = true
-                                    end
-                                end
+        if target:IsA("BasePart") then
+            return target.Position
+        end
 
-                                if isBlocked then
-                                    args[4] = att
-                                    args[3] = (hitPos - att.WorldPosition).Unit * 1000
-                                    return oldFireServer(self, table.unpack(args, 1, args.n))
-                                end
-                            end
-                        end
-                    end
-                end
+        local targetPartName = (_G.SILENT_CFG and _G.SILENT_CFG.TargetPart) or "Head"
+        if targetPartName == "Random" then
+            local parts = { "Head", "UpperTorso", "HumanoidRootPart" }
+            targetPartName = parts[math.random(1, #parts)]
+        end
+
+        local targetPart = target:FindFirstChild(targetPartName) or
+            target:FindFirstChild("Head") or
+            target:FindFirstChild("HumanoidRootPart")
+
+        return targetPart and targetPart.Position or nil
+    end
+
+    _G.FLUX_TRY_REDIRECT_VISUALIZE_BULLET = function(oldFireServerFn, remote, ...)
+        if not (_G.SILENT_CFG and _G.SILENT_CFG.Enabled and _G.SILENT_CFG.Wallbang) then
+            return false
+        end
+
+        local target = GetCachedTarget()
+        if not target then
+            return false
+        end
+
+        local attachment = _G.FLUX_GET_TARGET_ROOT_ATTACHMENT(target)
+        local hitPos = attachment and _G.FLUX_GET_SILENT_TARGET_HIT_POSITION(target)
+        local cam = workspace.CurrentCamera
+        if not attachment or not hitPos or not cam then
+            return false
+        end
+
+        local rayParams = RaycastParams.new()
+        rayParams.FilterType = Enum.RaycastFilterType.Exclude
+        rayParams.FilterDescendantsInstances = { LP.Character, target, cam }
+
+        local result = workspace:Raycast(cam.CFrame.Position, hitPos - cam.CFrame.Position, rayParams)
+        if not (result and result.Instance) then
+            return false
+        end
+
+        local args = table.pack(...)
+        args[4] = attachment
+        args[3] = (hitPos - attachment.WorldPosition).Unit * 1000
+        return true, oldFireServerFn(remote, table.unpack(args, 1, args.n))
+    end
+
+    _G.FLUX_OLD_FIRESERVER = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
+        if checkcaller() or typeof(self) ~= "Instance" then
+            return _G.FLUX_OLD_FIRESERVER(self, ...)
+        end
+
+        if self.Name == "AD" then
+            return
+        end
+
+        if self.Name == "VisualizeBullet" then
+            local handled, result = _G.FLUX_TRY_REDIRECT_VISUALIZE_BULLET(_G.FLUX_OLD_FIRESERVER, self, ...)
+            if handled then
+                return result
             end
         end
 
-        if _G.IK_CFG and _G.IK_CFG.Enabled and not checkcaller() and typeof(self) == "Instance" and self.Name == "kill" then
-            pcall(function()
-                local closestEnemy = nil
-                local closestDist = math.huge
-                local myRoot = LP.Character and
-                    (LP.Character:FindFirstChild("HumanoidRootPart") or LP.Character:FindFirstChild("Torso"))
-
-                -- 1. Attribute Check First
-                local myGame = LP:GetAttribute("Game")
-                local myTeam = LP:GetAttribute("Team")
-                local foundOpponent = false
-
-                if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" and myTeam and myTeam ~= "nothing" then
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= LP and p.Character then
-                            local theirGame = p:GetAttribute("Game")
-                            local theirTeam = p:GetAttribute("Team")
-                            if theirGame == myGame and theirTeam ~= myTeam then
-                                local enemyRoot = p.Character:FindFirstChild("HumanoidRootPart") or
-                                    p.Character:FindFirstChild("Torso")
-                                if enemyRoot and myRoot then
-                                    local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                                    if dist < closestDist then
-                                        closestDist = dist
-                                        closestEnemy = p
-                                        foundOpponent = true
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                -- 2. Legacy Fallback
-                if not foundOpponent then
-                    local runningGames = workspace:FindFirstChild("RunningGames")
-                    if runningGames then
-                        local myGameFolder = nil
-                        local myTeamName = nil
-
-                        for _, gameFolder in pairs(runningGames:GetChildren()) do
-                            local alivePlayers = gameFolder:FindFirstChild("AlivePlayers")
-                            if alivePlayers then
-                                for _, teamFolder in pairs(alivePlayers:GetChildren()) do
-                                    if teamFolder:FindFirstChild(LP.Name) then
-                                        myGameFolder = gameFolder
-                                        myTeamName = teamFolder.Name
-                                        break
-                                    end
-                                end
-                            end
-                            if myGameFolder then break end
-                        end
-
-                        if myGameFolder and myTeamName then
-                            local alivePlayers = myGameFolder:FindFirstChild("AlivePlayers")
-                            if alivePlayers then
-                                for _, teamFolder in pairs(alivePlayers:GetChildren()) do
-                                    if teamFolder.Name ~= myTeamName then
-                                        for _, nameVal in pairs(teamFolder:GetChildren()) do
-                                            local enemyPlayer = Players:FindFirstChild(nameVal.Name)
-                                            if enemyPlayer and enemyPlayer.Character then
-                                                local enemyRoot = enemyPlayer.Character:FindFirstChild(
-                                                        "HumanoidRootPart") or
-                                                    enemyPlayer.Character:FindFirstChild("Torso")
-                                                if enemyRoot and myRoot then
-                                                    local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                                                    if dist < closestDist then
-                                                        closestDist = dist
-                                                        closestEnemy = enemyPlayer
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                -- 3. Fire KnifeKill with the correct Player object
-                if closestEnemy then
-                    local rs = game:GetService("ReplicatedStorage")
-                    local knife = rs:FindFirstChild("Packages") and
-                        rs.Packages:FindFirstChild("Networking") and
-                        rs.Packages.Networking:FindFirstChild("RE/Combat/KnifeKill")
-                    if knife then
-                        knife:FireServer(closestEnemy)
-                    end
+        if self.Name == "kill" and _G.IK_CFG and _G.IK_CFG.Enabled then
+            task.defer(function()
+                local fireInstakill = _G.FLUX_FIRE_INSTAKILL
+                if type(fireInstakill) == "function" then
+                    pcall(fireInstakill, true)
                 end
             end)
         end
-        return oldFireServer(self, ...)
+
+        return _G.FLUX_OLD_FIRESERVER(self, ...)
     end)
 
-    -- [ INSTA KILL - Standalone G keybind, independent of shooting ]
-    local function FireInstaKill()
-        if not _G.IK_CFG or not _G.IK_CFG.Enabled then return end
+    _G.FLUX_GET_IK_ROOT = function(char)
+        return char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
+    end
 
-        local closestEnemy  = nil
-        local closestDist   = math.huge
-        local myRoot        = LP.Character and
-            (LP.Character:FindFirstChild("HumanoidRootPart") or LP.Character:FindFirstChild("Torso"))
+    _G.FLUX_FIND_IK_ENEMY_FROM_ATTRIBUTES = function(myRoot)
+        local myGame = LP:GetAttribute("Game")
+        local myTeam = LP:GetAttribute("Team")
+        if not myRoot or not myGame or myGame == "nothing" or myGame == "" or myGame == "Lobby" or not myTeam or myTeam == "nothing" then
+            return nil
+        end
 
-        -- 1. Try Attribute-based lookup first
-        local myGame        = LP:GetAttribute("Game")
-        local myTeam        = LP:GetAttribute("Team")
-        local foundOpponent = false
+        local closestEnemy = nil
+        local closestDist = math.huge
 
-        if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" and myTeam and myTeam ~= "nothing" then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LP and p.Character then
-                    local theirGame = p:GetAttribute("Game")
-                    local theirTeam = p:GetAttribute("Team")
-                    if theirGame == myGame and theirTeam ~= myTeam then
-                        local enemyRoot = p.Character:FindFirstChild("HumanoidRootPart") or
-                            p.Character:FindFirstChild("Torso")
-                        if enemyRoot and myRoot then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LP and not IsIgnoredPlayer(player) and player:GetAttribute("Game") == myGame and player:GetAttribute("Team") ~= myTeam then
+                local enemyRoot = _G.FLUX_GET_IK_ROOT(player.Character)
+                if enemyRoot then
+                    local dist = (myRoot.Position - enemyRoot.Position).Magnitude
+                    if dist < closestDist then
+                        closestDist = dist
+                        closestEnemy = player
+                    end
+                end
+            end
+        end
+
+        return closestEnemy
+    end
+
+    _G.FLUX_FIND_IK_ENEMY_FROM_RUNNING_GAMES = function(myRoot)
+        if not myRoot then
+            return nil
+        end
+
+        local runningGames = workspace:FindFirstChild("RunningGames")
+        if not runningGames then
+            return nil
+        end
+
+        local myGameFolder = nil
+        local myTeamName = nil
+
+        for _, gameFolder in ipairs(runningGames:GetChildren()) do
+            local alivePlayers = gameFolder:FindFirstChild("AlivePlayers")
+            if alivePlayers then
+                for _, teamFolder in ipairs(alivePlayers:GetChildren()) do
+                    if teamFolder:FindFirstChild(LP.Name) then
+                        myGameFolder = gameFolder
+                        myTeamName = teamFolder.Name
+                        break
+                    end
+                end
+            end
+            if myGameFolder then
+                break
+            end
+        end
+
+        if not myGameFolder or not myTeamName then
+            return nil
+        end
+
+        local alivePlayers = myGameFolder:FindFirstChild("AlivePlayers")
+        if not alivePlayers then
+            return nil
+        end
+
+        local closestEnemy = nil
+        local closestDist = math.huge
+
+        for _, teamFolder in ipairs(alivePlayers:GetChildren()) do
+            if teamFolder.Name ~= myTeamName then
+                for _, child in ipairs(teamFolder:GetChildren()) do
+                    local enemyPlayer = Players:FindFirstChild(child.Name)
+                    if enemyPlayer and not IsIgnoredPlayer(enemyPlayer) then
+                        local enemyRoot = _G.FLUX_GET_IK_ROOT(enemyPlayer.Character)
+                        if enemyRoot then
                             local dist = (myRoot.Position - enemyRoot.Position).Magnitude
                             if dist < closestDist then
                                 closestDist = dist
-                                closestEnemy = p
-                                foundOpponent = true
+                                closestEnemy = enemyPlayer
                             end
                         end
                     end
@@ -6964,80 +7418,64 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
         end
 
-        -- 2. Fallback to RunningGames lookup
-        if not foundOpponent then
-            local runningGames = workspace:FindFirstChild("RunningGames")
-            if runningGames then
-                -- Find LP's game folder and team
-                local myGameFolder, myTeamName = nil, nil
-                for _, gameFolder in pairs(runningGames:GetChildren()) do
-                    local alivePlayers = gameFolder:FindFirstChild("AlivePlayers")
-                    if alivePlayers then
-                        for _, teamFolder in pairs(alivePlayers:GetChildren()) do
-                            if teamFolder:FindFirstChild(LP.Name) then
-                                myGameFolder = gameFolder
-                                myTeamName = teamFolder.Name
-                                break
-                            end
-                        end
-                    end
-                    if myGameFolder then break end
-                end
+        return closestEnemy
+    end
 
-                if myGameFolder and myTeamName then
-                    local alivePlayers = myGameFolder:FindFirstChild("AlivePlayers")
-                    if alivePlayers then
-                        for _, teamFolder in pairs(alivePlayers:GetChildren()) do
-                            if teamFolder.Name ~= myTeamName then
-                                for _, child in pairs(teamFolder:GetChildren()) do
-                                    local enemyPlayer = Players:FindFirstChild(child.Name)
-                                    if enemyPlayer and enemyPlayer.Character then
-                                        local enemyRoot = enemyPlayer.Character:FindFirstChild("HumanoidRootPart") or
-                                            enemyPlayer.Character:FindFirstChild("Torso")
-                                        if enemyRoot and myRoot then
-                                            local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                                            if dist < closestDist then
-                                                closestDist = dist
-                                                closestEnemy = enemyPlayer
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+    _G.FLUX_CAN_FIRE_IK_ON = function(enemyPlayer)
+        if not enemyPlayer or IsIgnoredPlayer(enemyPlayer) then
+            return false
         end
+
+        local myGame = LP:GetAttribute("Game")
+        local myTeam = LP:GetAttribute("Team")
+        local theirGame = enemyPlayer:GetAttribute("Game")
+        local theirTeam = enemyPlayer:GetAttribute("Team")
+        local myHum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+
+        return myGame and theirGame == myGame and theirTeam ~= myTeam and myHum and myHum.Health > 0
+    end
+
+    -- [ INSTA KILL - Standalone G keybind, independent of shooting ]
+    _G.FLUX_FIRE_INSTAKILL = function(silent)
+        if not _G.IK_CFG or not _G.IK_CFG.Enabled then return end
+
+        local myRoot = _G.FLUX_GET_IK_ROOT(LP.Character)
+        local closestEnemy = _G.FLUX_FIND_IK_ENEMY_FROM_ATTRIBUTES(myRoot) or
+            _G.FLUX_FIND_IK_ENEMY_FROM_RUNNING_GAMES(myRoot)
 
         if not closestEnemy then
-            NOTIFY("InstaKill", "No enemy found!", 2); return
+            if not silent then
+                NOTIFY("InstaKill", "No enemy found!", 2)
+            end
+            return
         end
 
-        -- Fire KnifeKill via the correct Remotes module (from decompiled knife script)
         local ok, result = pcall(function()
             local rs = game:GetService("ReplicatedStorage")
-            local Remotes = require(rs.Shared.Remotes)
-            local knife = Remotes and Remotes.KnifeKill
-            if knife then
-                -- Match exact server validation: same game, different team, LP alive
-                local myGame    = LP:GetAttribute("Game")
-                local myTeam    = LP:GetAttribute("Team")
-                local theirGame = closestEnemy:GetAttribute("Game")
-                local theirTeam = closestEnemy:GetAttribute("Team")
-                local myHum     = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+            local remotesModule = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
+            local knife = remotesModule and require(remotesModule).KnifeKill
 
-                if myGame and theirGame == myGame and theirTeam ~= myTeam and myHum and myHum.Health > 0 then
-                    knife:FireServer(closestEnemy)
-                    NOTIFY("InstaKill", "Fired on " .. closestEnemy.Name, 2)
-                else
+            if not knife then
+                if not silent then
+                    NOTIFY("InstaKill", "KnifeKill remote not found!", 2)
+                end
+                return
+            end
+
+            if not _G.FLUX_CAN_FIRE_IK_ON(closestEnemy) then
+                if not silent then
                     NOTIFY("InstaKill", "Team/Game check failed!", 2)
                 end
-            else
-                NOTIFY("InstaKill", "KnifeKill remote not found!", 2)
+                return
+            end
+
+            knife:FireServer(closestEnemy)
+            if not silent then
+                NOTIFY("InstaKill", "Fired on " .. closestEnemy.Name, 2)
             end
         end)
-        if not ok then
+
+        if not ok and not silent then
             NOTIFY("InstaKill", "Error: " .. tostring(result), 3)
         end
     end
@@ -7047,7 +7485,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         if _G.IK_CFG and _G.IK_CFG.Enabled and _G.IK_CFG.Mode == "Keybind" then
             local keyName = _G.IK_CFG.Keybind or "G"
             if input.KeyCode == Enum.KeyCode[keyName] then
-                FireInstaKill()
+                _G.FLUX_FIRE_INSTAKILL()
             end
         end
     end))
@@ -7058,7 +7496,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             task.wait(0.1)
             if getgenv().FLUX_SESSION ~= MySession then break end
             if _G.IK_CFG and _G.IK_CFG.Enabled and _G.IK_CFG.Mode == "Auto Kill" then
-                FireInstaKill()
+                _G.FLUX_FIRE_INSTAKILL()
             end
         end
     end)
@@ -7675,8 +8113,37 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
     local lpChar = game.Players.LocalPlayer.Character
     if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return end
 
+    local isBlatantOrTele = (_G.KILLAURA_CFG.AuraType == "Blatant" or _G.KILLAURA_CFG.AuraType == "Tele Kill")
+
+    if IsDuelist() and isBlatantOrTele then
+        local inMatch = false
+        local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
+            LP.Data.Match:FindFirstChild("Enemies")
+        if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
+            inMatch = true
+        else
+            local myMatch = LP:GetAttribute("DuelsMatchId")
+            if myMatch and myMatch ~= "" and myMatch ~= "Lobby" then
+                inMatch = true
+            end
+        end
+
+        if inMatch and not lpChar:FindFirstChildOfClass("Tool") then
+            local backpack = LP:FindFirstChild("Backpack")
+            if backpack then
+                local gun = backpack:FindFirstChild("Pistol") or backpack:FindFirstChild("Carabine")
+                if gun then
+                    local hum = lpChar:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum:EquipTool(gun)
+                    end
+                end
+            end
+        end
+    end
+
     for _, p in ipairs(game.Players:GetPlayers()) do
-        if p ~= game.Players.LocalPlayer and p.Character then
+        if p ~= game.Players.LocalPlayer and not IsIgnoredPlayer(p) and p.Character then
             local char = p.Character
             if char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 and not char:GetAttribute("Downed") then
                 local validEnemy = true
@@ -7688,8 +8155,17 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                     local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head")
                     if hrp then
                         local mag = (hrp.Position - lpChar.HumanoidRootPart.Position).Magnitude
-                        if mag < closestDist then
-                            if _G.KILLAURA_CFG.Wallbang then
+                        local inView = true
+                        if _G.KILLAURA_CFG.AuraType == "Legit" then
+                            local _, onScreen = cam:WorldToViewportPoint(hrp.Position)
+                            if not onScreen then
+                                inView = false
+                            end
+                        end
+
+                        if inView and mag < closestDist then
+                            local bypassWall = _G.KILLAURA_CFG.Wallbang or isBlatantOrTele
+                            if bypassWall then
                                 closestDist = mag
                                 kaTarget = char
                             else
@@ -7713,7 +8189,23 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
     end
 
     if kaTarget then
-        if tick() - lastKaTime > ((_G.KILLAURA_CFG.Delay or 100) / 1000) then
+        if _G.KILLAURA_CFG.AuraType == "Tele Kill" then
+            local targetHrp = kaTarget:FindFirstChild("HumanoidRootPart")
+            local myHrp = lpChar:FindFirstChild("HumanoidRootPart")
+            if targetHrp and myHrp then
+                local safeCenter = Vector3.new(1591, 174, -793)
+                local isTargetNearSafe = (targetHrp.Position - safeCenter).Magnitude <= 100
+                local isMeNearSafe = (myHrp.Position - safeCenter).Magnitude <= 100
+                if not isTargetNearSafe and not isMeNearSafe then
+                    myHrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 3.5)
+                    myHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    myHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+
+        local delayTime = isBlatantOrTele and 0.01 or ((_G.KILLAURA_CFG.Delay or 100) / 1000)
+        if tick() - lastKaTime > delayTime then
             lastKaTime = tick()
             task.spawn(function()
                 pcall(function()
@@ -7739,12 +8231,16 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                         local tool = lpChar:FindFirstChildOfClass("Tool")
                         local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
                             game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
-                        if Weapons and tool and tool:GetAttribute("Damage") then
-                            local isHead = (hitPart.Name == "Head")
-                            local dmg = tool:GetAttribute(isHead and "HeadDamage" or "Damage") or 35
-                            Weapons:FireServer("Process")
-                            Weapons:FireServer("DamageRequest", kaTarget.Humanoid, dmg, isHead, hitPart, hitPart
-                                .Position)
+                        if Weapons and tool then
+                            local shotsCount = isBlatantOrTele and 6 or 1
+
+                            for i = 1, shotsCount do
+                                if kaTarget and kaTarget:FindFirstChild("Humanoid") and kaTarget.Humanoid.Health > 0 then
+                                    Weapons:FireServer("Process")
+                                    Weapons:FireServer("DamageRequest", kaTarget.Humanoid, nil, nil, hitPart,
+                                        hitPart.Position)
+                                end
+                            end
                         end
                     end
                 end)
@@ -7853,5 +8349,115 @@ table.insert(_G.FLUX_CONNS, game:GetService("SoundService").ChildAdded:Connect(f
         child:Destroy()
     end
 end))
+
+-- [ HITBOX EXPANDER ENGINE ]
+task.spawn(function()
+    local originalProps = {} -- Almacenará { [Part] = { Size = Vector3, Transparency = number, CanCollide = boolean, Massless = boolean, TargetPartName = string } }
+
+    while true do
+        task.wait(0.1)
+        if getgenv().FLUX_SESSION ~= MySession then
+            -- Restaurar todos los tamaños originales al cerrar
+            for part, data in pairs(originalProps) do
+                pcall(function()
+                    part.Size = data.Size
+                    part.Transparency = data.Transparency
+                    part.CanCollide = data.CanCollide
+                    part.Massless = data.Massless
+                end)
+            end
+            break
+        end
+
+        -- Limpiar partes destruidas o inválidas de la tabla para evitar fugas de memoria
+        for part, _ in pairs(originalProps) do
+            if not part or not part.Parent then
+                originalProps[part] = nil
+            end
+        end
+
+        if IsDuelist() and _G.HITBOX_CFG and _G.HITBOX_CFG.Enabled then
+            local size = _G.HITBOX_CFG.Size
+            local targetPartName = (_G.HITBOX_CFG.Part == "UpperTorso" and "UpperTorso" or "Head")
+            local sizeVec = Vector3.new(size, size, size)
+
+            -- Tabla temporal para saber qué partes están activas en este ciclo
+            local activeParts = {}
+
+            for _, p in ipairs(game.Players:GetPlayers()) do
+                if p ~= LP and not IsIgnoredPlayer(p) and p.Character then
+                    local char = p.Character
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.Health > 0 and not char:GetAttribute("Downed") then
+                        local isEnemy = true
+                        if _G.MY_TEAM_CACHE and _G.MY_TEAM_CACHE:FindFirstChild(p.Name) then
+                            isEnemy = false
+                        end
+
+                        if isEnemy then
+                            local part = char:FindFirstChild(targetPartName)
+                            if targetPartName == "UpperTorso" and not part then
+                                part = char:FindFirstChild("Torso")
+                            end
+
+                            if part and part:IsA("BasePart") then
+                                activeParts[part] = true
+
+                                if not originalProps[part] then
+                                    originalProps[part] = {
+                                        Size = part.Size,
+                                        Transparency = part.Transparency,
+                                        CanCollide = part.CanCollide,
+                                        Massless = part.Massless,
+                                        TargetPartName = targetPartName
+                                    }
+                                end
+
+                                pcall(function()
+                                    if part.Size ~= sizeVec then
+                                        part.Size = sizeVec
+                                    end
+                                    if part.CanCollide ~= false then
+                                        part.CanCollide = false
+                                    end
+                                    if part.Transparency ~= 0.5 then
+                                        part.Transparency = 0.5
+                                    end
+                                    if part.Massless ~= true then
+                                        part.Massless = true
+                                    end
+                                end)
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Restaurar partes que ya no están activas (por cambio de selección, respawn, etc.)
+            for part, data in pairs(originalProps) do
+                if not activeParts[part] then
+                    pcall(function()
+                        part.Size = data.Size
+                        part.Transparency = data.Transparency
+                        part.CanCollide = data.CanCollide
+                        part.Massless = data.Massless
+                    end)
+                    originalProps[part] = nil
+                end
+            end
+        else
+            -- Expander desactivado: restaurar todo
+            for part, data in pairs(originalProps) do
+                pcall(function()
+                    part.Size = data.Size
+                    part.Transparency = data.Transparency
+                    part.CanCollide = data.CanCollide
+                    part.Massless = data.Massless
+                end)
+            end
+            originalProps = {}
+        end
+    end
+end)
 
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
