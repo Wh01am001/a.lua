@@ -34,6 +34,11 @@ _G.KILLAURA_CFG = _G.KILLAURA_CFG or {
     TeleKill = false
 }
 
+_G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
+    Enabled = false,
+    Mode = "On Crosshair"
+}
+
 _G.HITBOX_CFG = _G.HITBOX_CFG or {
     Enabled = false,
     Size = 10,
@@ -5880,7 +5885,16 @@ do
     (function()
         local KAPage = tabPages[3]
         if IsHitmark() or IsDuelist() then
-            local KCard = NewFrame(KAPage, UDim2.new(0.54, -5, 0, 218), UDim2.new(0, 0, 0, 0), PANEL)
+            -- Left column: Kill Aura card + Trigger Bot card stacked vertically
+            local LeftCol = NewFrame(KAPage, UDim2.new(0.54, -5, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+            local LeftColLayout = Instance.new("UIListLayout", LeftCol)
+            LeftColLayout.FillDirection = Enum.FillDirection.Vertical
+            LeftColLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            LeftColLayout.Padding = UDim.new(0, 8)
+
+            -- ── Kill Aura Card ──
+            local KCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 218), UDim2.new(0, 0, 0, 0), PANEL)
+            KCard.LayoutOrder = 1
             Corner(KCard, 8); Stroke(KCard, STROKE, 1)
             local KTitle = NewLabel(KCard, "Auto Kill Aura", 13, TEXT, true)
             KTitle.Size = UDim2.new(1, 0, 0, 30); KTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -5951,8 +5965,51 @@ do
                 end)
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
+            -- ── Trigger Bot Card (below Kill Aura, same left column) ──
+            local TBCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), UDim2.new(0, 0, 0, 0), PANEL)
+            TBCard.LayoutOrder = 2
+            Corner(TBCard, 8); Stroke(TBCard, STROKE, 1)
+            local TBTitle = NewLabel(TBCard, "Trigger Bot", 13, TEXT, true)
+            TBTitle.Size = UDim2.new(1, 0, 0, 30); TBTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local TBHolder = NewFrame(TBCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+            Instance.new("UIListLayout", TBHolder).Padding = UDim.new(0, 6)
+
+            -- Enable Checkbox
+            local tbRow = NewBtn(TBHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+            Corner(tbRow, 5)
+            local tbcbBg = NewFrame(tbRow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+            Corner(tbcbBg, 3); Stroke(tbcbBg, STROKE2, 1)
+            local tbcbCheck = NewLabel(tbcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+            tbcbCheck.Size = UDim2.new(1, 0, 1, 0); tbcbCheck.Visible = _G.TRIGGERBOT_CFG.Enabled
+            local tbRowLbl = NewLabel(tbRow, "Enable Trigger Bot", 13, TEXT)
+            tbRowLbl.Size = UDim2.new(1, -40, 1, 0); tbRowLbl.Position = UDim2.new(0, 35, 0, 0)
+
+            tbRow.MouseButton1Click:Connect(function()
+                _G.TRIGGERBOT_CFG.Enabled = not _G.TRIGGERBOT_CFG.Enabled
+                tbcbCheck.Visible = _G.TRIGGERBOT_CFG.Enabled
+                Tw(tbcbBg, 0.1, "Quad", "Out",
+                    { BackgroundColor3 = _G.TRIGGERBOT_CFG.Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(36, 36, 48) })
+            end)
+            tbRow.MouseEnter:Connect(function()
+                Tw(tbRow, 0.1, "Quad", "Out", { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+            end)
+            tbRow.MouseLeave:Connect(function()
+                Tw(tbRow, 0.1, "Quad", "Out", { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+            end)
+
+            -- Mode Dropdown
+            _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "On Crosshair"
+            local tbDdRow = NewFrame(TBHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+            local tbDd = AddDropdown(tbDdRow, { "On Crosshair", "On Aim Key" }, _G.TRIGGERBOT_CFG.Mode, function(v)
+                _G.TRIGGERBOT_CFG.Mode = v
+                NOTIFY("Trigger Bot", "Mode: " .. v, 2)
+            end)
+            tbDd.Size = UDim2.new(1, 0, 1, 0)
+
+            -- Right column: HitBox Expander (only for Duelist)
             if IsDuelist() then
-                local HCard = NewFrame(KAPage, UDim2.new(0.46, -5, 0, 218), UDim2.new(0.54, 5, 0, 0), PANEL)
+                local HCard = NewFrame(KAPage, UDim2.new(0.46, -5, 0, 218), UDim2.new(0, 0, 0, 0), PANEL)
                 Corner(HCard, 8); Stroke(HCard, STROKE, 1)
                 local HTitle = NewLabel(HCard, "HitBox Expander", 13, TEXT, true)
                 HTitle.Size = UDim2.new(1, 0, 0, 30); HTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -6001,7 +6058,7 @@ do
                 end)
                 sliderRow.LayoutOrder = 2
 
-                -- 3. Body Part Dropdown (options: head, uptorso)
+                -- 3. Body Part Dropdown
                 local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
                 ddRowPart.LayoutOrder = 3
                 local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, _G.HITBOX_CFG.Part, function(v)
@@ -6018,6 +6075,7 @@ do
     end)()
 
     local function AddGlass(parent)
+
         parent.ClipsDescendants = true
         local g = Instance.new("ImageLabel")
         g.Name = "GlassLayer"
@@ -7500,7 +7558,127 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
         end
     end)
+
+    -- ═══════════════════════════════════════════════════════
+    -- TRIGGER BOT ENGINE
+    -- ═══════════════════════════════════════════════════════
+    task.spawn(function()
+        local tbCooldown = false
+
+        -- Helper: fire depending on platform
+        local function TBFire(cam)
+            if IS_MOBILE then
+                -- Mobile: tap at screen center
+                local cx = cam.ViewportSize.X / 2
+                local cy = cam.ViewportSize.Y / 2
+                pcall(tap, cx, cy)
+            else
+                -- PC: click (press + release in one call, most reliable)
+                pcall(mouse1click)
+                -- Fallback in case mouse1click not available
+                if not pcall(mouse1click) then
+                    pcall(mouse1press)
+                    task.wait(0.04)
+                    pcall(mouse1release)
+                end
+            end
+        end
+
+        local function IsEnemy(hitChar)
+            if not hitChar then return false end
+            local hitHum = hitChar:FindFirstChildOfClass("Humanoid")
+            if not hitHum or hitHum.Health <= 0 then return false end
+            if hitChar:GetAttribute("Downed") then return false end
+
+            local hitPlayer = Players:GetPlayerFromCharacter(hitChar)
+            if not hitPlayer or hitPlayer == LP then return false end
+            if IsIgnoredPlayer(hitPlayer) then return false end
+
+            -- Team check
+            if IsBronxDuels() or IsDuelist() then
+                local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
+                    LP.Data.Match:FindFirstChild("Enemies")
+                if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
+                    if not enemiesFolder:FindFirstChild(hitPlayer.Name) then return false end
+                end
+            else
+                local myTeamFolder = _G.MY_TEAM_CACHE
+                if myTeamFolder and myTeamFolder:FindFirstChild(hitPlayer.Name) then return false end
+            end
+
+            return true
+        end
+
+        while true do
+            task.wait(0.03) -- ~33 checks/sec for better response time
+            if getgenv().FLUX_SESSION ~= MySession then break end
+            if not (_G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled) then continue end
+
+            -- Mode gate
+            if _G.TRIGGERBOT_CFG.Mode == "On Aim Key" then
+                local aimHeld = false
+                if IS_MOBILE then
+                    -- On mobile "On Aim Key" = always fire (no RMB)
+                    aimHeld = true
+                else
+                    aimHeld = UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+                end
+                if not aimHeld then continue end
+            end
+
+            if tbCooldown then continue end
+
+            pcall(function()
+                local cam = workspace.CurrentCamera
+                local char = LP.Character
+                if not cam or not char then return end
+                local myHum = char:FindFirstChildOfClass("Humanoid")
+                if not myHum or myHum.Health <= 0 then return end
+
+                local viewSize = cam.ViewportSize
+                local cx, cy = viewSize.X / 2, viewSize.Y / 2
+
+                -- Raycast from crosshair center
+                local ray = cam:ViewportPointToRay(cx, cy, 0)
+                local rayParams = RaycastParams.new()
+                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                rayParams.FilterDescendantsInstances = { char, cam }
+
+                -- Try multiple ray origins slightly offset to improve hit detection
+                local offsets = {
+                    Vector3.new(0, 0, 0),
+                    Vector3.new(0, 0.5, 0),
+                    Vector3.new(0, -0.5, 0),
+                    Vector3.new(0.5, 0, 0),
+                    Vector3.new(-0.5, 0, 0),
+                }
+
+                local foundEnemy = false
+                for _, offset in ipairs(offsets) do
+                    local dir = (ray.Direction + offset).Unit
+                    local result = workspace:Raycast(ray.Origin, dir * 2000, rayParams)
+                    if result and result.Instance then
+                        local hitChar = result.Instance:FindFirstAncestorOfClass("Model")
+                        if IsEnemy(hitChar) then
+                            foundEnemy = true
+                            break
+                        end
+                    end
+                end
+
+                if not foundEnemy then return end
+
+                -- Fire!
+                tbCooldown = true
+                TBFire(cam)
+                task.wait(0.08) -- small cooldown between shots
+                tbCooldown = false
+            end)
+        end
+    end)
 end
+
+
 
 -- [ SPEED BOOST & FLY UTILITIES ]
 ; (function()
