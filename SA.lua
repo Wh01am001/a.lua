@@ -31,12 +31,8 @@ _G.KILLAURA_CFG = _G.KILLAURA_CFG or {
     MaxDist = 300,
     Delay = 100,
     Wallbang = false,
-    TeleKill = false
-}
-
-_G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
-    Enabled = false,
-    Mode = "On Crosshair"
+    TeleKill = false,
+    Keybind = Enum.KeyCode.None
 }
 
 _G.HITBOX_CFG = _G.HITBOX_CFG or {
@@ -45,13 +41,20 @@ _G.HITBOX_CFG = _G.HITBOX_CFG or {
     Part = "head"
 }
 
+_G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
+    Enabled = false,
+    Keybind = Enum.KeyCode.T,
+    Mode = "Legit"
+}
+
 
 _G.SILENT_CFG = _G.SILENT_CFG or {
     Enabled = false,
     Wallbang = false,
     FOV = 150,
     HitChance = 100,
-    TargetPart = "Head"
+    TargetPart = "Head",
+    Keybind = Enum.KeyCode.None
 }
 
 _G.GUN_MODS_CFG = _G.GUN_MODS_CFG or {
@@ -1180,7 +1183,18 @@ local function AddCardSetting(parent, label, default, callback, keybindDefault, 
         Corner(kbBox, 4)
         Stroke(kbBox, STROKE2, 1)
 
-        local defName = typeof(keybindDefault) == "EnumItem" and keybindDefault.Name or tostring(keybindDefault)
+        local defName = "None"
+        if keybindDefault then
+            if typeof(keybindDefault) == "EnumItem" then
+                if keybindDefault == Enum.KeyCode.None then
+                    defName = "None"
+                else
+                    defName = keybindDefault.Name
+                end
+            else
+                defName = tostring(keybindDefault)
+            end
+        end
         local bindLbl = NewLabel(kbBox, defName, 10, TEXT, false, Enum.TextXAlignment.Center)
         bindLbl.Name = "BindLabel"
         bindLbl.Size = UDim2.new(1, 0, 1, 0)
@@ -1906,7 +1920,7 @@ do
                 end)
                 speedCheck.LayoutOrder = 1
 
-                speedSlider = AddCardSlider(LPHolder, "Walk Speed", 16, 250, _G.LOCAL_PLAYER_CFG.Speed, function(v)
+                speedSlider = AddCardSlider(LPHolder, "Walk Speed", 16, 40, _G.LOCAL_PLAYER_CFG.Speed, function(v)
                     _G.LOCAL_PLAYER_CFG.Speed = v
                 end)
                 speedSlider.LayoutOrder = 2
@@ -2518,14 +2532,20 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
 
     local rightOffset = -35
     if hasKeybind and not IS_MOBILE then
-        rightOffset = -65
+        rightOffset = -94
     elseif colorCount and colorCount > 0 then
-        rightOffset = -(colorCount * 28 + 15)
+        rightOffset = -(colorCount * 28 + 38)
     end
 
     local lbl = NewLabel(row, label, 13, TEXT)
     lbl.Position = UDim2.new(0, 32, 0, 0)
     lbl.Size = UDim2.new(1, rightOffset, 1, 0)
+    lbl.TextScaled = true
+    lbl.TextWrapped = true
+    local fit = Instance.new("UITextSizeConstraint")
+    fit.MaxTextSize = 13
+    fit.MinTextSize = 8
+    fit.Parent = lbl
 
     local function updateUI()
         cbCheck.Visible = checked
@@ -3453,6 +3473,11 @@ do
         searchBox.PlaceholderText = "Buscar jugador por nombre o display..."
         searchBox.Text = ""
         searchBox.TextSize = 11
+        searchBox.TextScaled = true
+        local sFit = Instance.new("UITextSizeConstraint")
+        sFit.MaxTextSize = 11
+        sFit.MinTextSize = 8
+        sFit.Parent = searchBox
         searchBox.Font = Enum.Font.Gotham
         searchBox.ClearTextOnFocus = false
         searchBox.Parent = searchWrap
@@ -3528,15 +3553,17 @@ do
 
                         local nameLbl = NewLabel(row, player.Name, 12, TEXT, true)
                         nameLbl.Position = UDim2.new(0, 34, 0, 4)
-                        nameLbl.Size = UDim2.new(1, -120, 0, 16)
+                        nameLbl.Size = UDim2.new(1, -95, 0, 16)
+                        nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
                         local displayLbl = NewLabel(row, "Display: " .. player.DisplayName, 10, DIM)
                         displayLbl.Position = UDim2.new(0, 34, 0, 20)
-                        displayLbl.Size = UDim2.new(1, -120, 0, 14)
+                        displayLbl.Size = UDim2.new(1, -95, 0, 14)
+                        displayLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
                         local statusLbl = NewLabel(row, "", 10, DIM, true, Enum.TextXAlignment.Right)
-                        statusLbl.Position = UDim2.new(1, -96, 0, 0)
-                        statusLbl.Size = UDim2.new(0, 84, 1, 0)
+                        statusLbl.Position = UDim2.new(1, -60, 0, 0)
+                        statusLbl.Size = UDim2.new(0, 50, 1, 0)
 
                         local function ApplyRowState()
                             cbCheck.Visible = ignored
@@ -3746,11 +3773,23 @@ local function applyUITheme(name)
         currentNav.dot.BackgroundColor3 = t.accent
     end
 
-    for _, f in ipairs(accentFills) do Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+    for _, f in ipairs(accentFills) do
+        if f:IsA("UIGradient") then
+            f.Color = ColorSequence.new(t.side, t.bg)
+        else
+            Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
+        end
+    end
 
     for _, v in ipairs(SG:GetDescendants()) do
-        if v:IsA("TextLabel") and v.Name == "SectionTitle" then
-            Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+        if v:IsA("TextLabel") then
+            if v.Name == "SectionTitle" or v.TextColor3 == ACCENT then
+                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+            end
+        elseif v:IsA("ScrollingFrame") then
+            Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
+        elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == ACCENT) then
+            Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
         end
     end
 
@@ -5597,10 +5636,10 @@ do
 
 
     -- ══════════════════ CATEGORY CONTENT: SILENT AIM ══════════════════
-    do
+    ;(function()
         local SilentPage = tabPages[2]
         if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
-            local SLift = NewFrame(SilentPage, UDim2.new(0.54, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
+            local SLift = NewFrame(SilentPage, UDim2.new(0.53, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
             Corner(SLift, 8); Stroke(SLift, STROKE, 1)
             local STitle = NewLabel(SLift, "Silent Aim Configuration", 13, TEXT, true)
             STitle.Size = UDim2.new(1, 0, 0, 30); STitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -5620,6 +5659,11 @@ do
                 cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
                 local rowLbl = NewLabel(row, label, 13, TEXT)
                 rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
+                rowLbl.TextScaled = true
+                local sFit = Instance.new("UITextSizeConstraint")
+                sFit.MaxTextSize = 13
+                sFit.MinTextSize = 8
+                sFit.Parent = rowLbl
 
                 local function ToggleState(state)
                     if state ~= nil then checked = state else checked = not checked end
@@ -5648,7 +5692,41 @@ do
                 return row
             end
 
-            AddSilentToggle("Enable Silent Aim", "Enabled")
+            _G.SILENT_CFG.Keybind = _G.SILENT_CFG.Keybind or Enum.KeyCode.None
+            local silentCheck = AddCardSetting(SCheckHolder, "Enable Silent Aim", _G.SILENT_CFG.Enabled, function(v)
+                _G.SILENT_CFG.Enabled = v
+            end, _G.SILENT_CFG.Keybind, function(k)
+                _G.SILENT_CFG.Keybind = k
+            end)
+            
+            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+                if silentCheck then
+                    local active = _G.SILENT_CFG.Enabled
+                    local cbBg = silentCheck:FindFirstChildOfClass("Frame")
+                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                    if cbCheck then cbCheck.Visible = active end
+                    if cbBg then
+                        cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                    end
+
+                    local kbBox = silentCheck:FindFirstChild("KeybindBox")
+                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                    if bindLbl then
+                        local keyName = "None"
+                        local kb = _G.SILENT_CFG.Keybind
+                        if kb then
+                            if typeof(kb) == "EnumItem" then
+                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                            else
+                                keyName = tostring(kb)
+                            end
+                        end
+                        bindLbl.Text = keyName
+                    end
+                end
+            end)
+
             AddSilentToggle("Wallbang", "Wallbang")
             AddSilentToggle("Show FOV Circle", "DrawFov")
             AddCardSlider(SSliderHolder, "Hit Chance", 0, 100, _G.SILENT_CFG.HitChance,
@@ -5781,6 +5859,11 @@ do
                     local rowLbl = NewLabel(row, label, 13, TEXT)
                     rowLbl.Position = UDim2.new(0, 32, 0, 0)
                     rowLbl.Size = UDim2.new(1, -40, 1, 0)
+                    rowLbl.TextScaled = true
+                    local gFit = Instance.new("UITextSizeConstraint")
+                    gFit.MaxTextSize = 13
+                    gFit.MinTextSize = 8
+                    gFit.Parent = rowLbl
 
                     if not isLocked then
                         row.MouseButton1Click:Connect(function()
@@ -5814,7 +5897,7 @@ do
                 BuildInstaKillCard()
             elseif IsHitmark() or IsBronxDuels() or IsDuelist() then
                 (function()
-                    local RightCol = NewFrame(SilentPage, UDim2.new(0.46, -5, 1, 0), UDim2.new(0, 0, 0, 0), PANEL, 1)
+                    local RightCol = NewFrame(SilentPage, UDim2.new(0.45, -5, 1, 0), UDim2.new(0, 0, 0, 0), PANEL, 1)
                     local colLayout = Instance.new("UIListLayout", RightCol)
                     colLayout.Padding = UDim.new(0, 10)
                     colLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -5879,21 +5962,26 @@ do
                 Enum.TextXAlignment.Center)
             msg.Size = UDim2.new(1, 0, 1, 0)
         end
-    end
+    end)()
 
     -- BUILD KILL AURA PAGE
-    (function()
+    ;(function()
         local KAPage = tabPages[3]
         if IsHitmark() or IsDuelist() then
-            -- Left column: Kill Aura card + Trigger Bot card stacked vertically
-            local LeftCol = NewFrame(KAPage, UDim2.new(0.54, -5, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+            -- Column Containers for Horizontal Page Layout
+            local LeftCol = NewFrame(KAPage, UDim2.new(0.53, -5, 1, 0), nil, BG, 1)
+            LeftCol.LayoutOrder = 1
             local LeftColLayout = Instance.new("UIListLayout", LeftCol)
-            LeftColLayout.FillDirection = Enum.FillDirection.Vertical
             LeftColLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            LeftColLayout.Padding = UDim.new(0, 8)
+            LeftColLayout.Padding = UDim.new(0, 10)
 
-            -- ── Kill Aura Card ──
-            local KCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 218), UDim2.new(0, 0, 0, 0), PANEL)
+            local RightCol = NewFrame(KAPage, UDim2.new(0.45, -5, 1, 0), nil, BG, 1)
+            RightCol.LayoutOrder = 2
+            local RightColLayout = Instance.new("UIListLayout", RightCol)
+            RightColLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            RightColLayout.Padding = UDim.new(0, 10)
+
+            local KCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
             KCard.LayoutOrder = 1
             Corner(KCard, 8); Stroke(KCard, STROKE, 1)
             local KTitle = NewLabel(KCard, "Auto Kill Aura", 13, TEXT, true)
@@ -5902,32 +5990,39 @@ do
             local KHolder = NewFrame(KCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
             Instance.new("UIListLayout", KHolder).Padding = UDim.new(0, 6)
 
-            -- Enable Toggle
-            local row = NewBtn(KHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(row, 5)
-            local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-            local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = _G.KILLAURA_CFG.Enabled
-            local rowLbl = NewLabel(row, "Enable Auto Kill Aura", 13, TEXT)
-            rowLbl.Size = UDim2.new(1, -40, 1, 0); rowLbl.Position = UDim2.new(0, 35, 0, 0)
+            _G.KILLAURA_CFG.Keybind = _G.KILLAURA_CFG.Keybind or Enum.KeyCode.None
+            local kaCheck = AddCardSetting(KHolder, "Enable Auto Kill Aura", _G.KILLAURA_CFG.Enabled, function(v)
+                _G.KILLAURA_CFG.Enabled = v
+            end, _G.KILLAURA_CFG.Keybind, function(k)
+                _G.KILLAURA_CFG.Keybind = k
+            end)
+            
+            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+                if kaCheck then
+                    local active = _G.KILLAURA_CFG.Enabled
+                    local cbBg = kaCheck:FindFirstChildOfClass("Frame")
+                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                    if cbCheck then cbCheck.Visible = active end
+                    if cbBg then
+                        cbBg.BackgroundColor3 = active and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(36, 36, 48)
+                    end
 
-            row.MouseButton1Click:Connect(function()
-                _G.KILLAURA_CFG.Enabled = not _G.KILLAURA_CFG.Enabled
-                cbCheck.Visible = _G.KILLAURA_CFG.Enabled
-                Tw(cbBg, 0.1, "Quad", "Out",
-                    {
-                        BackgroundColor3 = _G.KILLAURA_CFG.Enabled and Color3.fromRGB(255, 60, 60) or
-                            Color3.fromRGB(36, 36, 48)
-                    })
-            end)
-            row.MouseEnter:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
-            end)
-            row.MouseLeave:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                    local kbBox = kaCheck:FindFirstChild("KeybindBox")
+                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                    if bindLbl then
+                        local keyName = "None"
+                        local kb = _G.KILLAURA_CFG.Keybind
+                        if kb then
+                            if typeof(kb) == "EnumItem" then
+                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                            else
+                                keyName = tostring(kb)
+                            end
+                        end
+                        bindLbl.Text = keyName
+                    end
+                end
             end)
 
             -- Wallbang Toggle
@@ -5939,6 +6034,11 @@ do
             wcbCheck.Size = UDim2.new(1, 0, 1, 0); wcbCheck.Visible = _G.KILLAURA_CFG.Wallbang
             local wrowLbl = NewLabel(wrow, "Shoot through Walls (Wallbang)", 13, TEXT)
             wrowLbl.Size = UDim2.new(1, -40, 1, 0); wrowLbl.Position = UDim2.new(0, 35, 0, 0)
+            wrowLbl.TextScaled = true
+            local wFit = Instance.new("UITextSizeConstraint")
+            wFit.MaxTextSize = 13
+            wFit.MinTextSize = 8
+            wFit.Parent = wrowLbl
 
             wrow.MouseButton1Click:Connect(function()
                 _G.KILLAURA_CFG.Wallbang = not _G.KILLAURA_CFG.Wallbang
@@ -5965,51 +6065,68 @@ do
                 end)
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
-            -- ── Trigger Bot Card (below Kill Aura, same left column) ──
-            local TBCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), UDim2.new(0, 0, 0, 0), PANEL)
-            TBCard.LayoutOrder = 2
-            Corner(TBCard, 8); Stroke(TBCard, STROKE, 1)
-            local TBTitle = NewLabel(TBCard, "Trigger Bot", 13, TEXT, true)
-            TBTitle.Size = UDim2.new(1, 0, 0, 30); TBTitle.TextXAlignment = Enum.TextXAlignment.Center
+            -- [ TRIGGER BOT CARD ]
+            local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
+            TCard.LayoutOrder = 2
+            Corner(TCard, 8); Stroke(TCard, STROKE, 1)
+            local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
+            TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            local TBHolder = NewFrame(TBCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            Instance.new("UIListLayout", TBHolder).Padding = UDim.new(0, 6)
+            local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+            local TLayout = Instance.new("UIListLayout", THolder)
+            TLayout.Padding = UDim.new(0, 6)
+            TLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-            -- Enable Checkbox
-            local tbRow = NewBtn(TBHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(tbRow, 5)
-            local tbcbBg = NewFrame(tbRow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(tbcbBg, 3); Stroke(tbcbBg, STROKE2, 1)
-            local tbcbCheck = NewLabel(tbcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            tbcbCheck.Size = UDim2.new(1, 0, 1, 0); tbcbCheck.Visible = _G.TRIGGERBOT_CFG.Enabled
-            local tbRowLbl = NewLabel(tbRow, "Enable Trigger Bot", 13, TEXT)
-            tbRowLbl.Size = UDim2.new(1, -40, 1, 0); tbRowLbl.Position = UDim2.new(0, 35, 0, 0)
-
-            tbRow.MouseButton1Click:Connect(function()
-                _G.TRIGGERBOT_CFG.Enabled = not _G.TRIGGERBOT_CFG.Enabled
-                tbcbCheck.Visible = _G.TRIGGERBOT_CFG.Enabled
-                Tw(tbcbBg, 0.1, "Quad", "Out",
-                    { BackgroundColor3 = _G.TRIGGERBOT_CFG.Enabled and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(36, 36, 48) })
+            -- Checkbox and Keybind
+            _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
+            local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
+                _G.TRIGGERBOT_CFG.Enabled = v
+            end, _G.TRIGGERBOT_CFG.Keybind, function(k)
+                _G.TRIGGERBOT_CFG.Keybind = k
             end)
-            tbRow.MouseEnter:Connect(function()
-                Tw(tbRow, 0.1, "Quad", "Out", { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
-            end)
-            tbRow.MouseLeave:Connect(function()
-                Tw(tbRow, 0.1, "Quad", "Out", { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
-            end)
+            triggerCheck.LayoutOrder = 1
 
-            -- Mode Dropdown
-            _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "On Crosshair"
-            local tbDdRow = NewFrame(TBHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            local tbDd = AddDropdown(tbDdRow, { "On Crosshair", "On Aim Key" }, _G.TRIGGERBOT_CFG.Mode, function(v)
+            -- Dropdown
+            _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+            local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+            ddRowTB.LayoutOrder = 2
+            local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
                 _G.TRIGGERBOT_CFG.Mode = v
                 NOTIFY("Trigger Bot", "Mode: " .. v, 2)
             end)
-            tbDd.Size = UDim2.new(1, 0, 1, 0)
+            ddTB.Size = UDim2.new(1, 0, 1, 0)
 
-            -- Right column: HitBox Expander (only for Duelist)
+            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+                if triggerCheck then
+                    local active = _G.TRIGGERBOT_CFG.Enabled
+                    local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
+                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                    if cbCheck then cbCheck.Visible = active end
+                    if cbBg then
+                        cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                    end
+
+                    local kbBox = triggerCheck:FindFirstChild("KeybindBox")
+                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                    if bindLbl then
+                        local keyName = "None"
+                        local kb = _G.TRIGGERBOT_CFG.Keybind
+                        if kb then
+                            if typeof(kb) == "EnumItem" then
+                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                            else
+                                keyName = tostring(kb)
+                            end
+                        end
+                        bindLbl.Text = keyName
+                    end
+                end
+            end)
+
             if IsDuelist() then
-                local HCard = NewFrame(KAPage, UDim2.new(0.46, -5, 0, 218), UDim2.new(0, 0, 0, 0), PANEL)
+                local HCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
+                HCard.LayoutOrder = 1
                 Corner(HCard, 8); Stroke(HCard, STROKE, 1)
                 local HTitle = NewLabel(HCard, "HitBox Expander", 13, TEXT, true)
                 HTitle.Size = UDim2.new(1, 0, 0, 30); HTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -6033,6 +6150,11 @@ do
                 end
                 local hrowLbl = NewLabel(hrow, "Enable HitBox Expander", 13, TEXT)
                 hrowLbl.Size = UDim2.new(1, -40, 1, 0); hrowLbl.Position = UDim2.new(0, 35, 0, 0)
+                hrowLbl.TextScaled = true
+                local hFit = Instance.new("UITextSizeConstraint")
+                hFit.MaxTextSize = 13
+                hFit.MinTextSize = 8
+                hFit.Parent = hrowLbl
 
                 hrow.MouseButton1Click:Connect(function()
                     _G.HITBOX_CFG.Enabled = not _G.HITBOX_CFG.Enabled
@@ -6058,7 +6180,7 @@ do
                 end)
                 sliderRow.LayoutOrder = 2
 
-                -- 3. Body Part Dropdown
+                -- 3. Body Part Dropdown (options: head, uptorso)
                 local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
                 ddRowPart.LayoutOrder = 3
                 local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, _G.HITBOX_CFG.Part, function(v)
@@ -6075,7 +6197,6 @@ do
     end)()
 
     local function AddGlass(parent)
-
         parent.ClipsDescendants = true
         local g = Instance.new("ImageLabel")
         g.Name = "GlassLayer"
@@ -7558,127 +7679,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
         end
     end)
-
-    -- ═══════════════════════════════════════════════════════
-    -- TRIGGER BOT ENGINE
-    -- ═══════════════════════════════════════════════════════
-    task.spawn(function()
-        local tbCooldown = false
-
-        -- Helper: fire depending on platform
-        local function TBFire(cam)
-            if IS_MOBILE then
-                -- Mobile: tap at screen center
-                local cx = cam.ViewportSize.X / 2
-                local cy = cam.ViewportSize.Y / 2
-                pcall(tap, cx, cy)
-            else
-                -- PC: click (press + release in one call, most reliable)
-                pcall(mouse1click)
-                -- Fallback in case mouse1click not available
-                if not pcall(mouse1click) then
-                    pcall(mouse1press)
-                    task.wait(0.04)
-                    pcall(mouse1release)
-                end
-            end
-        end
-
-        local function IsEnemy(hitChar)
-            if not hitChar then return false end
-            local hitHum = hitChar:FindFirstChildOfClass("Humanoid")
-            if not hitHum or hitHum.Health <= 0 then return false end
-            if hitChar:GetAttribute("Downed") then return false end
-
-            local hitPlayer = Players:GetPlayerFromCharacter(hitChar)
-            if not hitPlayer or hitPlayer == LP then return false end
-            if IsIgnoredPlayer(hitPlayer) then return false end
-
-            -- Team check
-            if IsBronxDuels() or IsDuelist() then
-                local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
-                    LP.Data.Match:FindFirstChild("Enemies")
-                if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
-                    if not enemiesFolder:FindFirstChild(hitPlayer.Name) then return false end
-                end
-            else
-                local myTeamFolder = _G.MY_TEAM_CACHE
-                if myTeamFolder and myTeamFolder:FindFirstChild(hitPlayer.Name) then return false end
-            end
-
-            return true
-        end
-
-        while true do
-            task.wait(0.03) -- ~33 checks/sec for better response time
-            if getgenv().FLUX_SESSION ~= MySession then break end
-            if not (_G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled) then continue end
-
-            -- Mode gate
-            if _G.TRIGGERBOT_CFG.Mode == "On Aim Key" then
-                local aimHeld = false
-                if IS_MOBILE then
-                    -- On mobile "On Aim Key" = always fire (no RMB)
-                    aimHeld = true
-                else
-                    aimHeld = UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
-                end
-                if not aimHeld then continue end
-            end
-
-            if tbCooldown then continue end
-
-            pcall(function()
-                local cam = workspace.CurrentCamera
-                local char = LP.Character
-                if not cam or not char then return end
-                local myHum = char:FindFirstChildOfClass("Humanoid")
-                if not myHum or myHum.Health <= 0 then return end
-
-                local viewSize = cam.ViewportSize
-                local cx, cy = viewSize.X / 2, viewSize.Y / 2
-
-                -- Raycast from crosshair center
-                local ray = cam:ViewportPointToRay(cx, cy, 0)
-                local rayParams = RaycastParams.new()
-                rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                rayParams.FilterDescendantsInstances = { char, cam }
-
-                -- Try multiple ray origins slightly offset to improve hit detection
-                local offsets = {
-                    Vector3.new(0, 0, 0),
-                    Vector3.new(0, 0.5, 0),
-                    Vector3.new(0, -0.5, 0),
-                    Vector3.new(0.5, 0, 0),
-                    Vector3.new(-0.5, 0, 0),
-                }
-
-                local foundEnemy = false
-                for _, offset in ipairs(offsets) do
-                    local dir = (ray.Direction + offset).Unit
-                    local result = workspace:Raycast(ray.Origin, dir * 2000, rayParams)
-                    if result and result.Instance then
-                        local hitChar = result.Instance:FindFirstAncestorOfClass("Model")
-                        if IsEnemy(hitChar) then
-                            foundEnemy = true
-                            break
-                        end
-                    end
-                end
-
-                if not foundEnemy then return end
-
-                -- Fire!
-                tbCooldown = true
-                TBFire(cam)
-                task.wait(0.08) -- small cooldown between shots
-                tbCooldown = false
-            end)
-        end
-    end)
 end
-
-
 
 -- [ SPEED BOOST & FLY UTILITIES ]
 ; (function()
@@ -7975,6 +7976,67 @@ end
     -- Keybind toggling listener
     table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
         if gpe then return end
+
+        -- Trigger Bot keybind check
+        if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Keybind then
+            local currentBind = _G.TRIGGERBOT_CFG.Keybind
+            local match = false
+            if typeof(currentBind) == "EnumItem" then
+                if currentBind.EnumType == Enum.KeyCode then
+                    match = (inp.KeyCode == currentBind)
+                elseif currentBind.EnumType == Enum.UserInputType then
+                    match = (inp.UserInputType == currentBind)
+                end
+            end
+            if match and currentBind ~= Enum.KeyCode.None then
+                _G.TRIGGERBOT_CFG.Enabled = not _G.TRIGGERBOT_CFG.Enabled
+                NOTIFY("Trigger Bot", _G.TRIGGERBOT_CFG.Enabled and "Enabled" or "Disabled", 2)
+                if _G.FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                end
+            end
+        end
+
+        -- Silent Aim keybind check
+        if _G.SILENT_CFG and _G.SILENT_CFG.Keybind then
+            local currentBind = _G.SILENT_CFG.Keybind
+            local match = false
+            if typeof(currentBind) == "EnumItem" then
+                if currentBind.EnumType == Enum.KeyCode then
+                    match = (inp.KeyCode == currentBind)
+                elseif currentBind.EnumType == Enum.UserInputType then
+                    match = (inp.UserInputType == currentBind)
+                end
+            end
+            if match and currentBind ~= Enum.KeyCode.None then
+                _G.SILENT_CFG.Enabled = not _G.SILENT_CFG.Enabled
+                NOTIFY("Silent Aim", _G.SILENT_CFG.Enabled and "Enabled" or "Disabled", 2)
+                if _G.FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                end
+            end
+        end
+
+        -- Kill Aura keybind check
+        if _G.KILLAURA_CFG and _G.KILLAURA_CFG.Keybind then
+            local currentBind = _G.KILLAURA_CFG.Keybind
+            local match = false
+            if typeof(currentBind) == "EnumItem" then
+                if currentBind.EnumType == Enum.KeyCode then
+                    match = (inp.KeyCode == currentBind)
+                elseif currentBind.EnumType == Enum.UserInputType then
+                    match = (inp.UserInputType == currentBind)
+                end
+            end
+            if match and currentBind ~= Enum.KeyCode.None then
+                _G.KILLAURA_CFG.Enabled = not _G.KILLAURA_CFG.Enabled
+                NOTIFY("Kill Aura", _G.KILLAURA_CFG.Enabled and "Enabled" or "Disabled", 2)
+                if _G.FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                end
+            end
+        end
+
         if inp.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = inp.KeyCode.Name
 
@@ -8634,6 +8696,282 @@ task.spawn(function()
                 end)
             end
             originalProps = {}
+        end
+    end
+end)
+
+-- [ TRIGGER BOT ENGINE ]
+local function GetTriggerBotTarget()
+    local cam = workspace.CurrentCamera
+    if not cam then return nil end
+    local viewportSize = cam.ViewportSize
+    if not viewportSize or viewportSize.X < 10 or viewportSize.Y < 10 then return nil end
+    local screenCenter = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+
+    local mode = _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Mode or "Legit"
+    local fovRadius = (_G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Fov)
+    if not fovRadius then
+        fovRadius = (mode == "Blatant") and 120 or 12 -- Large FOV for Blatant silent-trigger, small for Legit
+    end
+    local bestTarget = nil
+    local bestDist = fovRadius
+
+    -- Exclude local character from visibility check
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = { LP.Character }
+    params.IgnoreWater = true
+
+    local function checkChar(char)
+        if not char then return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum or hum.Health <= 0.1 or char:GetAttribute("Downed") then return end
+
+        local hitPart = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
+        if not hitPart then return end
+
+        -- Get screen position of the hitPart
+        local screenPos, onScreen = cam:WorldToViewportPoint(hitPart.Position)
+        if not onScreen then return end
+
+        local dist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+        if dist < bestDist then
+            -- Visibility Check using advanced IsPositionVisible function (handles accessories, bullet trails, etc.)
+            if IsPositionVisible(cam.CFrame.Position, hitPart.Position, char, cam) then
+                bestTarget = char
+                bestDist = dist
+            end
+        end
+    end
+
+    -- Loop through players
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP then
+            -- Teammate check
+            local isTeammate = false
+            if IsBronxDuels() or IsDuelist() then
+                local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
+                    LP.Data.Match:FindFirstChild("Enemies")
+                if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
+                    if not enemiesFolder:FindFirstChild(p.Name) then
+                        isTeammate = true
+                    end
+                else
+                    if p.Team and LP.Team and p.Team == LP.Team then
+                        isTeammate = true
+                    end
+                    local myTeam = LP:GetAttribute("DuelsTeam")
+                    local theirTeam = p:GetAttribute("DuelsTeam")
+                    local myMatch = LP:GetAttribute("DuelsMatchId")
+                    local theirMatch = p:GetAttribute("DuelsMatchId")
+                    if myMatch and theirMatch and myMatch == theirMatch then
+                        if myTeam and theirTeam and myTeam == theirTeam then
+                            isTeammate = true
+                        end
+                    end
+                end
+            else
+                local myTeamFolder = _G.MY_TEAM_CACHE
+                if myTeamFolder and myTeamFolder:FindFirstChild(p.Name) then
+                    isTeammate = true
+                end
+            end
+
+            if not isTeammate and p.Character then
+                checkChar(p.Character)
+            end
+        end
+    end
+
+    -- Loop through bots
+    local bots = _G.BOT_LIST or {}
+    for i = 1, #bots do
+        checkChar(bots[i])
+    end
+
+    return bestTarget
+end
+
+local function FireWeapon()
+    if _G.FireBind then
+        _G:FireBind("Shoot", true, false)
+        task.wait(0.01)
+        _G:FireBind("Shoot", false, false)
+    elseif mouse1click then
+        mouse1click()
+    elseif mouse1press and mouse1release then
+        mouse1press()
+        task.wait(0.01)
+        mouse1release()
+    end
+end
+
+local isTriggerPressed = false
+
+local function ReleaseTrigger()
+    if isTriggerPressed then
+        isTriggerPressed = false
+        if _G.FireBind then
+            _G:FireBind("Shoot", false, false)
+        elseif mouse1release then
+            mouse1release()
+        end
+    end
+end
+
+local function PressTrigger()
+    if not isTriggerPressed then
+        isTriggerPressed = true
+        if _G.FireBind then
+            _G:FireBind("Shoot", true, false)
+        elseif mouse1press then
+            mouse1press()
+        end
+    end
+end
+
+local function TapTrigger()
+    if _G.FireBind then
+        _G:FireBind("Shoot", true, false)
+        task.wait(0.01)
+        _G:FireBind("Shoot", false, false)
+    elseif mouse1click then
+        mouse1click()
+    elseif mouse1press and mouse1release then
+        mouse1press()
+        task.wait(0.01)
+        mouse1release()
+    end
+end
+
+local lastTriggerClick = 0
+task.spawn(function()
+    while task.wait() do
+        if getgenv().FLUX_SESSION ~= MySession then
+            ReleaseTrigger()
+            break
+        end
+        if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
+            -- Dynamic weapon override for 100% long range accuracy (no spread, infinite range, no recoil)
+            local activeTool = nil
+            pcall(function()
+                local char = LP.Character
+                if char then
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then
+                        activeTool = tool
+                        tool:SetAttribute("Range", 9999)
+                        tool:SetAttribute("Spread", 0)
+                        tool:SetAttribute("MinSpread", 0)
+                        tool:SetAttribute("MaxSpread", 0)
+                        tool:SetAttribute("Recoil", 0)
+                        tool:SetAttribute("AimRecoil", 0)
+                    end
+                end
+            end)
+
+            local targetChar = GetTriggerBotTarget()
+            if targetChar then
+                local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+
+                if mode == "Legit" then
+                    -- Check if active weapon is automatic
+                    local isAuto = false
+                    if activeTool then
+                        isAuto = activeTool:GetAttribute("Automatic") == true
+                            or activeTool:GetAttribute("Auto") == true
+                            or activeTool:GetAttribute("FireMode") == "Auto"
+                            or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
+                    end
+
+                    if isAuto then
+                        PressTrigger()
+                    else
+                        -- Semi-automatic: tap weapon
+                        ReleaseTrigger() -- Make sure we release before tapping again
+                        local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
+                        if tick() - lastTriggerClick > delay then
+                            lastTriggerClick = tick()
+                            TapTrigger()
+                        end
+                    end
+                elseif mode == "Blatant" then
+                    ReleaseTrigger()
+                    -- Blatant mode: instantly hit via remote/process if Duelist or Hitmark, otherwise click fast
+                    if IsDuelist() then
+                        local tool = activeTool
+                        local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
+                            game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
+                        if Weapons and tool then
+                            local hitPart = targetChar:FindFirstChild("Head") or
+                                targetChar:FindFirstChild("HumanoidRootPart")
+                            if hitPart and targetChar:FindFirstChild("Humanoid") and targetChar.Humanoid.Health > 0 then
+                                if tick() - lastTriggerClick > 0.01 then
+                                    lastTriggerClick = tick()
+                                    local isHead = hitPart.Name == "Head"
+                                    local dmgAttr = isHead and "HeadDamage" or "Damage"
+                                    local damage = tool:GetAttribute(dmgAttr) or (isHead and 150 or 100)
+
+                                    -- Instant Kill (multiple remote shots paired with Process)
+                                    for i = 1, 3 do
+                                        Weapons:FireServer("Process")
+                                        Weapons:FireServer("DamageRequest", targetChar.Humanoid, damage, isHead, hitPart,
+                                            hitPart.Position)
+                                    end
+                                end
+                            end
+                        end
+                    elseif IsHitmark() then
+                        local hitPart = targetChar:FindFirstChild("Head") or
+                            targetChar:FindFirstChild("HumanoidRootPart")
+                        if hitPart and tick() - lastTriggerClick > 0.01 then
+                            lastTriggerClick = tick()
+                            local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
+                            local Gun2 = BridgeNet2.ClientBridge("Gun2")
+                            local cam = workspace.CurrentCamera
+
+                            -- Instant Kill (multiple remote shots with unique timestamps/hitIds)
+                            for i = 1, 3 do
+                                Gun2:Fire({
+                                    ["hitType"] = "Hit",
+                                    ["char"] = targetChar,
+                                    ["hitPart"] = hitPart,
+                                    ["hitPosition"] = hitPart.Position,
+                                    ["cameraDir"] = cam.CFrame.LookVector,
+                                    ["cameraPos"] = cam.CFrame.Position,
+                                    ["timestamp"] = time() + (i * 0.001),
+                                    ["hitId"] = tick() + i
+                                })
+                            end
+                        end
+                    else
+                        -- Fallback to fast click if not Duelist or Hitmark
+                        local isAuto = false
+                        if activeTool then
+                            isAuto = activeTool:GetAttribute("Automatic") == true
+                                or activeTool:GetAttribute("Auto") == true
+                                or activeTool:GetAttribute("FireMode") == "Auto"
+                                or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
+                        end
+
+                        if isAuto then
+                            PressTrigger()
+                        else
+                            ReleaseTrigger()
+                            if tick() - lastTriggerClick > 0.01 then
+                                lastTriggerClick = tick()
+                                TapTrigger()
+                            end
+                        end
+                    end
+                end
+            else
+                -- No target: release trigger immediately
+                ReleaseTrigger()
+            end
+        else
+            -- Triggerbot disabled: release trigger immediately
+            ReleaseTrigger()
         end
     end
 end)
