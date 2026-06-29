@@ -151,70 +151,44 @@ local GAME_IDS = {
 }
 
 -- Game-specific check helpers
-_G.DETEC_GAMES = _G.DETEC_GAMES or {
-    MVS = false,
-    Hitmark = false,
-    Bronx = false,
-    Duelist = false
-}
-
-local function DetectGame()
+local function IsMurderVsSheriff()
     local pid = game.PlaceId
-    
-    -- Check Murder Vs Sheriff
-    if GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid] then
-        _G.DETEC_GAMES.MVS = true
-        return
-    end
+    return GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid]
+end
 
-    -- Check Hitmark
-    if GAME_IDS.Hitmark[pid] ~= nil then
-        _G.DETEC_GAMES.Hitmark = true
-        return
-    end
+local function IsHitmark()
+    local pid = game.PlaceId
+    return GAME_IDS.Hitmark[pid] ~= nil
+end
 
-    -- Check Bronx Duels
+local function IsBronxDuels()
+    local pid = game.PlaceId
     if GAME_IDS.BronxDuels and GAME_IDS.BronxDuels[pid] then
-        _G.DETEC_GAMES.Bronx = true
-        return
+        return true
     end
-
-    -- Check Duelist
-    if GAME_IDS.Duelist and GAME_IDS.Duelist[pid] ~= nil then
-        _G.DETEC_GAMES.Duelist = true
-        return
-    end
-
-    -- Delayed checks (wait for replication)
+    -- Fallback: Detect by checking ReplicatedStorage unique combat structures
     local rs = game:GetService("ReplicatedStorage")
-    
-    -- Check Bronx Duels fallbacks
     local remotes = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
     if remotes and remotes:FindFirstChild("KnifeKill") then
-        _G.DETEC_GAMES.Bronx = true
-        return
+        return true
     end
-
-    -- Check Duelist fallbacks
-    if rs:FindFirstChild("SmurklesLib") and rs:FindFirstChild("Events") and rs.Events:FindFirstChild("Weapons") then
-        _G.DETEC_GAMES.Duelist = true
-        return
-    end
-
-    -- Async / slower check for Duelist (crucial for mobile loading times)
-    local foundSmurkles = rs:WaitForChild("SmurklesLib", 3)
-    if foundSmurkles then
-        _G.DETEC_GAMES.Duelist = true
-        GAME_IDS.Duelist[pid] = true
-        return
-    end
+    return false
 end
-DetectGame()
 
-local function IsMurderVsSheriff() return _G.DETEC_GAMES.MVS end
-local function IsHitmark() return _G.DETEC_GAMES.Hitmark end
-local function IsBronxDuels() return _G.DETEC_GAMES.Bronx end
-local function IsDuelist() return _G.DETEC_GAMES.Duelist end
+function IsDuelist()
+    local pid = game.PlaceId
+    if GAME_IDS.Duelist and GAME_IDS.Duelist[pid] ~= nil then
+        return true
+    end
+    local rs = game:GetService("ReplicatedStorage")
+    if rs:FindFirstChild("SmurklesLib") and rs:FindFirstChild("Events") and rs.Events:FindFirstChild("Weapons") then
+        if GAME_IDS.Duelist then
+            GAME_IDS.Duelist[pid] = true
+        end
+        return true
+    end
+    return false
+end
 
 local function IsMurderVsSheriffLobby()
     return GAME_IDS.MurderVsSheriff.Lobbies[game.PlaceId]
@@ -669,7 +643,7 @@ local PICKER_MAIN     = nil
 
 -- State Variables
 -- UI state variables (initially set at top)
-local IS_MOBILE       = UIS.TouchEnabled
+local IS_MOBILE       = UIS.TouchEnabled -- Mobile executors spoof KeyboardEnabled, so only check TouchEnabled
 local curW            = IS_MOBILE and 600 or 900
 local curH            = IS_MOBILE and 350 or 530
 local SIDE_W          = IS_MOBILE and 160 or 220
@@ -6093,7 +6067,7 @@ do
                 end)
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
-            -- [ TRIGGER BOT CARD ]
+            -- [ TRIGGER BOT CARD ] (PC only — mobile has built-in triggerbot)
             local triggerCheck
             if not IS_MOBILE then
                 local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
@@ -7161,13 +7135,13 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
         if _G.SILENT_CFG.Enabled and _G.SILENT_CFG.DrawFov then
             local cam = workspace.CurrentCamera
-            local pos = UIS:GetMouseLocation()
-            if IS_MOBILE and cam then
-                pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-            end
             silentFovCircle.Visible = true
             silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-            silentFovCircle.Position = pos
+            if IS_MOBILE and cam then
+                silentFovCircle.Position = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+            else
+                silentFovCircle.Position = UIS:GetMouseLocation()
+            end
         else
             silentFovCircle.Visible = false
         end
@@ -7177,7 +7151,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         local cam = workspace.CurrentCamera
         if not cam then return nil end
         local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-        local refPos = IS_MOBILE and center or UIS:GetMouseLocation()
+        local mousePos = IS_MOBILE and center or UIS:GetMouseLocation()
         local target = nil
         local dist = _G.SILENT_CFG.FOV or 150
 
@@ -7188,7 +7162,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 if child:IsA("BasePart") and child.Name == "TargetShoot" then
                     local pos, vis = cam:WorldToViewportPoint(child.Position)
                     if vis or _G.SILENT_CFG.Wallbang then
-                        local mag = (Vector2.new(pos.X, pos.Y) - refPos).Magnitude
+                        local mag = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
                         if mag < dist then
                             local isVisible = true
                             if not _G.SILENT_CFG.Wallbang then
@@ -7267,7 +7241,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 if not _G.SILENT_CFG.Wallbang and not vis then return end
             end
 
-            local mag = (Vector2.new(pos.X, pos.Y) - refPos).Magnitude
+            local mag = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
             if mag < dist then
                 if not _G.SILENT_CFG.Wallbang then
                     if not IsPositionVisible(cam.CFrame.Position, hrp.Position, char, cam) then return end
@@ -7300,230 +7274,149 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     -- NAMECALL INTERCEPTION SYSTEM (Undetectable Wallbang)
     -- ═══════════════════════════════════════════════════════
 
-    (function()
-        local oldNamecall, oldIndex
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    local oldIndex = mt.__index
+    setreadonly(mt, false)
 
-        -- Cache for target to avoid recalculating every frame
-        local cachedTarget = nil
-        local cacheExpire = 0
-        local isGettingTarget = false
+    -- Cache for target to avoid recalculating every frame
+    local cachedTarget = nil
+    local cacheExpire = 0
+    local isGettingTarget = false
 
-        local function GetCachedTarget()
-            if isGettingTarget then return nil end
-            isGettingTarget = true
-            local now = tick()
-            if now > cacheExpire or not cachedTarget then
-                local ok, res = pcall(GetSilentTarget)
-                isGettingTarget = false
-                if ok then
-                    cachedTarget = res
-                    cacheExpire = now + 0.05 -- 50ms cache
-                else
-                    warn("Error in GetSilentTarget: " .. tostring(res))
-                    return nil
-                end
+    local function GetCachedTarget()
+        if isGettingTarget then return nil end
+        isGettingTarget = true
+        local now = tick()
+        if now > cacheExpire or not cachedTarget then
+            local ok, res = pcall(GetSilentTarget)
+            isGettingTarget = false
+            if ok then
+                cachedTarget = res
+                cacheExpire = now + 0.05 -- 50ms cache
             else
-                isGettingTarget = false
+                warn("Error in GetSilentTarget: " .. tostring(res))
+                return nil
             end
-            return cachedTarget
+        else
+            isGettingTarget = false
         end
-        _G.FLUX_GET_CACHED_TARGET = GetCachedTarget
+        return cachedTarget
+    end
 
-        local function customIndex(self, k)
-            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-            if not checkcaller() and hookActive then
-                if typeof(self) == "Instance" and self:IsA("Camera") then
-                    if k == "CFrame" or k == "cf" then
-                        -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
-                        if IsHitmark() or IsBronxDuels() or IsDuelist() then
+    mt.__index = function(self, k)
+        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+        if not checkcaller() and hookActive then
+            if typeof(self) == "Instance" and self:IsA("Camera") then
+                if k == "CFrame" or k == "cf" then
+                    -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
+                    if IsHitmark() or IsBronxDuels() or IsDuelist() then
+                        return oldIndex(self, k)
+                    end
+
+                    -- Prevent Aimlock: Do not spoof CFrame if a camera script is asking for it
+                    local caller = getcallingscript()
+                    if caller then
+                        local cName = caller.Name
+                        if cName == "CameraModule" or cName == "BaseCamera" or cName == "ClassicCamera" or cName == "CameraUtils" or cName == "ZoomController" or cName == "PlayerModule" then
                             return oldIndex(self, k)
                         end
+                    end
 
-                        -- Prevent Aimlock: Do not spoof CFrame if a camera script is asking for it
-                        local caller = getcallingscript()
-                        if caller then
-                            local cName = caller.Name
-                            if cName == "CameraModule" or cName == "BaseCamera" or cName == "ClassicCamera" or cName == "CameraUtils" or cName == "ZoomController" or cName == "PlayerModule" then
-                                return oldIndex(self, k)
+                    local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+                    if target then
+                        local hitPos = nil
+                        if target:IsA("BasePart") then
+                            hitPos = target.Position
+                        else
+                            local humT = target:FindFirstChildOfClass("Humanoid")
+                            local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                                target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
+                            if rootT then
+                                local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                hitPos = tp and tp.Position or rootT.Position
                             end
                         end
 
-                        local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
-                        if target then
-                            local hitPos = nil
-                            if target:IsA("BasePart") then
-                                hitPos = target.Position
-                            else
-                                local humT = target:FindFirstChildOfClass("Humanoid")
-                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
-                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
-                                if rootT then
-                                    local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
-                                    hitPos = tp and tp.Position or rootT.Position
-                                end
-                            end
-
-                            if hitPos then
-                                local orgCFrame = oldIndex(self, k)
-                                local spoofedDir = (hitPos - orgCFrame.Position).Unit
-                                return CFrame.new(orgCFrame.Position, orgCFrame.Position + spoofedDir)
-                            end
+                        if hitPos then
+                            local orgCFrame = oldIndex(self, k)
+                            local spoofedDir = (hitPos - orgCFrame.Position).Unit
+                            return CFrame.new(orgCFrame.Position, orgCFrame.Position + spoofedDir)
                         end
                     end
                 end
             end
-            return oldIndex(self, k)
+        end
+        return oldIndex(self, k)
+    end
+
+    mt.__namecall = function(self, ...)
+        local method = getnamecallmethod()
+        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+
+        -- Bypass Bronx Duels Anti-Cheat (AD event)
+        if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
+            return
         end
 
-        local function customNamecall(self, ...)
-            local method = getnamecallmethod()
-            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+        -- Intercept Raycast for Silent Aim & Wallbang
+        if hookActive and method == "Raycast" and typeof(self) == "Instance" and self == workspace and not checkcaller() and not ignoreSilentRay then
+            local args = table.pack(...)
 
-            -- Bypass Bronx Duels Anti-Cheat (AD event)
-            if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
-                return
-            end
+            -- Usually bullets have a very long direction vector
+            if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
+                local chance = math.random(1, 100)
+                if chance <= (_G.SILENT_CFG.HitChance or 100) then
+                    local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
 
-            -- Intercept Raycast for Silent Aim & Wallbang
-            if hookActive and method == "Raycast" and typeof(self) == "Instance" and self == workspace and not checkcaller() and not ignoreSilentRay then
-                local args = table.pack(...)
+                    if target then
+                        local hitPos = nil
+                        if target:IsA("BasePart") then
+                            hitPos = target.Position
+                        else
+                            local humT = target:FindFirstChildOfClass("Humanoid")
+                            local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                                target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
 
-                -- Usually bullets have a very long direction vector
-                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
-                    local chance = math.random(1, 100)
-                    if chance <= (_G.SILENT_CFG.HitChance or 100) then
-                        local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
-
-                        if target then
-                            local hitPos = nil
-                            if target:IsA("BasePart") then
-                                hitPos = target.Position
-                            else
-                                local humT = target:FindFirstChildOfClass("Humanoid")
-                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
-                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
-
-                                if rootT then
-                                    local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
-                                    hitPos = tp and tp.Position or rootT.Position
-                                end
+                            if rootT then
+                                local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                hitPos = tp and tp.Position or rootT.Position
                             end
+                        end
 
-                            if hitPos then
-                                -- Redirect the ray direction towards the target
-                                args[2] = (hitPos - args[1]).Unit * 10000
+                        if hitPos then
+                            -- Redirect the ray direction towards the target
+                            args[2] = (hitPos - args[1]).Unit * 10000
 
-                                -- Handle Wallbang
-                                local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
-                                    (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
-                                    (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
-                                if doWallbang then
-                                    local params = args[3]
-                                    local newParams = RaycastParams.new()
-                                    newParams.FilterType = Enum.RaycastFilterType.Include
-                                    newParams.FilterDescendantsInstances = { target }
-                                    if params and typeof(params) == "RaycastParams" then
-                                        newParams.IgnoreWater = params.IgnoreWater
-                                        newParams.CollisionGroup = params.CollisionGroup
-                                    end
-                                    args[3] = newParams
+                            -- Handle Wallbang
+                            local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
+                                (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
+                                (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
+                            if doWallbang then
+                                local params = args[3]
+                                local newParams = RaycastParams.new()
+                                newParams.FilterType = Enum.RaycastFilterType.Include
+                                newParams.FilterDescendantsInstances = { target }
+                                if params and typeof(params) == "RaycastParams" then
+                                    newParams.IgnoreWater = params.IgnoreWater
+                                    newParams.CollisionGroup = params.CollisionGroup
                                 end
+                                args[3] = newParams
                             end
                         end
                     end
                 end
-
-                setnamecallmethod(method)
-                return oldNamecall(self, table.unpack(args, 1, args.n))
             end
 
             setnamecallmethod(method)
-            return oldNamecall(self, ...)
+            return oldNamecall(self, table.unpack(args, 1, args.n))
         end
 
-        if hookmetamethod then
-            local success1, err1 = pcall(function()
-                oldIndex = hookmetamethod(game, "__index", function(self, k)
-                    return customIndex(self, k)
-                end)
-            end)
-            local success2, err2 = pcall(function()
-                oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-                    return customNamecall(self, ...)
-                end)
-            end)
-            if not success1 or not success2 then
-                local mt = getrawmetatable(game)
-                oldNamecall = mt.__namecall
-                oldIndex = mt.__index
-                setreadonly(mt, false)
-                mt.__index = customIndex
-                mt.__namecall = customNamecall
-                setreadonly(mt, true)
-            end
-        else
-            local mt = getrawmetatable(game)
-            oldNamecall = mt.__namecall
-            oldIndex = mt.__index
-            setreadonly(mt, false)
-            mt.__index = customIndex
-            mt.__namecall = customNamecall
-            setreadonly(mt, true)
-        end
-    end)()
+        setnamecallmethod(method)
+        return oldNamecall(self, ...)
+    end
 
-    -- Direct hookfunction for workspace.Raycast (100% stable on all mobile executors)
-    pcall(function()
-        local oldRaycast
-        oldRaycast = hookfunction(workspace.Raycast, function(self, ...)
-            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-            if not checkcaller() and hookActive and self == workspace and not ignoreSilentRay then
-                local args = table.pack(...)
-                -- Bullet raycast detection
-                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
-                    local chance = math.random(1, 100)
-                    if chance <= (_G.SILENT_CFG.HitChance or 100) then
-                        local target = _G.KILLAURA_ACTIVE_TARGET or (_G.FLUX_GET_CACHED_TARGET and _G.FLUX_GET_CACHED_TARGET() or nil)
-                        if target then
-                            local hitPos = nil
-                            if target:IsA("BasePart") then
-                                hitPos = target.Position
-                            else
-                                local humT = target:FindFirstChildOfClass("Humanoid")
-                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
-                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
-                                if rootT then
-                                    local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
-                                    hitPos = tp and tp.Position or rootT.Position
-                                end
-                            end
-
-                            if hitPos then
-                                args[2] = (hitPos - args[1]).Unit * 10000
-
-                                local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
-                                    (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
-                                    (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
-                                if doWallbang then
-                                    local params = args[3]
-                                    local newParams = RaycastParams.new()
-                                    newParams.FilterType = Enum.RaycastFilterType.Include
-                                    newParams.FilterDescendantsInstances = { target }
-                                    if params and typeof(params) == "RaycastParams" then
-                                        newParams.IgnoreWater = params.IgnoreWater
-                                        newParams.CollisionGroup = params.CollisionGroup
-                                    end
-                                    args[3] = newParams
-                                end
-                            end
-                        end
-                    end
-                end
-                return oldRaycast(self, table.unpack(args, 1, args.n))
-            end
-            return oldRaycast(self, ...)
-        end)
-    end)
+    setreadonly(mt, true)
 
     _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
@@ -7572,7 +7465,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return false
         end
 
-        local target = _G.FLUX_GET_CACHED_TARGET and _G.FLUX_GET_CACHED_TARGET() or nil
+        local target = GetCachedTarget()
         if not target then
             return false
         end
@@ -8925,77 +8818,146 @@ local function FireWeapon()
     end
 end
 
-(function()
-    local isTriggerPressed = false
+local isTriggerPressed = false
 
-    local function ReleaseTrigger()
-        if isTriggerPressed then
-            isTriggerPressed = false
-            if _G.FireBind then
-                _G:FireBind("Shoot", false, false)
-            elseif mouse1release then
-                mouse1release()
-            end
-        end
-    end
-
-    local function PressTrigger()
-        if not isTriggerPressed then
-            isTriggerPressed = true
-            if _G.FireBind then
-                _G:FireBind("Shoot", true, false)
-            elseif mouse1press then
-                mouse1press()
-            end
-        end
-    end
-
-    local function TapTrigger()
+local function ReleaseTrigger()
+    if isTriggerPressed then
+        isTriggerPressed = false
         if _G.FireBind then
-            _G:FireBind("Shoot", true, false)
-            task.wait(0.01)
             _G:FireBind("Shoot", false, false)
-        elseif mouse1click then
-            mouse1click()
-        elseif mouse1press and mouse1release then
-            mouse1press()
-            task.wait(0.01)
+        elseif mouse1release then
             mouse1release()
         end
     end
+end
 
-    local lastTriggerClick = 0
-    task.spawn(function()
-        while task.wait() do
-            if getgenv().FLUX_SESSION ~= MySession then
-                ReleaseTrigger()
-                break
-            end
-            if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
-                -- Dynamic weapon override for 100% long range accuracy (no spread, infinite range, no recoil)
-                local activeTool = nil
-                pcall(function()
-                    local char = LP.Character
-                    if char then
-                        local tool = char:FindFirstChildOfClass("Tool")
-                        if tool then
-                            activeTool = tool
-                            tool:SetAttribute("Range", 9999)
-                            tool:SetAttribute("Spread", 0)
-                            tool:SetAttribute("MinSpread", 0)
-                            tool:SetAttribute("MaxSpread", 0)
-                            tool:SetAttribute("Recoil", 0)
-                            tool:SetAttribute("AimRecoil", 0)
+local function PressTrigger()
+    if not isTriggerPressed then
+        isTriggerPressed = true
+        if _G.FireBind then
+            _G:FireBind("Shoot", true, false)
+        elseif mouse1press then
+            mouse1press()
+        end
+    end
+end
+
+local function TapTrigger()
+    if _G.FireBind then
+        _G:FireBind("Shoot", true, false)
+        task.wait(0.01)
+        _G:FireBind("Shoot", false, false)
+    elseif mouse1click then
+        mouse1click()
+    elseif mouse1press and mouse1release then
+        mouse1press()
+        task.wait(0.01)
+        mouse1release()
+    end
+end
+
+local lastTriggerClick = 0
+task.spawn(function()
+    while task.wait() do
+        if getgenv().FLUX_SESSION ~= MySession then
+            ReleaseTrigger()
+            break
+        end
+        if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
+            -- Dynamic weapon override for 100% long range accuracy (no spread, infinite range, no recoil)
+            local activeTool = nil
+            pcall(function()
+                local char = LP.Character
+                if char then
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then
+                        activeTool = tool
+                        tool:SetAttribute("Range", 9999)
+                        tool:SetAttribute("Spread", 0)
+                        tool:SetAttribute("MinSpread", 0)
+                        tool:SetAttribute("MaxSpread", 0)
+                        tool:SetAttribute("Recoil", 0)
+                        tool:SetAttribute("AimRecoil", 0)
+                    end
+                end
+            end)
+
+            local targetChar = GetTriggerBotTarget()
+            if targetChar then
+                local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+
+                if mode == "Legit" then
+                    -- Check if active weapon is automatic
+                    local isAuto = false
+                    if activeTool then
+                        isAuto = activeTool:GetAttribute("Automatic") == true
+                            or activeTool:GetAttribute("Auto") == true
+                            or activeTool:GetAttribute("FireMode") == "Auto"
+                            or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
+                    end
+
+                    if isAuto then
+                        PressTrigger()
+                    else
+                        -- Semi-automatic: tap weapon
+                        ReleaseTrigger() -- Make sure we release before tapping again
+                        local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
+                        if tick() - lastTriggerClick > delay then
+                            lastTriggerClick = tick()
+                            TapTrigger()
                         end
                     end
-                end)
+                elseif mode == "Blatant" then
+                    ReleaseTrigger()
+                    -- Blatant mode: instantly hit via remote/process if Duelist or Hitmark, otherwise click fast
+                    if IsDuelist() then
+                        local tool = activeTool
+                        local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
+                            game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
+                        if Weapons and tool then
+                            local hitPart = targetChar:FindFirstChild("Head") or
+                                targetChar:FindFirstChild("HumanoidRootPart")
+                            if hitPart and targetChar:FindFirstChild("Humanoid") and targetChar.Humanoid.Health > 0 then
+                                if tick() - lastTriggerClick > 0.01 then
+                                    lastTriggerClick = tick()
+                                    local isHead = hitPart.Name == "Head"
+                                    local dmgAttr = isHead and "HeadDamage" or "Damage"
+                                    local damage = tool:GetAttribute(dmgAttr) or (isHead and 150 or 100)
 
-                local targetChar = GetTriggerBotTarget()
-                if targetChar then
-                    local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+                                    -- Instant Kill (multiple remote shots paired with Process)
+                                    for i = 1, 3 do
+                                        Weapons:FireServer("Process")
+                                        Weapons:FireServer("DamageRequest", targetChar.Humanoid, damage, isHead, hitPart,
+                                            hitPart.Position)
+                                    end
+                                end
+                            end
+                        end
+                    elseif IsHitmark() then
+                        local hitPart = targetChar:FindFirstChild("Head") or
+                            targetChar:FindFirstChild("HumanoidRootPart")
+                        if hitPart and tick() - lastTriggerClick > 0.01 then
+                            lastTriggerClick = tick()
+                            local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
+                            local Gun2 = BridgeNet2.ClientBridge("Gun2")
+                            local cam = workspace.CurrentCamera
 
-                    if mode == "Legit" then
-                        -- Check if active weapon is automatic
+                            -- Instant Kill (multiple remote shots with unique timestamps/hitIds)
+                            for i = 1, 3 do
+                                Gun2:Fire({
+                                    ["hitType"] = "Hit",
+                                    ["char"] = targetChar,
+                                    ["hitPart"] = hitPart,
+                                    ["hitPosition"] = hitPart.Position,
+                                    ["cameraDir"] = cam.CFrame.LookVector,
+                                    ["cameraPos"] = cam.CFrame.Position,
+                                    ["timestamp"] = time() + (i * 0.001),
+                                    ["hitId"] = tick() + i
+                                })
+                            end
+                        end
+                    else
+                        -- Fallback to fast click if not Duelist or Hitmark
                         local isAuto = false
                         if activeTool then
                             isAuto = activeTool:GetAttribute("Automatic") == true
@@ -9007,94 +8969,23 @@ end
                         if isAuto then
                             PressTrigger()
                         else
-                            -- Semi-automatic: tap weapon
-                            ReleaseTrigger() -- Make sure we release before tapping again
-                            local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
-                            if tick() - lastTriggerClick > delay then
+                            ReleaseTrigger()
+                            if tick() - lastTriggerClick > 0.01 then
                                 lastTriggerClick = tick()
                                 TapTrigger()
                             end
                         end
-                    elseif mode == "Blatant" then
-                        ReleaseTrigger()
-                        -- Blatant mode: instantly hit via remote/process if Duelist or Hitmark, otherwise click fast
-                        if IsDuelist() then
-                            local tool = activeTool
-                            local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
-                                game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
-                            if Weapons and tool then
-                                local hitPart = targetChar:FindFirstChild("Head") or
-                                    targetChar:FindFirstChild("HumanoidRootPart")
-                                if hitPart and targetChar:FindFirstChild("Humanoid") and targetChar.Humanoid.Health > 0 then
-                                    if tick() - lastTriggerClick > 0.01 then
-                                        lastTriggerClick = tick()
-                                        local isHead = hitPart.Name == "Head"
-                                        local dmgAttr = isHead and "HeadDamage" or "Damage"
-                                        local damage = tool:GetAttribute(dmgAttr) or (isHead and 150 or 100)
-
-                                        -- Instant Kill (multiple remote shots paired with Process)
-                                        for i = 1, 3 do
-                                            Weapons:FireServer("Process")
-                                            Weapons:FireServer("DamageRequest", targetChar.Humanoid, damage, isHead, hitPart,
-                                                hitPart.Position)
-                                        end
-                                    end
-                                end
-                            end
-                        elseif IsHitmark() then
-                            local hitPart = targetChar:FindFirstChild("Head") or
-                                targetChar:FindFirstChild("HumanoidRootPart")
-                            if hitPart and tick() - lastTriggerClick > 0.01 then
-                                lastTriggerClick = tick()
-                                local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
-                                local Gun2 = BridgeNet2.ClientBridge("Gun2")
-                                local cam = workspace.CurrentCamera
-
-                                -- Instant Kill (multiple remote shots with unique timestamps/hitIds)
-                                for i = 1, 3 do
-                                    Gun2:Fire({
-                                        ["hitType"] = "Hit",
-                                        ["char"] = targetChar,
-                                        ["hitPart"] = hitPart,
-                                        ["hitPosition"] = hitPart.Position,
-                                        ["cameraDir"] = cam.CFrame.LookVector,
-                                        ["cameraPos"] = cam.CFrame.Position,
-                                        ["timestamp"] = time() + (i * 0.001),
-                                        ["hitId"] = tick() + i
-                                    })
-                                end
-                            end
-                        else
-                            -- Fallback to fast click if not Duelist or Hitmark
-                            local isAuto = false
-                            if activeTool then
-                                isAuto = activeTool:GetAttribute("Automatic") == true
-                                    or activeTool:GetAttribute("Auto") == true
-                                    or activeTool:GetAttribute("FireMode") == "Auto"
-                                    or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
-                            end
-
-                            if isAuto then
-                                PressTrigger()
-                            else
-                                ReleaseTrigger()
-                                if tick() - lastTriggerClick > 0.01 then
-                                    lastTriggerClick = tick()
-                                    TapTrigger()
-                                end
-                            end
-                        end
                     end
-                else
-                    -- No target: release trigger immediately
-                    ReleaseTrigger()
                 end
             else
-                -- Triggerbot disabled: release trigger immediately
+                -- No target: release trigger immediately
                 ReleaseTrigger()
             end
+        else
+            -- Triggerbot disabled: release trigger immediately
+            ReleaseTrigger()
         end
-    end)
-end)()
-print("1p931")
+    end
+end)
+
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
