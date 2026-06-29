@@ -1,3 +1,5 @@
+-- ══════════════════ EXECUTOR COMPATIBILITY SHIM ══════════════════
+-- Medium executor doesn't expose getgenv() — polyfill it so the script loads.
 if not getgenv then
     local _sharedEnv = {}
     getgenv = function() return _sharedEnv end
@@ -9011,3 +9013,5 @@ task.spawn(function()
 end)
 
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
+
+print("1")
