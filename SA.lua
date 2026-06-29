@@ -151,44 +151,70 @@ local GAME_IDS = {
 }
 
 -- Game-specific check helpers
-local function IsMurderVsSheriff()
-    local pid = game.PlaceId
-    return GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid]
-end
+_G.DETEC_GAMES = _G.DETEC_GAMES or {
+    MVS = false,
+    Hitmark = false,
+    Bronx = false,
+    Duelist = false
+}
 
-local function IsHitmark()
+local function DetectGame()
     local pid = game.PlaceId
-    return GAME_IDS.Hitmark[pid] ~= nil
-end
-
-local function IsBronxDuels()
-    local pid = game.PlaceId
-    if GAME_IDS.BronxDuels and GAME_IDS.BronxDuels[pid] then
-        return true
+    
+    -- Check Murder Vs Sheriff
+    if GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid] then
+        _G.DETEC_GAMES.MVS = true
+        return
     end
-    -- Fallback: Detect by checking ReplicatedStorage unique combat structures
+
+    -- Check Hitmark
+    if GAME_IDS.Hitmark[pid] ~= nil then
+        _G.DETEC_GAMES.Hitmark = true
+        return
+    end
+
+    -- Check Bronx Duels
+    if GAME_IDS.BronxDuels and GAME_IDS.BronxDuels[pid] then
+        _G.DETEC_GAMES.Bronx = true
+        return
+    end
+
+    -- Check Duelist
+    if GAME_IDS.Duelist and GAME_IDS.Duelist[pid] ~= nil then
+        _G.DETEC_GAMES.Duelist = true
+        return
+    end
+
+    -- Delayed checks (wait for replication)
     local rs = game:GetService("ReplicatedStorage")
+    
+    -- Check Bronx Duels fallbacks
     local remotes = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
     if remotes and remotes:FindFirstChild("KnifeKill") then
-        return true
+        _G.DETEC_GAMES.Bronx = true
+        return
     end
-    return false
-end
 
-function IsDuelist()
-    local pid = game.PlaceId
-    if GAME_IDS.Duelist and GAME_IDS.Duelist[pid] ~= nil then
-        return true
-    end
-    local rs = game:GetService("ReplicatedStorage")
+    -- Check Duelist fallbacks
     if rs:FindFirstChild("SmurklesLib") and rs:FindFirstChild("Events") and rs.Events:FindFirstChild("Weapons") then
-        if GAME_IDS.Duelist then
-            GAME_IDS.Duelist[pid] = true
-        end
-        return true
+        _G.DETEC_GAMES.Duelist = true
+        return
     end
-    return false
+
+    -- Async / slower check for Duelist (crucial for mobile loading times)
+    local foundSmurkles = rs:WaitForChild("SmurklesLib", 3)
+    if foundSmurkles then
+        _G.DETEC_GAMES.Duelist = true
+        GAME_IDS.Duelist[pid] = true
+        return
+    end
 end
+DetectGame()
+
+local function IsMurderVsSheriff() return _G.DETEC_GAMES.MVS end
+local function IsHitmark() return _G.DETEC_GAMES.Hitmark end
+local function IsBronxDuels() return _G.DETEC_GAMES.Bronx end
+local function IsDuelist() return _G.DETEC_GAMES.Duelist end
 
 local function IsMurderVsSheriffLobby()
     return GAME_IDS.MurderVsSheriff.Lobbies[game.PlaceId]
@@ -2012,7 +2038,7 @@ do
                     local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
                     local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
                     if fillFrame and knobFrame then
-                        local rel = math.clamp((speedVal - 16) / (40 - 16), 0, 1)
+                        local rel = math.clamp((speedVal - 16) / (250 - 16), 0, 1)
                         fillFrame.Size = UDim2.new(rel, 0, 1, 0)
                         local knobS = IS_MOBILE and 18 or 12
                         knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
@@ -2533,15 +2559,10 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
     cbCheck.Visible = checked
 
     local rightOffset = -35
-    local extra = 0
     if hasKeybind and not IS_MOBILE then
-        extra = extra + 58
-    end
-    if colorCount and colorCount > 0 then
-        extra = extra + (colorCount * 28)
-    end
-    if extra > 0 then
-        rightOffset = -(extra + 38)
+        rightOffset = -94
+    elseif colorCount and colorCount > 0 then
+        rightOffset = -(colorCount * 28 + 38)
     end
 
     local lbl = NewLabel(row, label, 13, TEXT)
@@ -3744,7 +3765,6 @@ local function applyUITheme(name)
     local t = UI_THEMES[name]
     if not t then return end
     currentUITheme = name
-    local oldAccent = ACCENT
     ACCENT = t.accent
 
     -- Smooth Blend Transition (Cinematic Fade)
@@ -3775,66 +3795,52 @@ local function applyUITheme(name)
     end
 
     if currentNav then
-        pcall(function()
-            -- Use instant update (0s) to avoid race condition with tab-switch tweens
-            currentNav.sym.ImageColor3 = t.accent
-            currentNav.lbl.TextColor3 = t.accent
-            currentNav.dot.BackgroundColor3 = t.accent
-        end)
+        -- Use instant update (0s) to avoid race condition with tab-switch tweens
+        currentNav.sym.ImageColor3 = t.accent
+        currentNav.lbl.TextColor3 = t.accent
+        currentNav.dot.BackgroundColor3 = t.accent
     end
 
     for _, f in ipairs(accentFills) do
-        pcall(function()
-            if f and f.Parent then
-                if f:IsA("UIGradient") then
-                    f.Color = ColorSequence.new(t.side, t.bg)
-                else
-                    Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
-                end
-            end
-        end)
+        if f:IsA("UIGradient") then
+            f.Color = ColorSequence.new(t.side, t.bg)
+        else
+            Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
+        end
     end
 
     for _, v in ipairs(SG:GetDescendants()) do
-        pcall(function()
-            if v and v.Parent then
-                if v:IsA("TextLabel") then
-                    if v.Name == "SectionTitle" or v.TextColor3 == oldAccent then
-                        Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
-                    end
-                elseif v:IsA("ScrollingFrame") then
-                    Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
-                elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == oldAccent) then
-                    Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
-                end
+        if v:IsA("TextLabel") then
+            if v.Name == "SectionTitle" or v.TextColor3 == ACCENT then
+                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
             end
-        end)
+        elseif v:IsA("ScrollingFrame") then
+            Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
+        elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == ACCENT) then
+            Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
+        end
     end
 
-    for _, ul in ipairs(tabLines) do pcall(function() Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end) end
-    if tabBtns[activeTabIdx] then pcall(function() Tw(tabBtns[activeTabIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end) end
-    for _, ul in ipairs(stLines) do pcall(function() Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end) end
-    if stBtns[activeStIdx] then pcall(function() Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end) end
-    for _, ul in ipairs(vsLines) do pcall(function() Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end) end
-    if vsBtns[activeVsIdx] then pcall(function() Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end) end
+    for _, ul in ipairs(tabLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+    if tabBtns[activeTabIdx] then Tw(tabBtns[activeTabIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+    for _, ul in ipairs(stLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+    if stBtns[activeStIdx] then Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+    for _, ul in ipairs(vsLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+    if vsBtns[activeVsIdx] then Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
     if _G.FLUX_CONFIG_TAB_THEME_SYNC then pcall(_G.FLUX_CONFIG_TAB_THEME_SYNC) end
 
     for _, v in ipairs(SG:GetDescendants()) do
-        pcall(function()
-            if v and v.Parent and v:IsA("TextLabel") and v.Text == "✓" then
-                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
-            end
-        end)
+        if v:IsA("TextLabel") and v.Text == "✓" then
+            Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+        end
     end
     -- Notifications
     for _, dat in pairs(activeNotifs) do
-        pcall(function()
-            Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
-            Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
-        end)
+        Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
+        Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
     end
     -- Watermark
-    pcall(function() Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent }) end)
+    Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
     -- Keybind HUD (lives in separate ScreenGui, must be updated manually)
     if _G.FLUX_KB_HUD_ACCENT_UPDATE then _G.FLUX_KB_HUD_ACCENT_UPDATE() end
     if _G.FLUX_PREFERENCES_REFRESH then pcall(_G.FLUX_PREFERENCES_REFRESH) end
@@ -5658,7 +5664,7 @@ do
 
 
     -- ══════════════════ CATEGORY CONTENT: SILENT AIM ══════════════════
-    ;(function()
+    ; (function()
         local SilentPage = tabPages[2]
         if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             local SLift = NewFrame(SilentPage, UDim2.new(0.53, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
@@ -5720,7 +5726,7 @@ do
             end, _G.SILENT_CFG.Keybind, function(k)
                 _G.SILENT_CFG.Keybind = k
             end)
-            
+
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
                 if silentCheck then
@@ -5987,7 +5993,7 @@ do
     end)()
 
     -- BUILD KILL AURA PAGE
-    ;(function()
+    ; (function()
         local KAPage = tabPages[3]
         if IsHitmark() or IsDuelist() then
             -- Column Containers for Horizontal Page Layout
@@ -6018,7 +6024,7 @@ do
             end, _G.KILLAURA_CFG.Keybind, function(k)
                 _G.KILLAURA_CFG.Keybind = k
             end)
-            
+
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
                 if kaCheck then
@@ -6088,35 +6094,38 @@ do
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
             -- [ TRIGGER BOT CARD ]
-            local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
-            TCard.LayoutOrder = 2
-            Corner(TCard, 8); Stroke(TCard, STROKE, 1)
-            local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
-            TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
+            local triggerCheck
+            if not IS_MOBILE then
+                local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
+                TCard.LayoutOrder = 2
+                Corner(TCard, 8); Stroke(TCard, STROKE, 1)
+                local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
+                TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local TLayout = Instance.new("UIListLayout", THolder)
-            TLayout.Padding = UDim.new(0, 6)
-            TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local TLayout = Instance.new("UIListLayout", THolder)
+                TLayout.Padding = UDim.new(0, 6)
+                TLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-            -- Checkbox and Keybind
-            _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
-            local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
-                _G.TRIGGERBOT_CFG.Enabled = v
-            end, _G.TRIGGERBOT_CFG.Keybind, function(k)
-                _G.TRIGGERBOT_CFG.Keybind = k
-            end)
-            triggerCheck.LayoutOrder = 1
+                -- Checkbox and Keybind
+                _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
+                triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
+                    _G.TRIGGERBOT_CFG.Enabled = v
+                end, _G.TRIGGERBOT_CFG.Keybind, function(k)
+                    _G.TRIGGERBOT_CFG.Keybind = k
+                end)
+                triggerCheck.LayoutOrder = 1
 
-            -- Dropdown
-            _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
-            local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            ddRowTB.LayoutOrder = 2
-            local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
-                _G.TRIGGERBOT_CFG.Mode = v
-                NOTIFY("Trigger Bot", "Mode: " .. v, 2)
-            end)
-            ddTB.Size = UDim2.new(1, 0, 1, 0)
+                -- Dropdown
+                _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+                local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                ddRowTB.LayoutOrder = 2
+                local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
+                    _G.TRIGGERBOT_CFG.Mode = v
+                    NOTIFY("Trigger Bot", "Mode: " .. v, 2)
+                end)
+                ddTB.Size = UDim2.new(1, 0, 1, 0)
+            end
 
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
@@ -8863,153 +8872,77 @@ local function FireWeapon()
     end
 end
 
-local isTriggerPressed = false
+(function()
+    local isTriggerPressed = false
 
-local function ReleaseTrigger()
-    if isTriggerPressed then
-        isTriggerPressed = false
+    local function ReleaseTrigger()
+        if isTriggerPressed then
+            isTriggerPressed = false
+            if _G.FireBind then
+                _G:FireBind("Shoot", false, false)
+            elseif mouse1release then
+                mouse1release()
+            end
+        end
+    end
+
+    local function PressTrigger()
+        if not isTriggerPressed then
+            isTriggerPressed = true
+            if _G.FireBind then
+                _G:FireBind("Shoot", true, false)
+            elseif mouse1press then
+                mouse1press()
+            end
+        end
+    end
+
+    local function TapTrigger()
         if _G.FireBind then
+            _G:FireBind("Shoot", true, false)
+            task.wait(0.01)
             _G:FireBind("Shoot", false, false)
-        elseif mouse1release then
+        elseif mouse1click then
+            mouse1click()
+        elseif mouse1press and mouse1release then
+            mouse1press()
+            task.wait(0.01)
             mouse1release()
         end
     end
-end
 
-local function PressTrigger()
-    if not isTriggerPressed then
-        isTriggerPressed = true
-        if _G.FireBind then
-            _G:FireBind("Shoot", true, false)
-        elseif mouse1press then
-            mouse1press()
-        end
-    end
-end
-
-local function TapTrigger()
-    if _G.FireBind then
-        _G:FireBind("Shoot", true, false)
-        task.wait(0.01)
-        _G:FireBind("Shoot", false, false)
-    elseif mouse1click then
-        mouse1click()
-    elseif mouse1press and mouse1release then
-        mouse1press()
-        task.wait(0.01)
-        mouse1release()
-    end
-end
-
-local lastTriggerClick = 0
-task.spawn(function()
-    while task.wait() do
-        if getgenv().FLUX_SESSION ~= MySession then
-            ReleaseTrigger()
-            break
-        end
-        if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
-            -- Dynamic weapon override for 100% long range accuracy (no spread, infinite range, no recoil)
-            local activeTool = nil
-            pcall(function()
-                local char = LP.Character
-                if char then
-                    local tool = char:FindFirstChildOfClass("Tool")
-                    if tool then
-                        activeTool = tool
-                        tool:SetAttribute("Range", 9999)
-                        tool:SetAttribute("Spread", 0)
-                        tool:SetAttribute("MinSpread", 0)
-                        tool:SetAttribute("MaxSpread", 0)
-                        tool:SetAttribute("Recoil", 0)
-                        tool:SetAttribute("AimRecoil", 0)
-                    end
-                end
-            end)
-
-            local targetChar = GetTriggerBotTarget()
-            if targetChar and _G.TRIGGERBOT_CFG.Mode == "Legit" and IS_MOBILE and IsDuelist() then
-                local char = LP.Character
-                if not (char and char:GetAttribute("Aiming") == true) then
-                    targetChar = nil
-                end
+    local lastTriggerClick = 0
+    task.spawn(function()
+        while task.wait() do
+            if getgenv().FLUX_SESSION ~= MySession then
+                ReleaseTrigger()
+                break
             end
-
-            if targetChar then
-                local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
-
-                if mode == "Legit" then
-                    -- Check if active weapon is automatic
-                    local isAuto = false
-                    if activeTool then
-                        isAuto = activeTool:GetAttribute("Automatic") == true
-                            or activeTool:GetAttribute("Auto") == true
-                            or activeTool:GetAttribute("FireMode") == "Auto"
-                            or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
-                    end
-
-                    if isAuto then
-                        PressTrigger()
-                    else
-                        -- Semi-automatic: tap weapon
-                        ReleaseTrigger() -- Make sure we release before tapping again
-                        local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
-                        if tick() - lastTriggerClick > delay then
-                            lastTriggerClick = tick()
-                            TapTrigger()
+            if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
+                -- Dynamic weapon override for 100% long range accuracy (no spread, infinite range, no recoil)
+                local activeTool = nil
+                pcall(function()
+                    local char = LP.Character
+                    if char then
+                        local tool = char:FindFirstChildOfClass("Tool")
+                        if tool then
+                            activeTool = tool
+                            tool:SetAttribute("Range", 9999)
+                            tool:SetAttribute("Spread", 0)
+                            tool:SetAttribute("MinSpread", 0)
+                            tool:SetAttribute("MaxSpread", 0)
+                            tool:SetAttribute("Recoil", 0)
+                            tool:SetAttribute("AimRecoil", 0)
                         end
                     end
-                elseif mode == "Blatant" then
-                    ReleaseTrigger()
-                    -- Blatant mode: instantly hit via remote/process if Duelist or Hitmark, otherwise click fast
-                    if IsDuelist() then
-                        local tool = activeTool
-                        local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
-                            game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
-                        if Weapons and tool then
-                            local hitPart = targetChar:FindFirstChild("Head") or
-                                targetChar:FindFirstChild("HumanoidRootPart")
-                            if hitPart and targetChar:FindFirstChild("Humanoid") and targetChar.Humanoid.Health > 0 then
-                                if tick() - lastTriggerClick > 0.01 then
-                                    lastTriggerClick = tick()
-                                    local isHead = hitPart.Name == "Head"
-                                    local dmgAttr = isHead and "HeadDamage" or "Damage"
-                                    local damage = tool:GetAttribute(dmgAttr) or (isHead and 150 or 100)
+                end)
 
-                                    -- Instant Kill (multiple remote shots paired with Process)
-                                    for i = 1, 3 do
-                                        Weapons:FireServer("Process")
-                                        Weapons:FireServer("DamageRequest", targetChar.Humanoid, damage, isHead, hitPart,
-                                            hitPart.Position)
-                                    end
-                                end
-                            end
-                        end
-                    elseif IsHitmark() then
-                        local hitPart = targetChar:FindFirstChild("Head") or
-                            targetChar:FindFirstChild("HumanoidRootPart")
-                        if hitPart and tick() - lastTriggerClick > 0.01 then
-                            lastTriggerClick = tick()
-                            local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
-                            local Gun2 = BridgeNet2.ClientBridge("Gun2")
-                            local cam = workspace.CurrentCamera
+                local targetChar = GetTriggerBotTarget()
+                if targetChar then
+                    local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
 
-                            -- Instant Kill (multiple remote shots with unique timestamps/hitIds)
-                            for i = 1, 3 do
-                                Gun2:Fire({
-                                    ["hitType"] = "Hit",
-                                    ["char"] = targetChar,
-                                    ["hitPart"] = hitPart,
-                                    ["hitPosition"] = hitPart.Position,
-                                    ["cameraDir"] = cam.CFrame.LookVector,
-                                    ["cameraPos"] = cam.CFrame.Position,
-                                    ["timestamp"] = time() + (i * 0.001),
-                                    ["hitId"] = tick() + i
-                                })
-                            end
-                        end
-                    else
-                        -- Fallback to fast click if not Duelist or Hitmark
+                    if mode == "Legit" then
+                        -- Check if active weapon is automatic
                         local isAuto = false
                         if activeTool then
                             isAuto = activeTool:GetAttribute("Automatic") == true
@@ -9021,24 +8954,95 @@ task.spawn(function()
                         if isAuto then
                             PressTrigger()
                         else
-                            ReleaseTrigger()
-                            if tick() - lastTriggerClick > 0.01 then
+                            -- Semi-automatic: tap weapon
+                            ReleaseTrigger() -- Make sure we release before tapping again
+                            local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
+                            if tick() - lastTriggerClick > delay then
                                 lastTriggerClick = tick()
                                 TapTrigger()
                             end
                         end
+                    elseif mode == "Blatant" then
+                        ReleaseTrigger()
+                        -- Blatant mode: instantly hit via remote/process if Duelist or Hitmark, otherwise click fast
+                        if IsDuelist() then
+                            local tool = activeTool
+                            local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
+                                game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
+                            if Weapons and tool then
+                                local hitPart = targetChar:FindFirstChild("Head") or
+                                    targetChar:FindFirstChild("HumanoidRootPart")
+                                if hitPart and targetChar:FindFirstChild("Humanoid") and targetChar.Humanoid.Health > 0 then
+                                    if tick() - lastTriggerClick > 0.01 then
+                                        lastTriggerClick = tick()
+                                        local isHead = hitPart.Name == "Head"
+                                        local dmgAttr = isHead and "HeadDamage" or "Damage"
+                                        local damage = tool:GetAttribute(dmgAttr) or (isHead and 150 or 100)
+
+                                        -- Instant Kill (multiple remote shots paired with Process)
+                                        for i = 1, 3 do
+                                            Weapons:FireServer("Process")
+                                            Weapons:FireServer("DamageRequest", targetChar.Humanoid, damage, isHead, hitPart,
+                                                hitPart.Position)
+                                        end
+                                    end
+                                end
+                            end
+                        elseif IsHitmark() then
+                            local hitPart = targetChar:FindFirstChild("Head") or
+                                targetChar:FindFirstChild("HumanoidRootPart")
+                            if hitPart and tick() - lastTriggerClick > 0.01 then
+                                lastTriggerClick = tick()
+                                local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
+                                local Gun2 = BridgeNet2.ClientBridge("Gun2")
+                                local cam = workspace.CurrentCamera
+
+                                -- Instant Kill (multiple remote shots with unique timestamps/hitIds)
+                                for i = 1, 3 do
+                                    Gun2:Fire({
+                                        ["hitType"] = "Hit",
+                                        ["char"] = targetChar,
+                                        ["hitPart"] = hitPart,
+                                        ["hitPosition"] = hitPart.Position,
+                                        ["cameraDir"] = cam.CFrame.LookVector,
+                                        ["cameraPos"] = cam.CFrame.Position,
+                                        ["timestamp"] = time() + (i * 0.001),
+                                        ["hitId"] = tick() + i
+                                    })
+                                end
+                            end
+                        else
+                            -- Fallback to fast click if not Duelist or Hitmark
+                            local isAuto = false
+                            if activeTool then
+                                isAuto = activeTool:GetAttribute("Automatic") == true
+                                    or activeTool:GetAttribute("Auto") == true
+                                    or activeTool:GetAttribute("FireMode") == "Auto"
+                                    or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
+                            end
+
+                            if isAuto then
+                                PressTrigger()
+                            else
+                                ReleaseTrigger()
+                                if tick() - lastTriggerClick > 0.01 then
+                                    lastTriggerClick = tick()
+                                    TapTrigger()
+                                end
+                            end
+                        end
                     end
+                else
+                    -- No target: release trigger immediately
+                    ReleaseTrigger()
                 end
             else
-                -- No target: release trigger immediately
+                -- Triggerbot disabled: release trigger immediately
                 ReleaseTrigger()
             end
-        else
-            -- Triggerbot disabled: release trigger immediately
-            ReleaseTrigger()
         end
-    end
-end)
+    end)
+end)()
 
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
-print("9901")
+print("0001")
