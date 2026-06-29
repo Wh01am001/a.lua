@@ -7472,6 +7472,59 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
     end)()
 
+    -- Direct hookfunction for workspace.Raycast (100% stable on all mobile executors)
+    pcall(function()
+        local oldRaycast
+        oldRaycast = hookfunction(workspace.Raycast, function(self, ...)
+            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+            if not checkcaller() and hookActive and self == workspace and not ignoreSilentRay then
+                local args = table.pack(...)
+                -- Bullet raycast detection
+                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
+                    local chance = math.random(1, 100)
+                    if chance <= (_G.SILENT_CFG.HitChance or 100) then
+                        local target = _G.KILLAURA_ACTIVE_TARGET or (_G.FLUX_GET_CACHED_TARGET and _G.FLUX_GET_CACHED_TARGET() or nil)
+                        if target then
+                            local hitPos = nil
+                            if target:IsA("BasePart") then
+                                hitPos = target.Position
+                            else
+                                local humT = target:FindFirstChildOfClass("Humanoid")
+                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
+                                if rootT then
+                                    local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                    hitPos = tp and tp.Position or rootT.Position
+                                end
+                            end
+
+                            if hitPos then
+                                args[2] = (hitPos - args[1]).Unit * 10000
+
+                                local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
+                                    (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
+                                    (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
+                                if doWallbang then
+                                    local params = args[3]
+                                    local newParams = RaycastParams.new()
+                                    newParams.FilterType = Enum.RaycastFilterType.Include
+                                    newParams.FilterDescendantsInstances = { target }
+                                    if params and typeof(params) == "RaycastParams" then
+                                        newParams.IgnoreWater = params.IgnoreWater
+                                        newParams.CollisionGroup = params.CollisionGroup
+                                    end
+                                    args[3] = newParams
+                                end
+                            end
+                        end
+                    end
+                end
+                return oldRaycast(self, table.unpack(args, 1, args.n))
+            end
+            return oldRaycast(self, ...)
+        end)
+    end)
+
     _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
         local hrp = target:FindFirstChild("HumanoidRootPart")
@@ -9043,6 +9096,5 @@ end
         end
     end)
 end)()
-
+print("1p931")
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
-print("0001")
