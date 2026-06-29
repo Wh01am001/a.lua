@@ -1,3 +1,5 @@
+-- ══════════════════ EXECUTOR COMPATIBILITY SHIM ══════════════════
+-- Medium executor doesn't expose getgenv() — polyfill it so the script loads.
 if not getgenv then
     local _sharedEnv = {}
     getgenv = function() return _sharedEnv end
