@@ -643,7 +643,7 @@ local PICKER_MAIN     = nil
 
 -- State Variables
 -- UI state variables (initially set at top)
-local IS_MOBILE       = UIS.TouchEnabled and not UIS.KeyboardEnabled
+local IS_MOBILE       = UIS.TouchEnabled and not UIS.MouseEnabled
 local curW            = IS_MOBILE and 600 or 900
 local curH            = IS_MOBILE and 350 or 530
 local SIDE_W          = IS_MOBILE and 160 or 220
@@ -7291,149 +7291,176 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     -- NAMECALL INTERCEPTION SYSTEM (Undetectable Wallbang)
     -- ═══════════════════════════════════════════════════════
 
-    local mt = getrawmetatable(game)
-    local oldNamecall = mt.__namecall
-    local oldIndex = mt.__index
-    setreadonly(mt, false)
+    (function()
+        local oldNamecall, oldIndex
 
-    -- Cache for target to avoid recalculating every frame
-    local cachedTarget = nil
-    local cacheExpire = 0
-    local isGettingTarget = false
+        -- Cache for target to avoid recalculating every frame
+        local cachedTarget = nil
+        local cacheExpire = 0
+        local isGettingTarget = false
 
-    local function GetCachedTarget()
-        if isGettingTarget then return nil end
-        isGettingTarget = true
-        local now = tick()
-        if now > cacheExpire or not cachedTarget then
-            local ok, res = pcall(GetSilentTarget)
-            isGettingTarget = false
-            if ok then
-                cachedTarget = res
-                cacheExpire = now + 0.05 -- 50ms cache
+        local function GetCachedTarget()
+            if isGettingTarget then return nil end
+            isGettingTarget = true
+            local now = tick()
+            if now > cacheExpire or not cachedTarget then
+                local ok, res = pcall(GetSilentTarget)
+                isGettingTarget = false
+                if ok then
+                    cachedTarget = res
+                    cacheExpire = now + 0.05 -- 50ms cache
+                else
+                    warn("Error in GetSilentTarget: " .. tostring(res))
+                    return nil
+                end
             else
-                warn("Error in GetSilentTarget: " .. tostring(res))
-                return nil
+                isGettingTarget = false
             end
-        else
-            isGettingTarget = false
+            return cachedTarget
         end
-        return cachedTarget
-    end
 
-    mt.__index = function(self, k)
-        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-        if not checkcaller() and hookActive then
-            if typeof(self) == "Instance" and self:IsA("Camera") then
-                if k == "CFrame" or k == "cf" then
-                    -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
-                    if IsHitmark() or IsBronxDuels() or IsDuelist() then
-                        return oldIndex(self, k)
-                    end
-
-                    -- Prevent Aimlock: Do not spoof CFrame if a camera script is asking for it
-                    local caller = getcallingscript()
-                    if caller then
-                        local cName = caller.Name
-                        if cName == "CameraModule" or cName == "BaseCamera" or cName == "ClassicCamera" or cName == "CameraUtils" or cName == "ZoomController" or cName == "PlayerModule" then
+        local function customIndex(self, k)
+            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+            if not checkcaller() and hookActive then
+                if typeof(self) == "Instance" and self:IsA("Camera") then
+                    if k == "CFrame" or k == "cf" then
+                        -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
+                        if IsHitmark() or IsBronxDuels() or IsDuelist() then
                             return oldIndex(self, k)
                         end
-                    end
 
-                    local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
-                    if target then
-                        local hitPos = nil
-                        if target:IsA("BasePart") then
-                            hitPos = target.Position
-                        else
-                            local humT = target:FindFirstChildOfClass("Humanoid")
-                            local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
-                                target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
-                            if rootT then
-                                local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
-                                hitPos = tp and tp.Position or rootT.Position
+                        -- Prevent Aimlock: Do not spoof CFrame if a camera script is asking for it
+                        local caller = getcallingscript()
+                        if caller then
+                            local cName = caller.Name
+                            if cName == "CameraModule" or cName == "BaseCamera" or cName == "ClassicCamera" or cName == "CameraUtils" or cName == "ZoomController" or cName == "PlayerModule" then
+                                return oldIndex(self, k)
                             end
                         end
 
-                        if hitPos then
-                            local orgCFrame = oldIndex(self, k)
-                            local spoofedDir = (hitPos - orgCFrame.Position).Unit
-                            return CFrame.new(orgCFrame.Position, orgCFrame.Position + spoofedDir)
+                        local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+                        if target then
+                            local hitPos = nil
+                            if target:IsA("BasePart") then
+                                hitPos = target.Position
+                            else
+                                local humT = target:FindFirstChildOfClass("Humanoid")
+                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
+                                if rootT then
+                                    local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                    hitPos = tp and tp.Position or rootT.Position
+                                end
+                            end
+
+                            if hitPos then
+                                local orgCFrame = oldIndex(self, k)
+                                local spoofedDir = (hitPos - orgCFrame.Position).Unit
+                                return CFrame.new(orgCFrame.Position, orgCFrame.Position + spoofedDir)
+                            end
                         end
                     end
                 end
             end
-        end
-        return oldIndex(self, k)
-    end
-
-    mt.__namecall = function(self, ...)
-        local method = getnamecallmethod()
-        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-
-        -- Bypass Bronx Duels Anti-Cheat (AD event)
-        if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
-            return
+            return oldIndex(self, k)
         end
 
-        -- Intercept Raycast for Silent Aim & Wallbang
-        if hookActive and method == "Raycast" and typeof(self) == "Instance" and self == workspace and not checkcaller() and not ignoreSilentRay then
-            local args = table.pack(...)
+        local function customNamecall(self, ...)
+            local method = getnamecallmethod()
+            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
 
-            -- Usually bullets have a very long direction vector
-            if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
-                local chance = math.random(1, 100)
-                if chance <= (_G.SILENT_CFG.HitChance or 100) then
-                    local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+            -- Bypass Bronx Duels Anti-Cheat (AD event)
+            if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
+                return
+            end
 
-                    if target then
-                        local hitPos = nil
-                        if target:IsA("BasePart") then
-                            hitPos = target.Position
-                        else
-                            local humT = target:FindFirstChildOfClass("Humanoid")
-                            local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
-                                target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
+            -- Intercept Raycast for Silent Aim & Wallbang
+            if hookActive and method == "Raycast" and typeof(self) == "Instance" and self == workspace and not checkcaller() and not ignoreSilentRay then
+                local args = table.pack(...)
 
-                            if rootT then
-                                local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
-                                hitPos = tp and tp.Position or rootT.Position
-                            end
-                        end
+                -- Usually bullets have a very long direction vector
+                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
+                    local chance = math.random(1, 100)
+                    if chance <= (_G.SILENT_CFG.HitChance or 100) then
+                        local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
 
-                        if hitPos then
-                            -- Redirect the ray direction towards the target
-                            args[2] = (hitPos - args[1]).Unit * 10000
+                        if target then
+                            local hitPos = nil
+                            if target:IsA("BasePart") then
+                                hitPos = target.Position
+                            else
+                                local humT = target:FindFirstChildOfClass("Humanoid")
+                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
 
-                            -- Handle Wallbang
-                            local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
-                                (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
-                                (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
-                            if doWallbang then
-                                local params = args[3]
-                                local newParams = RaycastParams.new()
-                                newParams.FilterType = Enum.RaycastFilterType.Include
-                                newParams.FilterDescendantsInstances = { target }
-                                if params and typeof(params) == "RaycastParams" then
-                                    newParams.IgnoreWater = params.IgnoreWater
-                                    newParams.CollisionGroup = params.CollisionGroup
+                                if rootT then
+                                    local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                    hitPos = tp and tp.Position or rootT.Position
                                 end
-                                args[3] = newParams
+                            end
+
+                            if hitPos then
+                                -- Redirect the ray direction towards the target
+                                args[2] = (hitPos - args[1]).Unit * 10000
+
+                                -- Handle Wallbang
+                                local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
+                                    (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
+                                    (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
+                                if doWallbang then
+                                    local params = args[3]
+                                    local newParams = RaycastParams.new()
+                                    newParams.FilterType = Enum.RaycastFilterType.Include
+                                    newParams.FilterDescendantsInstances = { target }
+                                    if params and typeof(params) == "RaycastParams" then
+                                        newParams.IgnoreWater = params.IgnoreWater
+                                        newParams.CollisionGroup = params.CollisionGroup
+                                    end
+                                    args[3] = newParams
+                                end
                             end
                         end
                     end
                 end
+
+                setnamecallmethod(method)
+                return oldNamecall(self, table.unpack(args, 1, args.n))
             end
 
             setnamecallmethod(method)
-            return oldNamecall(self, table.unpack(args, 1, args.n))
+            return oldNamecall(self, ...)
         end
 
-        setnamecallmethod(method)
-        return oldNamecall(self, ...)
-    end
-
-    setreadonly(mt, true)
+        if hookmetamethod then
+            local success1, err1 = pcall(function()
+                oldIndex = hookmetamethod(game, "__index", function(self, k)
+                    return customIndex(self, k)
+                end)
+            end)
+            local success2, err2 = pcall(function()
+                oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+                    return customNamecall(self, ...)
+                end)
+            end)
+            if not success1 or not success2 then
+                local mt = getrawmetatable(game)
+                oldNamecall = mt.__namecall
+                oldIndex = mt.__index
+                setreadonly(mt, false)
+                mt.__index = customIndex
+                mt.__namecall = customNamecall
+                setreadonly(mt, true)
+            end
+        else
+            local mt = getrawmetatable(game)
+            oldNamecall = mt.__namecall
+            oldIndex = mt.__index
+            setreadonly(mt, false)
+            mt.__index = customIndex
+            mt.__namecall = customNamecall
+            setreadonly(mt, true)
+        end
+    end)()
 
     _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
@@ -9013,5 +9040,4 @@ task.spawn(function()
 end)
 
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
-
-print("1")
+print("V1.3")
