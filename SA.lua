@@ -1,5 +1,3 @@
--- ══════════════════ EXECUTOR COMPATIBILITY SHIM ══════════════════
--- Medium executor doesn't expose getgenv() — polyfill it so the script loads.
 if not getgenv then
     local _sharedEnv = {}
     getgenv = function() return _sharedEnv end
@@ -3443,7 +3441,7 @@ do
 
         prefScroll.ClipsDescendants = true
 
-        local ignoreCard = NewFrame(prefScroll, UDim2.new(0.98, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
+        local ignoreCard = NewFrame(prefScroll, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
         Corner(ignoreCard, 8)
         Stroke(ignoreCard, STROKE, 1)
 
@@ -7165,6 +7163,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     end)
 
     local function GetSilentTarget()
+        local cam = workspace.CurrentCamera
+        if not cam then return nil end
         local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
         local refPos = IS_MOBILE and center or UIS:GetMouseLocation()
         local target = nil
