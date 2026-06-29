@@ -7602,14 +7602,13 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end)
         end
 
-        -- [ SILENT AIM: Intercept DamageRequest for Duelist ]
-        -- Duelist uses Weapons:FireServer("DamageRequest", humanoid, damage, isHead, hitPart, hitPos)
-        -- We redirect hitPart and hitPos to the Silent Aim target.
-        if self.Name == "Weapons" and _G.SILENT_CFG and _G.SILENT_CFG.Enabled then
+        -- [ SILENT AIM for Duelist: Intercept 'Process' event ]
+        -- In Duelist, Weapons:FireServer("Process") is called EVERY time the player shoots.
+        -- We hook it to also send DamageRequest to the silent aim target, regardless of where they aimed.
+        if self.Name == "Weapons" and _G.SILENT_CFG and _G.SILENT_CFG.Enabled and IsDuelist() then
             local args = table.pack(...)
-            -- args[1] = event name ("DamageRequest"), args[2] = humanoid, args[3] = damage,
-            -- args[4] = isHead, args[5] = hitPart, args[6] = hitPos
-            if args[1] == "DamageRequest" then
+            if args[1] == "Process" then
+                -- Find the silent aim target
                 local silentTarget = GetCachedTarget()
                 if silentTarget then
                     local partName = _G.SILENT_CFG.TargetPart or "Head"
@@ -7617,17 +7616,22 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                         local parts = {"Head", "UpperTorso", "HumanoidRootPart"}
                         partName = parts[math.random(1, #parts)]
                     end
-                    local newHitPart = silentTarget:FindFirstChild(partName)
+                    local hitPart = silentTarget:FindFirstChild(partName)
                         or silentTarget:FindFirstChild("Head")
                         or silentTarget:FindFirstChild("HumanoidRootPart")
-                    local newHum = silentTarget:FindFirstChildOfClass("Humanoid")
-                    if newHitPart and newHum and newHum.Health > 0 then
-                        local isHead = newHitPart.Name == "Head"
-                        args[2] = newHum          -- redirect humanoid
-                        args[4] = isHead           -- update isHead flag
-                        args[5] = newHitPart       -- redirect hitPart
-                        args[6] = newHitPart.Position -- redirect hitPos
-                        return _G.FLUX_OLD_FIRESERVER(self, table.unpack(args, 1, args.n))
+                    local hum = silentTarget:FindFirstChildOfClass("Humanoid")
+                    if hitPart and hum and hum.Health > 0 then
+                        -- Get damage from tool
+                        local tool = LP.Character and LP.Character:FindFirstChildOfClass("Tool")
+                        local isHead = hitPart.Name == "Head"
+                        local dmgAttr = isHead and "HeadDamage" or "Damage"
+                        local damage = (tool and tool:GetAttribute(dmgAttr)) or (isHead and 150 or 100)
+                        -- Send the redirected damage immediately after Process
+                        task.defer(function()
+                            pcall(function()
+                                _G.FLUX_OLD_FIRESERVER(self, "DamageRequest", hum, damage, isHead, hitPart, hitPart.Position)
+                            end)
+                        end)
                     end
                 end
             end
