@@ -643,7 +643,7 @@ local PICKER_MAIN     = nil
 
 -- State Variables
 -- UI state variables (initially set at top)
-local IS_MOBILE       = UIS.TouchEnabled and not UIS.MouseEnabled
+local IS_MOBILE       = UIS.TouchEnabled
 local curW            = IS_MOBILE and 600 or 900
 local curH            = IS_MOBILE and 350 or 530
 local SIDE_W          = IS_MOBILE and 160 or 220
@@ -7318,6 +7318,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
             return cachedTarget
         end
+        _G.FLUX_GET_CACHED_TARGET = GetCachedTarget
 
         local function customIndex(self, k)
             local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
@@ -7509,7 +7510,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return false
         end
 
-        local target = GetCachedTarget()
+        local target = _G.FLUX_GET_CACHED_TARGET and _G.FLUX_GET_CACHED_TARGET() or nil
         if not target then
             return false
         end
@@ -9040,4 +9041,4 @@ task.spawn(function()
 end)
 
 NOTIFY("WH01AM", "AIMBOT & SILENT SYSTEM LOADED!", 4)
-print("V1.3")
+print("9901")
