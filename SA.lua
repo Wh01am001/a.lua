@@ -7138,15 +7138,17 @@ if not (IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist()) the
     end
 end
 if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
-    silentFovCircle = Drawing.new("Circle")
-    silentFovCircle.Thickness = 1.5
-    silentFovCircle.NumSides = 60
-    silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-    silentFovCircle.Filled = false
-    silentFovCircle.Visible = false
-    silentFovCircle.ZIndex = 999
-    silentFovCircle.Transparency = 1
-    silentFovCircle.Color = Color3.fromRGB(255, 255, 255)
+    pcall(function()
+        silentFovCircle = Drawing.new("Circle")
+        silentFovCircle.Thickness = 1.5
+        silentFovCircle.NumSides = 60
+        silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
+        silentFovCircle.Filled = false
+        silentFovCircle.Visible = false
+        silentFovCircle.ZIndex = 999
+        silentFovCircle.Transparency = 1
+        silentFovCircle.Color = Color3.fromRGB(255, 255, 255)
+    end)
 
     local silentFovConn
     silentFovConn = game:GetService("RunService").RenderStepped:Connect(function()
@@ -7295,11 +7297,14 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     -- ═══════════════════════════════════════════════════════
     -- NAMECALL INTERCEPTION SYSTEM (Undetectable Wallbang)
     -- ═══════════════════════════════════════════════════════
-
-    local mt = getrawmetatable(game)
-    local oldNamecall = mt.__namecall
-    local oldIndex = mt.__index
-    setreadonly(mt, false)
+    local mt, oldNamecall, oldIndex
+    pcall(function()
+        mt = getrawmetatable(game)
+        oldNamecall = mt.__namecall
+        oldIndex = mt.__index
+        setreadonly(mt, false)
+    end)
+    local metatableHookOk = mt ~= nil
 
     -- Cache for target to avoid recalculating every frame
     local cachedTarget = nil
@@ -7326,9 +7331,10 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return cachedTarget
     end
 
-    mt.__index = function(self, k)
-        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-        if not checkcaller() and hookActive then
+    if metatableHookOk then
+        mt.__index = function(self, k)
+            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+            if not checkcaller() and hookActive then
             if typeof(self) == "Instance" and self:IsA("Camera") then
                 if k == "CFrame" or k == "cf" then
                     -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
@@ -7371,8 +7377,10 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
         return oldIndex(self, k)
     end
+    end -- end if metatableHookOk (mt.__index)
 
-    mt.__namecall = function(self, ...)
+    if metatableHookOk then
+        mt.__namecall = function(self, ...)
         local method = getnamecallmethod()
         local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
 
@@ -7437,8 +7445,11 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         setnamecallmethod(method)
         return oldNamecall(self, ...)
     end
+    end -- end if metatableHookOk (mt.__namecall)
 
-    setreadonly(mt, true)
+    if metatableHookOk then
+        setreadonly(mt, true)
+    end
 
     -- [ MOBILE FALLBACK: hookfunction on workspace.Raycast ]
     -- Metatable hooks may be blocked on some mobile executors.
@@ -7589,6 +7600,37 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                     pcall(fireInstakill, true)
                 end
             end)
+        end
+
+        -- [ SILENT AIM: Intercept DamageRequest for Duelist ]
+        -- Duelist uses Weapons:FireServer("DamageRequest", humanoid, damage, isHead, hitPart, hitPos)
+        -- We redirect hitPart and hitPos to the Silent Aim target.
+        if self.Name == "Weapons" and _G.SILENT_CFG and _G.SILENT_CFG.Enabled then
+            local args = table.pack(...)
+            -- args[1] = event name ("DamageRequest"), args[2] = humanoid, args[3] = damage,
+            -- args[4] = isHead, args[5] = hitPart, args[6] = hitPos
+            if args[1] == "DamageRequest" then
+                local silentTarget = GetCachedTarget()
+                if silentTarget then
+                    local partName = _G.SILENT_CFG.TargetPart or "Head"
+                    if partName == "Random" then
+                        local parts = {"Head", "UpperTorso", "HumanoidRootPart"}
+                        partName = parts[math.random(1, #parts)]
+                    end
+                    local newHitPart = silentTarget:FindFirstChild(partName)
+                        or silentTarget:FindFirstChild("Head")
+                        or silentTarget:FindFirstChild("HumanoidRootPart")
+                    local newHum = silentTarget:FindFirstChildOfClass("Humanoid")
+                    if newHitPart and newHum and newHum.Health > 0 then
+                        local isHead = newHitPart.Name == "Head"
+                        args[2] = newHum          -- redirect humanoid
+                        args[4] = isHead           -- update isHead flag
+                        args[5] = newHitPart       -- redirect hitPart
+                        args[6] = newHitPart.Position -- redirect hitPos
+                        return _G.FLUX_OLD_FIRESERVER(self, table.unpack(args, 1, args.n))
+                    end
+                end
+            end
         end
 
         return _G.FLUX_OLD_FIRESERVER(self, ...)
