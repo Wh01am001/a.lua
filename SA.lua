@@ -2010,7 +2010,7 @@ do
                     local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
                     local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
                     if fillFrame and knobFrame then
-                        local rel = math.clamp((speedVal - 16) / (250 - 16), 0, 1)
+                        local rel = math.clamp((speedVal - 16) / (40 - 16), 0, 1)
                         fillFrame.Size = UDim2.new(rel, 0, 1, 0)
                         local knobS = IS_MOBILE and 18 or 12
                         knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
@@ -2531,10 +2531,15 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
     cbCheck.Visible = checked
 
     local rightOffset = -35
+    local extra = 0
     if hasKeybind and not IS_MOBILE then
-        rightOffset = -94
-    elseif colorCount and colorCount > 0 then
-        rightOffset = -(colorCount * 28 + 38)
+        extra = extra + 58
+    end
+    if colorCount and colorCount > 0 then
+        extra = extra + (colorCount * 28)
+    end
+    if extra > 0 then
+        rightOffset = -(extra + 38)
     end
 
     local lbl = NewLabel(row, label, 13, TEXT)
@@ -3436,7 +3441,7 @@ do
 
         prefScroll.ClipsDescendants = true
 
-        local ignoreCard = NewFrame(prefScroll, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
+        local ignoreCard = NewFrame(prefScroll, UDim2.new(0.98, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
         Corner(ignoreCard, 8)
         Stroke(ignoreCard, STROKE, 1)
 
@@ -3737,6 +3742,7 @@ local function applyUITheme(name)
     local t = UI_THEMES[name]
     if not t then return end
     currentUITheme = name
+    local oldAccent = ACCENT
     ACCENT = t.accent
 
     -- Smooth Blend Transition (Cinematic Fade)
@@ -3767,52 +3773,66 @@ local function applyUITheme(name)
     end
 
     if currentNav then
-        -- Use instant update (0s) to avoid race condition with tab-switch tweens
-        currentNav.sym.ImageColor3 = t.accent
-        currentNav.lbl.TextColor3 = t.accent
-        currentNav.dot.BackgroundColor3 = t.accent
+        pcall(function()
+            -- Use instant update (0s) to avoid race condition with tab-switch tweens
+            currentNav.sym.ImageColor3 = t.accent
+            currentNav.lbl.TextColor3 = t.accent
+            currentNav.dot.BackgroundColor3 = t.accent
+        end)
     end
 
     for _, f in ipairs(accentFills) do
-        if f:IsA("UIGradient") then
-            f.Color = ColorSequence.new(t.side, t.bg)
-        else
-            Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
-        end
+        pcall(function()
+            if f and f.Parent then
+                if f:IsA("UIGradient") then
+                    f.Color = ColorSequence.new(t.side, t.bg)
+                else
+                    Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
+                end
+            end
+        end)
     end
 
     for _, v in ipairs(SG:GetDescendants()) do
-        if v:IsA("TextLabel") then
-            if v.Name == "SectionTitle" or v.TextColor3 == ACCENT then
-                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+        pcall(function()
+            if v and v.Parent then
+                if v:IsA("TextLabel") then
+                    if v.Name == "SectionTitle" or v.TextColor3 == oldAccent then
+                        Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+                    end
+                elseif v:IsA("ScrollingFrame") then
+                    Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
+                elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == oldAccent) then
+                    Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
+                end
             end
-        elseif v:IsA("ScrollingFrame") then
-            Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
-        elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == ACCENT) then
-            Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
-        end
+        end)
     end
 
-    for _, ul in ipairs(tabLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
-    if tabBtns[activeTabIdx] then Tw(tabBtns[activeTabIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
-    for _, ul in ipairs(stLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
-    if stBtns[activeStIdx] then Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
-    for _, ul in ipairs(vsLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
-    if vsBtns[activeVsIdx] then Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+    for _, ul in ipairs(tabLines) do pcall(function() Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end) end
+    if tabBtns[activeTabIdx] then pcall(function() Tw(tabBtns[activeTabIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end) end
+    for _, ul in ipairs(stLines) do pcall(function() Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end) end
+    if stBtns[activeStIdx] then pcall(function() Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end) end
+    for _, ul in ipairs(vsLines) do pcall(function() Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end) end
+    if vsBtns[activeVsIdx] then pcall(function() Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end) end
     if _G.FLUX_CONFIG_TAB_THEME_SYNC then pcall(_G.FLUX_CONFIG_TAB_THEME_SYNC) end
 
     for _, v in ipairs(SG:GetDescendants()) do
-        if v:IsA("TextLabel") and v.Text == "✓" then
-            Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
-        end
+        pcall(function()
+            if v and v.Parent and v:IsA("TextLabel") and v.Text == "✓" then
+                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+            end
+        end)
     end
     -- Notifications
     for _, dat in pairs(activeNotifs) do
-        Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
-        Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
+        pcall(function()
+            Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
+            Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
+        end)
     end
     -- Watermark
-    Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
+    pcall(function() Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent }) end)
     -- Keybind HUD (lives in separate ScreenGui, must be updated manually)
     if _G.FLUX_KB_HUD_ACCENT_UPDATE then _G.FLUX_KB_HUD_ACCENT_UPDATE() end
     if _G.FLUX_PREFERENCES_REFRESH then pcall(_G.FLUX_PREFERENCES_REFRESH) end
@@ -7129,19 +7149,24 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return
         end
         if _G.SILENT_CFG.Enabled and _G.SILENT_CFG.DrawFov then
+            local cam = workspace.CurrentCamera
+            local pos = UIS:GetMouseLocation()
+            if IS_MOBILE and cam then
+                pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+            end
             silentFovCircle.Visible = true
             silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-            silentFovCircle.Position = UIS:GetMouseLocation()
+            silentFovCircle.Position = pos
         else
             silentFovCircle.Visible = false
         end
     end)
 
     local function GetSilentTarget()
-        local cam = workspace.CurrentCamera
-        local mousePos = UIS:GetMouseLocation()
+        local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+        local refPos = IS_MOBILE and center or UIS:GetMouseLocation()
         local target = nil
-        local dist = _G.SILENT_CFG.FOV
+        local dist = _G.SILENT_CFG.FOV or 150
 
         -- PRIORITY: TargetShoots
         local tsFolder = workspace:FindFirstChild("TargetShoots")
@@ -7150,7 +7175,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 if child:IsA("BasePart") and child.Name == "TargetShoot" then
                     local pos, vis = cam:WorldToViewportPoint(child.Position)
                     if vis or _G.SILENT_CFG.Wallbang then
-                        local mag = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
+                        local mag = (Vector2.new(pos.X, pos.Y) - refPos).Magnitude
                         if mag < dist then
                             local isVisible = true
                             if not _G.SILENT_CFG.Wallbang then
@@ -7229,7 +7254,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 if not _G.SILENT_CFG.Wallbang and not vis then return end
             end
 
-            local mag = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
+            local mag = (Vector2.new(pos.X, pos.Y) - refPos).Magnitude
             if mag < dist then
                 if not _G.SILENT_CFG.Wallbang then
                     if not IsPositionVisible(cam.CFrame.Position, hrp.Position, char, cam) then return end
@@ -8871,6 +8896,13 @@ task.spawn(function()
             end)
 
             local targetChar = GetTriggerBotTarget()
+            if targetChar and _G.TRIGGERBOT_CFG.Mode == "Legit" and IS_MOBILE and IsDuelist() then
+                local char = LP.Character
+                if not (char and char:GetAttribute("Aiming") == true) then
+                    targetChar = nil
+                end
+            end
+
             if targetChar then
                 local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
 
