@@ -53,7 +53,6 @@ _G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
 _G.SILENT_CFG = _G.SILENT_CFG or {
     Enabled = false,
     Wallbang = false,
-    DrawFov = false,
     FOV = 150,
     HitChance = 100,
     TargetPart = "Head",
@@ -644,7 +643,7 @@ local PICKER_MAIN     = nil
 
 -- State Variables
 -- UI state variables (initially set at top)
-local IS_MOBILE       = UIS.TouchEnabled -- Mobile executors spoof KeyboardEnabled, so only check TouchEnabled
+local IS_MOBILE       = UIS.TouchEnabled and not UIS.KeyboardEnabled
 local curW            = IS_MOBILE and 600 or 900
 local curH            = IS_MOBILE and 350 or 530
 local SIDE_W          = IS_MOBILE and 160 or 220
@@ -6068,39 +6067,36 @@ do
                 end)
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
-            -- [ TRIGGER BOT CARD ] (PC only — mobile has built-in triggerbot)
-            local triggerCheck
-            if not IS_MOBILE then
-                local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
-                TCard.LayoutOrder = 2
-                Corner(TCard, 8); Stroke(TCard, STROKE, 1)
-                local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
-                TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
+            -- [ TRIGGER BOT CARD ]
+            local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
+            TCard.LayoutOrder = 2
+            Corner(TCard, 8); Stroke(TCard, STROKE, 1)
+            local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
+            TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-                local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-                local TLayout = Instance.new("UIListLayout", THolder)
-                TLayout.Padding = UDim.new(0, 6)
-                TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+            local TLayout = Instance.new("UIListLayout", THolder)
+            TLayout.Padding = UDim.new(0, 6)
+            TLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-                -- Checkbox and Keybind
-                _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
-                triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
-                    _G.TRIGGERBOT_CFG.Enabled = v
-                end, _G.TRIGGERBOT_CFG.Keybind, function(k)
-                    _G.TRIGGERBOT_CFG.Keybind = k
-                end)
-                triggerCheck.LayoutOrder = 1
+            -- Checkbox and Keybind
+            _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
+            local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
+                _G.TRIGGERBOT_CFG.Enabled = v
+            end, _G.TRIGGERBOT_CFG.Keybind, function(k)
+                _G.TRIGGERBOT_CFG.Keybind = k
+            end)
+            triggerCheck.LayoutOrder = 1
 
-                -- Dropdown
-                _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
-                local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-                ddRowTB.LayoutOrder = 2
-                local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
-                    _G.TRIGGERBOT_CFG.Mode = v
-                    NOTIFY("Trigger Bot", "Mode: " .. v, 2)
-                end)
-                ddTB.Size = UDim2.new(1, 0, 1, 0)
-            end
+            -- Dropdown
+            _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+            local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+            ddRowTB.LayoutOrder = 2
+            local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
+                _G.TRIGGERBOT_CFG.Mode = v
+                NOTIFY("Trigger Bot", "Mode: " .. v, 2)
+            end)
+            ddTB.Size = UDim2.new(1, 0, 1, 0)
 
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
@@ -7116,39 +7112,22 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
 end)
 
 -- [ SILENT AIM ENGINE ]
--- On mobile, ReplicatedStorage may not have loaded yet when this line runs.
--- We wait for it in a coroutine so the 'if' check below gets the right result.
-if not (IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist()) then
-    local rs = game:GetService("ReplicatedStorage")
-    -- Wait up to 5s for Duelist's SmurklesLib folder
-    local slib = rs:WaitForChild("SmurklesLib", 5)
-    if slib then
-        local pid = game.PlaceId
-        if GAME_IDS.Duelist then GAME_IDS.Duelist[pid] = true end
-    end
-    -- Wait for Bronx Duels' KnifeKill remote
-    if not slib then
-        local shared = rs:FindFirstChild("Shared") or rs:WaitForChild("Shared", 3)
-        if shared then
-            local remotes = shared:FindFirstChild("Remotes")
-            if remotes and remotes:FindFirstChild("KnifeKill") then
-                -- IsBronxDuels() now returns true via RS check
-            end
-        end
-    end
-end
 if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
-    pcall(function()
-        silentFovCircle = Drawing.new("Circle")
-        silentFovCircle.Thickness = 1.5
-        silentFovCircle.NumSides = 60
-        silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-        silentFovCircle.Filled = false
-        silentFovCircle.Visible = false
-        silentFovCircle.ZIndex = 999
-        silentFovCircle.Transparency = 1
-        silentFovCircle.Color = Color3.fromRGB(255, 255, 255)
-    end)
+    -- If we are on mobile and playing Duelist, skip the old engine entirely
+    if IS_MOBILE and IsDuelist() then
+        -- We will handle Mobile Duelist Silent Aim separately below
+    else
+        pcall(function()
+            silentFovCircle = Drawing.new("Circle")
+            silentFovCircle.Thickness = 1.5
+            silentFovCircle.NumSides = 60
+            silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
+            silentFovCircle.Filled = false
+            silentFovCircle.Visible = false
+            silentFovCircle.ZIndex = 999
+            silentFovCircle.Transparency = 1
+            silentFovCircle.Color = Color3.fromRGB(255, 255, 255)
+        end)
 
     local silentFovConn
     silentFovConn = game:GetService("RunService").RenderStepped:Connect(function()
@@ -7158,14 +7137,9 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return
         end
         if _G.SILENT_CFG.Enabled and _G.SILENT_CFG.DrawFov then
-            local cam = workspace.CurrentCamera
             silentFovCircle.Visible = true
             silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-            if IS_MOBILE and cam then
-                silentFovCircle.Position = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-            else
-                silentFovCircle.Position = UIS:GetMouseLocation()
-            end
+            silentFovCircle.Position = UIS:GetMouseLocation()
         else
             silentFovCircle.Visible = false
         end
@@ -7173,11 +7147,9 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
     local function GetSilentTarget()
         local cam = workspace.CurrentCamera
-        if not cam then return nil end
-        local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-        local mousePos = IS_MOBILE and center or UIS:GetMouseLocation()
+        local mousePos = UIS:GetMouseLocation()
         local target = nil
-        local dist = _G.SILENT_CFG.FOV or 150
+        local dist = _G.SILENT_CFG.FOV
 
         -- PRIORITY: TargetShoots
         local tsFolder = workspace:FindFirstChild("TargetShoots")
@@ -7297,14 +7269,11 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     -- ═══════════════════════════════════════════════════════
     -- NAMECALL INTERCEPTION SYSTEM (Undetectable Wallbang)
     -- ═══════════════════════════════════════════════════════
-    local mt, oldNamecall, oldIndex
-    pcall(function()
-        mt = getrawmetatable(game)
-        oldNamecall = mt.__namecall
-        oldIndex = mt.__index
-        setreadonly(mt, false)
-    end)
-    local metatableHookOk = mt ~= nil
+
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    local oldIndex = mt.__index
+    setreadonly(mt, false)
 
     -- Cache for target to avoid recalculating every frame
     local cachedTarget = nil
@@ -7331,10 +7300,9 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return cachedTarget
     end
 
-    if metatableHookOk then
-        mt.__index = function(self, k)
-            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-            if not checkcaller() and hookActive then
+    mt.__index = function(self, k)
+        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+        if not checkcaller() and hookActive then
             if typeof(self) == "Instance" and self:IsA("Camera") then
                 if k == "CFrame" or k == "cf" then
                     -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
@@ -7377,10 +7345,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
         return oldIndex(self, k)
     end
-    end -- end if metatableHookOk (mt.__index)
 
-    if metatableHookOk then
-        mt.__namecall = function(self, ...)
+    mt.__namecall = function(self, ...)
         local method = getnamecallmethod()
         local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
 
@@ -7445,63 +7411,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         setnamecallmethod(method)
         return oldNamecall(self, ...)
     end
-    end -- end if metatableHookOk (mt.__namecall)
 
-    if metatableHookOk then
-        setreadonly(mt, true)
-    end
-
-    -- [ MOBILE FALLBACK: hookfunction on workspace.Raycast ]
-    -- Metatable hooks may be blocked on some mobile executors.
-    -- hookfunction on workspace.Raycast is supported on ALL executors and runs at C-side speed.
-    pcall(function()
-        if not hookfunction then return end
-        local oldRaycast = hookfunction(workspace.Raycast, function(self, origin, direction, raycastParams)
-            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
-            if hookActive and self == workspace and not ignoreSilentRay then
-                if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" and direction.Magnitude > 25 then
-                    local chance = math.random(1, 100)
-                    if chance <= (_G.SILENT_CFG.HitChance or 100) then
-                        local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
-                        if target then
-                            local hitPos
-                            if target:IsA("BasePart") then
-                                hitPos = target.Position
-                            else
-                                local hum = target:FindFirstChildOfClass("Humanoid")
-                                local root = hum and hum.RootPart or
-                                    target:FindFirstChild("UpperTorso") or
-                                    target:FindFirstChild("HumanoidRootPart")
-                                if root then
-                                    local tp = _G.SILENT_CFG.TargetPart
-                                    local part = tp and target:FindFirstChild(tp)
-                                    hitPos = part and part.Position or root.Position
-                                end
-                            end
-                            if hitPos then
-                                direction = (hitPos - origin).Unit * 10000
-                                local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil and _G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang)
-                                    or (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
-                                if doWallbang then
-                                    local newParams = RaycastParams.new()
-                                    newParams.FilterType = Enum.RaycastFilterType.Include
-                                    newParams.FilterDescendantsInstances = { target }
-                                    if raycastParams then
-                                        pcall(function()
-                                            newParams.IgnoreWater = raycastParams.IgnoreWater
-                                            newParams.CollisionGroup = raycastParams.CollisionGroup
-                                        end)
-                                    end
-                                    raycastParams = newParams
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            return oldRaycast(self, origin, direction, raycastParams)
-        end)
-    end)
+    setreadonly(mt, true)
 
     _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
@@ -7601,45 +7512,115 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 end
             end)
         end
-
-        -- [ SILENT AIM for Duelist: Intercept 'Process' event ]
-        -- In Duelist, Weapons:FireServer("Process") is called EVERY time the player shoots.
-        -- We hook it to also send DamageRequest to the silent aim target, regardless of where they aimed.
-        if self.Name == "Weapons" and _G.SILENT_CFG and _G.SILENT_CFG.Enabled and IsDuelist() then
-            local args = table.pack(...)
-            if args[1] == "Process" then
-                -- Find the silent aim target
-                local silentTarget = GetCachedTarget()
-                if silentTarget then
-                    local partName = _G.SILENT_CFG.TargetPart or "Head"
-                    if partName == "Random" then
-                        local parts = {"Head", "UpperTorso", "HumanoidRootPart"}
-                        partName = parts[math.random(1, #parts)]
-                    end
-                    local hitPart = silentTarget:FindFirstChild(partName)
-                        or silentTarget:FindFirstChild("Head")
-                        or silentTarget:FindFirstChild("HumanoidRootPart")
-                    local hum = silentTarget:FindFirstChildOfClass("Humanoid")
-                    if hitPart and hum and hum.Health > 0 then
-                        -- Get damage from tool
-                        local tool = LP.Character and LP.Character:FindFirstChildOfClass("Tool")
-                        local isHead = hitPart.Name == "Head"
-                        local dmgAttr = isHead and "HeadDamage" or "Damage"
-                        local damage = (tool and tool:GetAttribute(dmgAttr)) or (isHead and 150 or 100)
-                        -- Send the redirected damage immediately after Process
-                        task.defer(function()
-                            pcall(function()
-                                _G.FLUX_OLD_FIRESERVER(self, "DamageRequest", hum, damage, isHead, hitPart, hitPart.Position)
-                            end)
-                        end)
+        return _G.FLUX_OLD_FIRESERVER(self, ...)
+    end)
+    end -- end for if IS_MOBILE and IsDuelist() else block
+    
+    -- [ MOBILE EXCLUSIVE SILENT AIM FOR DUELIST ]
+    if IS_MOBILE and IsDuelist() then
+        local cam = workspace.CurrentCamera
+        
+        -- Drawing for mobile FOV (if supported)
+        local mobileFovCircle = nil
+        pcall(function()
+            mobileFovCircle = Drawing.new("Circle")
+            mobileFovCircle.Thickness = 1.5
+            mobileFovCircle.NumSides = 60
+            mobileFovCircle.Filled = false
+            mobileFovCircle.ZIndex = 999
+            mobileFovCircle.Transparency = 1
+            mobileFovCircle.Color = Color3.fromRGB(255, 255, 255)
+        end)
+        
+        local function GetMobileTarget()
+            if not cam then return nil end
+            local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+            local dist = _G.SILENT_CFG.FOV or 150
+            local target = nil
+            
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LP and p.Character then
+                    -- Team check
+                    local myTeam = LP:GetAttribute("DuelsTeam")
+                    local theirTeam = p:GetAttribute("DuelsTeam")
+                    if not (myTeam and theirTeam and myTeam == theirTeam) then
+                        local hrp = p.Character:FindFirstChild("Head") or p.Character:FindFirstChild("HumanoidRootPart")
+                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if hrp and hum and hum.Health > 0 and not p.Character:GetAttribute("Downed") then
+                            local pos, vis = cam:WorldToViewportPoint(hrp.Position)
+                            if pos.Z > 0 then
+                                local mag = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                                if mag < dist then
+                                    if _G.SILENT_CFG.Wallbang or IsPositionVisible(cam.CFrame.Position, hrp.Position, p.Character, cam) then
+                                        dist = mag
+                                        target = p.Character
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
             end
+            return target
         end
-
-        return _G.FLUX_OLD_FIRESERVER(self, ...)
-    end)
-
+        
+        -- FOV Render Loop
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if getgenv().FLUX_SESSION ~= MySession then return end
+            if mobileFovCircle then
+                if _G.SILENT_CFG and _G.SILENT_CFG.Enabled and _G.SILENT_CFG.DrawFov and cam then
+                    mobileFovCircle.Visible = true
+                    mobileFovCircle.Radius = _G.SILENT_CFG.FOV or 150
+                    mobileFovCircle.Position = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+                else
+                    mobileFovCircle.Visible = false
+                end
+            end
+        end)
+        
+        -- FireServer Hook specifically for Mobile Duelist
+        local oldFire = nil
+        oldFire = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
+            if checkcaller() or typeof(self) ~= "Instance" then
+                return oldFire(self, ...)
+            end
+            
+            if self.Name == "Weapons" and _G.SILENT_CFG and _G.SILENT_CFG.Enabled then
+                local args = table.pack(...)
+                if args[1] == "Process" then
+                    local target = GetMobileTarget()
+                    if target then
+                        local partName = _G.SILENT_CFG.TargetPart or "Head"
+                        if partName == "Random" then
+                            local parts = {"Head", "UpperTorso", "HumanoidRootPart"}
+                            partName = parts[math.random(1, #parts)]
+                        end
+                        local hitPart = target:FindFirstChild(partName) or target:FindFirstChild("Head")
+                        local hum = target:FindFirstChildOfClass("Humanoid")
+                        if hitPart and hum then
+                            local tool = LP.Character and LP.Character:FindFirstChildOfClass("Tool")
+                            local isHead = hitPart.Name == "Head"
+                            local dmgAttr = isHead and "HeadDamage" or "Damage"
+                            local damage = (tool and tool:GetAttribute(dmgAttr)) or (isHead and 150 or 100)
+                            
+                            task.defer(function()
+                                pcall(function()
+                                    oldFire(self, "DamageRequest", hum, damage, isHead, hitPart, hitPart.Position)
+                                end)
+                            end)
+                        end
+                    end
+                end
+            end
+            
+            -- Call the original FLUX hook if it exists (for instakill/etc)
+            if _G.FLUX_OLD_FIRESERVER and type(_G.FLUX_OLD_FIRESERVER) == "function" then
+                return _G.FLUX_OLD_FIRESERVER(self, ...)
+            end
+            return oldFire(self, ...)
+        end)
+    end
+    
     _G.FLUX_GET_IK_ROOT = function(char)
         return char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
     end
