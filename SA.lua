@@ -53,6 +53,7 @@ _G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
 _G.SILENT_CFG = _G.SILENT_CFG or {
     Enabled = false,
     Wallbang = false,
+    DrawFov = false,
     FOV = 150,
     HitChance = 100,
     TargetPart = "Head",
@@ -7115,6 +7116,27 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
 end)
 
 -- [ SILENT AIM ENGINE ]
+-- On mobile, ReplicatedStorage may not have loaded yet when this line runs.
+-- We wait for it in a coroutine so the 'if' check below gets the right result.
+if not (IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist()) then
+    local rs = game:GetService("ReplicatedStorage")
+    -- Wait up to 5s for Duelist's SmurklesLib folder
+    local slib = rs:WaitForChild("SmurklesLib", 5)
+    if slib then
+        local pid = game.PlaceId
+        if GAME_IDS.Duelist then GAME_IDS.Duelist[pid] = true end
+    end
+    -- Wait for Bronx Duels' KnifeKill remote
+    if not slib then
+        local shared = rs:FindFirstChild("Shared") or rs:WaitForChild("Shared", 3)
+        if shared then
+            local remotes = shared:FindFirstChild("Remotes")
+            if remotes and remotes:FindFirstChild("KnifeKill") then
+                -- IsBronxDuels() now returns true via RS check
+            end
+        end
+    end
+end
 if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     silentFovCircle = Drawing.new("Circle")
     silentFovCircle.Thickness = 1.5
@@ -7417,6 +7439,58 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     end
 
     setreadonly(mt, true)
+
+    -- [ MOBILE FALLBACK: hookfunction on workspace.Raycast ]
+    -- Metatable hooks may be blocked on some mobile executors.
+    -- hookfunction on workspace.Raycast is supported on ALL executors and runs at C-side speed.
+    pcall(function()
+        if not hookfunction then return end
+        local oldRaycast = hookfunction(workspace.Raycast, function(self, origin, direction, raycastParams)
+            local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+            if hookActive and self == workspace and not ignoreSilentRay then
+                if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" and direction.Magnitude > 25 then
+                    local chance = math.random(1, 100)
+                    if chance <= (_G.SILENT_CFG.HitChance or 100) then
+                        local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+                        if target then
+                            local hitPos
+                            if target:IsA("BasePart") then
+                                hitPos = target.Position
+                            else
+                                local hum = target:FindFirstChildOfClass("Humanoid")
+                                local root = hum and hum.RootPart or
+                                    target:FindFirstChild("UpperTorso") or
+                                    target:FindFirstChild("HumanoidRootPart")
+                                if root then
+                                    local tp = _G.SILENT_CFG.TargetPart
+                                    local part = tp and target:FindFirstChild(tp)
+                                    hitPos = part and part.Position or root.Position
+                                end
+                            end
+                            if hitPos then
+                                direction = (hitPos - origin).Unit * 10000
+                                local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil and _G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang)
+                                    or (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
+                                if doWallbang then
+                                    local newParams = RaycastParams.new()
+                                    newParams.FilterType = Enum.RaycastFilterType.Include
+                                    newParams.FilterDescendantsInstances = { target }
+                                    if raycastParams then
+                                        pcall(function()
+                                            newParams.IgnoreWater = raycastParams.IgnoreWater
+                                            newParams.CollisionGroup = raycastParams.CollisionGroup
+                                        end)
+                                    end
+                                    raycastParams = newParams
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            return oldRaycast(self, origin, direction, raycastParams)
+        end)
+    end)
 
     _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
