@@ -1,5 +1,3 @@
--- ══════════════════ EXECUTOR COMPATIBILITY SHIM ══════════════════
--- Medium executor doesn't expose getgenv() — polyfill it so the script loads.
 if not getgenv then
     local _sharedEnv = {}
     getgenv = function() return _sharedEnv end
@@ -121,18 +119,17 @@ getgenv()._CEN_SLD_ACTIVE = false
 getgenv()._CEN_PKR_ACTIVE = false
 
 local CoreGui = game:GetService("CoreGui")
-
--- ══════════════════ GAME CONFIGURATIONS ══════════════════
 local GAME_IDS = {
     MurderVsSheriff = {
         Lobbies = {
-            [135856908115931] = true,
-            [124848751642883] = true
-        },
-        Arenas = {
             [92876937625630] = true,
             [101617670515690] = true,
             [74084441161738] = true
+        },
+        Arenas = {
+            [123627218337521] = true,
+            [124848751642883] = true,
+            [135856908115931] = true
         }
     },
     Hitmark = {
@@ -150,7 +147,6 @@ local GAME_IDS = {
     }
 }
 
--- Game-specific check helpers
 local function IsMurderVsSheriff()
     local pid = game.PlaceId
     return GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid]
@@ -166,7 +162,6 @@ local function IsBronxDuels()
     if GAME_IDS.BronxDuels and GAME_IDS.BronxDuels[pid] then
         return true
     end
-    -- Fallback: Detect by checking ReplicatedStorage unique combat structures
     local rs = game:GetService("ReplicatedStorage")
     local remotes = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
     if remotes and remotes:FindFirstChild("KnifeKill") then
@@ -266,8 +261,6 @@ local function IsIgnoredCharacter(char)
     local owner = char and Players:GetPlayerFromCharacter(char)
     return owner and IsIgnoredPlayer(owner) or false
 end
-
--- Session Control (Kills old loops)
 local MySession = os.clock()
 getgenv().FLUX_SESSION = MySession
 
@@ -279,14 +272,10 @@ local function CleanOld()
             hum:SetAttribute("ForceSpeed", nil)
         end
     end)
-
-    -- Disconnect all tracked connections
     for _, c in pairs(_G.FLUX_CONNS) do
         pcall(function() c:Disconnect() end)
     end
     _G.FLUX_CONNS = {}
-
-    -- Clean UI
     for _, v in pairs(CoreGui:GetChildren()) do
         if v.Name == "FluxUI" or v.Name == "MobileToggle" or v.Name == "NotifySG" or v.Name == "ESP_HOLDER" then
             pcall(function() v:Destroy() end)
@@ -297,12 +286,8 @@ local function CleanOld()
             pcall(function() v:Destroy() end)
         end
     end
-
-    -- Stop Render Loops
     pcall(function() RunService:UnbindFromRenderStep("FluxAimbot") end)
     pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
-
-    -- Clean ESP Cache and Drawings
     if _G.ESP_CACHE then
         for target, e in pairs(_G.ESP_CACHE) do
             pcall(function() e.FRM:Destroy() end)
@@ -317,8 +302,6 @@ local function CleanOld()
     pcall(function() if FOV_CIRCLE then FOV_CIRCLE:Destroy() end end)
 end
 CleanOld()
-
--- Input Tracking with Connection Management
 local isRmbDown = false
 table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(input)
     if getgenv().FLUX_SESSION ~= MySession then return end
@@ -332,8 +315,6 @@ table.insert(_G.FLUX_CONNS, UIS.InputEnded:Connect(function(input)
         isRmbDown = false
     end
 end))
-
--- Cleanup old ESP
 if _G.ESP_LOOP then
     _G.ESP_LOOP:Disconnect(); _G.ESP_LOOP = nil
 end
@@ -364,8 +345,6 @@ local UpdateCustomBackground
 local UpdatePreview
 local blurActive = false
 local blurVal = 0
-
--- UI Root References for cross-scope access
 local Watermark
 local NotifySG
 local KbWin
@@ -374,8 +353,6 @@ local KbSG
 
 local uiVis = true
 local FOV_CIRCLE, silentFovCircle
-
--- Performance Caches
 _G.MY_TEAM_CACHE = nil
 _G.ACTIVE_MATCH_PLAYERS = {}
 task.spawn(function()
@@ -383,8 +360,6 @@ task.spawn(function()
         if getgenv().FLUX_SESSION ~= MySession then break end
         local matchPlayers = {}
         local found = false
-
-        -- 1. Check Bronx Duels enemies folder
         local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
             LP.Data.Match:FindFirstChild("Enemies")
         if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
@@ -395,8 +370,6 @@ task.spawn(function()
             _G.MY_TEAM_CACHE = nil
             found = true
         end
-
-        -- 2. Check Player Attributes (MurderVsSheriff & New Updates)
         if not found then
             local myGame = LP:GetAttribute("Game")
             if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" then
@@ -405,8 +378,6 @@ task.spawn(function()
                         matchPlayers[p.Name] = true
                     end
                 end
-
-                -- Mock MY_TEAM_CACHE to check attributes on the fly
                 local myTeam = LP:GetAttribute("Team")
                 _G.MY_TEAM_CACHE = {
                     FindFirstChild = function(self, name)
@@ -420,8 +391,6 @@ task.spawn(function()
                 found = true
             end
         end
-
-        -- 3. Legacy RunningGames folder check
         if not found then
             local runningGames = workspace:FindFirstChild("RunningGames")
             if runningGames then
@@ -589,7 +558,7 @@ local function MakeDraggable(area, target)
 
     area.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            task.wait() -- Small wait to let slider flags set
+            task.wait()
             if getgenv()._CEN_SLD_ACTIVE or getgenv()._CEN_PKR_ACTIVE then return end
 
             dragging = true
@@ -634,15 +603,10 @@ local DIM             = Color3.fromRGB(110, 112, 130)
 local ACCENT          = Color3.fromRGB(238, 240, 255)
 local SLBG            = Color3.fromRGB(42, 42, 54)
 local SLFILL          = Color3.fromRGB(200, 204, 238)
-
--- Global Picker State
 local PICKER_OPEN     = false
 local PICKER_CALLBACK = nil
 local PICKER_GUI      = nil
 local PICKER_MAIN     = nil
-
--- State Variables
--- UI state variables (initially set at top)
 local IS_MOBILE       = UIS.TouchEnabled and not UIS.KeyboardEnabled
 local curW            = IS_MOBILE and 600 or 900
 local curH            = IS_MOBILE and 350 or 530
@@ -754,8 +718,6 @@ function AddDropdown(parent, options, default, callback)
             close()
         end
     end)
-
-    -- Close on click outside
     UIS.InputBegan:Connect(function(inp, gp)
         if not open or gp then return end
         if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
@@ -779,7 +741,7 @@ Root                 = NewFrame(SG,
 )
 Root.BorderSizePixel = 0
 Corner(Root, 10)
-MakeDraggable(Root) -- Re-enabled global drag with smart filtering
+MakeDraggable(Root)
 
 local SnowHolder                  = Instance.new("Frame")
 SnowHolder.Name                   = "SnowHolder"
@@ -794,7 +756,6 @@ local Sidebar                     = NewFrame(Root,
     SIDEBAR
 )
 Corner(Sidebar, 10)
--- MakeDraggable(Sidebar, Root) -- Redundant now
 Stroke(Sidebar, STROKE2, 1.2)
 local sideGrad = Instance.new("UIGradient")
 sideGrad.Rotation = 90
@@ -837,8 +798,6 @@ RightBoxBgImage.Parent = RightBox
 local rightGrad = Instance.new("UIGradient")
 rightGrad.Rotation = 90
 rightGrad.Parent = RightBox
-
--- ══════════════════ MOBILE HIDE BUTTON ══════════════════
 if IS_MOBILE then
     local MobileBtn = Instance.new("ScreenGui")
     MobileBtn.Name = "MobileToggle"
@@ -861,10 +820,8 @@ if IS_MOBILE then
             PICKER_OPEN = false
         end
     end)
-    MakeDraggable(Toggle) -- Allow moving the toggle button
+    MakeDraggable(Toggle)
 end
-
--- ══════════════════ NOTIFICATION SYSTEM ══════════════════
 local NotifySG = Instance.new("ScreenGui")
 NotifySG.Name = "FluxNotify"
 NotifySG.ResetOnSpawn = false
@@ -909,8 +866,6 @@ local function NOTIFY(title, msg, dur)
     Corner(bar, 2)
 
     activeNotifs[n] = { t = tLbl, b = bar }
-
-    -- Animation
     n.Position = UDim2.new(1.5, 0, 0, 0)
     Tw(n, 0.4, "Quart", "Out", { Position = UDim2.new(0, 0, 0, 0) })
     local barTween = Tw(bar, dur, "Linear", "Out", { Size = UDim2.new(0, 0, 1, 0) })
@@ -923,8 +878,6 @@ local function NOTIFY(title, msg, dur)
         end)
     end)
 end
-
--- ══════════════════ WATERMARK SYSTEM ══════════════════
 Watermark = NewFrame(NotifySG, UDim2.new(0, 230, 0, 30), UDim2.new(0, 50, 0, 50), Color3.fromRGB(24, 24, 30))
 Watermark.Visible = useWatermark
 Corner(Watermark, 6)
@@ -960,8 +913,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
         fps = frames
         frames = 0
         lastFPS = now
-
-        -- Only update text once per second
         if useWatermark and Watermark.Visible then
             local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
             wmLbl.Text = string.format("Wh01 - %d fps - %d ping", fps, ping)
@@ -1022,17 +973,17 @@ local NAV_DATA = {
 
 local currentNav = nil
 local navPages = {}
-local accentFills = {} -- slider fill bars and accent elements, recolored on theme change
+local accentFills = {}
 
 local function MakeNav(data, idx)
     local btn = NewBtn(NavHolder,
         UDim2.new(1, 0, 0, 38),
         UDim2.new(0, 0, 0, 0),
-        Color3.fromRGB(30, 30, 38), -- Dark pill background
+        Color3.fromRGB(30, 30, 38),
         data.active and 0 or 1
     )
     btn.LayoutOrder = idx
-    Corner(btn, 19) -- Full pill shape
+    Corner(btn, 19)
 
     local dot = NewFrame(btn, UDim2.new(0, 8, 0, 8), UDim2.new(1, -20, 0.5, -4),
         data.active and ACCENT or Color3.new(1, 1, 1))
@@ -1050,8 +1001,6 @@ local function MakeNav(data, idx)
     local lbl = NewLabel(btn, data.name, 13, data.active and Color3.new(1, 1, 1) or DIM, data.active)
     lbl.Size = UDim2.new(1, -65, 1, 0)
     lbl.Position = UDim2.new(0, 48, 0, 0)
-
-    -- Create Category Page
     local catPage = NewFrame(RightBox, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
     catPage.Visible = data.active
     navPages[data.name] = catPage
@@ -1284,9 +1233,6 @@ local function AddCardSlider(parent, label, min, max, default, callback)
     end)
     return row
 end
-
--- ══════════════════ CATEGORY CONTENT: MAIN ══════════════════
--- ══════════════════ CATEGORY CONTENT: MAIN ══════════════════
 do
     local MainPage = navPages["Main"]
     local M_TAB_H = 44
@@ -1313,7 +1259,6 @@ do
         mPages[i] = page
 
         local function IsMatchActive()
-            -- Bronx Duels match active check
             if IsBronxDuels() then
                 local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
                     LP.Data.Match:FindFirstChild("Enemies")
@@ -1321,14 +1266,10 @@ do
                     return true
                 end
             end
-
-            -- MurderVsSheriff & generic attribute active match check
             local myGame = LP:GetAttribute("Game")
             if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" then
                 return true
             end
-
-            -- Legacy fallback
             local runningGames = workspace:FindFirstChild("RunningGames")
             if runningGames then
                 for _, gameFolder in pairs(runningGames:GetChildren()) do
@@ -1418,8 +1359,6 @@ do
                 if ns == nil then ns = checked end
                 ToggleState(ns, true)
             end)
-
-            -- Persistence Hook: Auto re-queue if cancelled
             if not getgenv().AM_HOOKED then
                 getgenv().AM_HOOKED = true
                 local oldNS
@@ -1544,14 +1483,11 @@ do
             list.HorizontalAlignment = Enum.HorizontalAlignment.Center
             list.SortOrder = Enum.SortOrder.LayoutOrder
 
-            -- Enable Toggle
             local toggleRow = AddCardSetting(KSHolder, "Enable Custom Sound", _G.WORLD_CFG.KillSoundEnabled, function(v)
                 _G.WORLD_CFG.KillSoundEnabled = v
                 SaveUI()
             end)
             toggleRow.LayoutOrder = 1
-
-            -- TextBox Wrapper
             local tbWrap = NewFrame(KSHolder, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
             tbWrap.LayoutOrder = 2
             Corner(tbWrap, 5)
@@ -1577,15 +1513,11 @@ do
                 idTextBox.Text = txt
                 SaveUI()
             end)
-
-            -- Sound Volume Slider
             local volSlider = AddCardSlider(KSHolder, "Sound Volume", 0, 200, _G.WORLD_CFG.KillSoundVolume, function(v)
                 _G.WORLD_CFG.KillSoundVolume = v
                 SaveUI()
             end)
             volSlider.LayoutOrder = 3
-
-            -- Test Sound Button
             local testBtn = NewBtn(KSHolder, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(36, 36, 48))
             testBtn.LayoutOrder = 4
             Corner(testBtn, 6)
@@ -1618,8 +1550,6 @@ do
             testBtn.MouseLeave:Connect(function()
                 Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
             end)
-
-            -- Sync function
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
                 if not KSCard or not KSCard.Parent then return end
@@ -1631,8 +1561,6 @@ do
                     cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
                 end
                 idTextBox.Text = tostring(_G.WORLD_CFG.KillSoundId)
-
-                -- Sync Volume Slider
                 local volVal = _G.WORLD_CFG.KillSoundVolume or 100
                 local topFrame = volSlider:FindFirstChildOfClass("Frame")
                 if topFrame then
@@ -1731,8 +1659,6 @@ do
                 Tw(row, 0.1, "Quad", "Out",
                     { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
             end)
-
-            -- Auto-reset when entering a new match
             task.spawn(function()
                 local wasInMatch = false
                 while task.wait(2) do
@@ -2018,8 +1944,6 @@ do
                         knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
                     end
                 end
-
-                -- Fly sync
                 local fActive = _G.LOCAL_PLAYER_CFG.FlyEnabled
                 local fCbBg = flyCheck:FindFirstChildOfClass("Frame")
                 local fCbCheck = fCbBg and fCbBg:FindFirstChildOfClass("TextLabel")
@@ -2053,8 +1977,6 @@ do
                     local knobS = IS_MOBILE and 18 or 12
                     fKnobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
                 end
-
-                -- Invisibility sync
                 if invisCheck then
                     local iActive = _G.LOCAL_PLAYER_CFG.InvisEnabled
                     local iCbBg = invisCheck:FindFirstChildOfClass("Frame")
@@ -2070,8 +1992,6 @@ do
                         iBindLbl.Text = tostring(_G.LOCAL_PLAYER_CFG.InvisKey)
                     end
                 end
-
-                -- Fun Options sync
                 if IsHitmark() or IsDuelist() then
                     if infCheck then
                         local active = _G.FUN_CFG.InfJump
@@ -2159,13 +2079,9 @@ do
         BuildLocalPlayerCard()
     end
 end
-
--- ══════════════════ CATEGORY CONTENT: COMBAT ══════════════════
 local CombatPage = navPages["Combat"]
 local TAB_H = 44
 local TabBar = NewFrame(CombatPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
--- MakeDraggable(TabBar, Root)
-
 
 
 local TabSep = NewFrame(CombatPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
@@ -2194,7 +2110,6 @@ for i, name in ipairs(TABS) do
     ul.Visible = i == 1
     Corner(ul, 1)
 
-    -- Create Page Container
     local page = NewFrame(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
     page.Visible = (i == 1)
 
@@ -2211,14 +2126,11 @@ for i, name in ipairs(TABS) do
 
     tb.MouseButton1Click:Connect(function()
         if activeTabIdx == i then return end
-
-        -- Hide Old
         tabBtns[activeTabIdx].lbl.TextColor3 = DIM
         tabBtns[activeTabIdx].lbl.Font = Enum.Font.Gotham
         tabLines[activeTabIdx].Visible = false
         tabPages[activeTabIdx].Visible = false
 
-        -- Show New
         activeTabIdx = i
         tl.TextColor3 = ACCENT
         tl.Font = Enum.Font.GothamBold
@@ -2227,8 +2139,6 @@ for i, name in ipairs(TABS) do
     end)
 end
 
-
--- Content for Aimbot Tab (Page 1)
 local AimbotPage = tabPages[1]
 
 local LeftPanel = NewFrame(AimbotPage, UDim2.new(0.54, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
@@ -2262,16 +2172,12 @@ for i, data in ipairs(CHECKS) do
     Corner(row, 5)
 
     local bLbl = nil
-
-    -- Checkbox
     local checked = false
     if data.label == "Ignore Dead Players" then checked = true end
     local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
     Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
     local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
     cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
-
-    -- Label
     local rowLbl = NewLabel(row, data.label, 13, TEXT)
     rowLbl.Position = UDim2.new(0, 32, 0, 0)
     local rightOffset = (data.badge and not IS_MOBILE) and -96 or -38
@@ -2288,8 +2194,6 @@ for i, data in ipairs(CHECKS) do
         Tw(cbBg, 0.1, "Quad", "Out", {
             BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
         })
-
-        -- Sync with Aimbot Config
         if data.label == "Aimbot" then
             _G.AIMBOT_CFG.Enabled = checked
         elseif data.label == "Draw Fov" then
@@ -2309,7 +2213,6 @@ for i, data in ipairs(CHECKS) do
         local ns = checked
         if data.label == "Aimbot" then
             ns = _G.AIMBOT_CFG.Enabled
-            -- Sync loaded Keybind badge label
             if data.badge and _G.AIMBOT_CFG.Keybind and bLbl then
                 local k = _G.AIMBOT_CFG.Keybind
                 local name = (typeof(k) == "EnumItem" and k.Name or tostring(k):gsub("Enum.UserInputType.", ""))
@@ -2367,8 +2270,6 @@ for i, data in ipairs(CHECKS) do
                 end
             end)
         end)
-
-        -- Add InputBegan listener to toggle Aimbot
         table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gp)
             if gp or waiting then return end
             local currentBind = (data.label == "Aimbot") and _G.AIMBOT_CFG.Keybind or nil
@@ -2440,8 +2341,6 @@ local SLIDERS = {
 
 
 local activeSliders = {}
-
--- accentFills declared near top (line ~605)
 for i, data in ipairs(SLIDERS) do
     local row = NewFrame(SliderHolder, UDim2.new(1, 0, 0, 52), UDim2.new(0, 0, 0, 0), PANEL, 1)
     row.LayoutOrder = i
@@ -2481,8 +2380,6 @@ for i, data in ipairs(SLIDERS) do
         valLbl.Text = string.format("%.1f", nv)
         Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
         Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
-
-        -- Sync Slider Value
         if data.key then _G.AIMBOT_CFG[data.key] = nv end
     end
 
@@ -2511,9 +2408,6 @@ for i, data in ipairs(SLIDERS) do
     end)
 end
 
-
-
--- [ GLOBAL UI HELPERS ]
 function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback, defaultColors)
     local row = NewBtn(parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
     row.LayoutOrder = #parent:GetChildren()
@@ -2869,17 +2763,12 @@ end
 SETUP_COLOR_PICKER()
 
 local ConfigPreferencesTabPage
-
--- ══════════════════ CATEGORY CONTENT: OTHERS ══════════════════
--- ══════════════════ CATEGORY CONTENT: CONFIG ══════════════════
 do
     local ConfigPage = navPages["Config"]
     if ConfigPage then
         local HS = game:GetService("HttpService")
         local CONFIG_FOLDER = "FluxConfigs"
         local AUTOLOAD_FILE = "FluxAutoload.json"
-
-        -- Standard Layout Components
         local TAB_H = 44
         local TabBar = NewFrame(ConfigPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
         local TabSep = NewFrame(ConfigPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
@@ -2947,9 +2836,6 @@ do
 
         local page = configPages[1]
         ConfigPreferencesTabPage = configPages[2]
-
-        -- Absolute layout used
-        -- Helpers
         local function EnsureFolder()
             if not isfolder(CONFIG_FOLDER) then makefolder(CONFIG_FOLDER) end
         end
@@ -3016,18 +2902,12 @@ do
             if data.LOCALPLAYER then merge(_G.LOCAL_PLAYER_CFG, data.LOCALPLAYER) end
             if data.FUN then merge(_G.FUN_CFG, data.FUN) end
             if data.ESP and _G.ESP_CFG then merge(_G.ESP_CFG, data.ESP) end
-
-            -- UI Preference Sync from Config
             if data.UI then
                 if data.UI.notifications ~= nil then useNotifications = data.UI.notifications end
                 if data.UI.watermark ~= nil then useWatermark = data.UI.watermark end
                 if data.UI.kbhud ~= nil then useKbHud = data.UI.kbhud end
-
-                -- Force apply to active instances
                 if ApplyUIPreferences then ApplyUIPreferences() end
             end
-
-            -- Sync UI Elements
             if _G.FLUX_UI_UPDATE_FUNCS then
                 for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do
                     pcall(f)
@@ -3036,8 +2916,6 @@ do
 
             NOTIFY("Config", "Config loaded ✓", 2.5)
         end
-
-        -- Auto-load on start
         task.defer(function()
             local aName = GetAutoload()
             if aName then
@@ -3048,8 +2926,6 @@ do
                 end
             end
         end)
-
-        -- ─── Left Panel (Management) ───
         local LeftPanel = NewFrame(page, UDim2.new(0.46, 0, 0, 380), UDim2.new(0, 1, 0, 3), PANEL)
         LeftPanel.LayoutOrder = 1
         Corner(LeftPanel, 8); Stroke(LeftPanel, STROKE, 1)
@@ -3061,8 +2937,6 @@ do
 
         local scroll = NewFrame(LeftPanel, UDim2.new(1, -16, 1, -42), UDim2.new(0, 8, 0, 42), BG, 1)
         Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 10)
-
-        -- Name input card
         local nameCard = NewFrame(scroll, UDim2.new(1, 0, 0, 70), nil, PANEL)
         Corner(nameCard, 8)
         NewLabel(nameCard, "Config name", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
@@ -3079,13 +2953,9 @@ do
         nameBox.PlaceholderText = "Enter name..."; nameBox.Text = ""
         nameBox.TextSize = 11; nameBox.Font = Enum.Font.Gotham
         nameBox.ClearTextOnFocus = false; nameBox.Parent = nameBoxWrap
-
-        -- List card
         local listCard = NewFrame(scroll, UDim2.new(1, 0, 0, 260), nil, PANEL)
         Corner(listCard, 8)
         NewLabel(listCard, "Config list", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
-
-        -- Dropdown (Matching Global Style)
         local selectedConfig = nil
         local ddFrame = NewFrame(listCard, UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 26), Color3.fromRGB(32, 32, 44))
         Corner(ddFrame, 6); Stroke(ddFrame, STROKE2, 1)
@@ -3194,8 +3064,6 @@ do
         end)
 
         listCard.Size = UDim2.new(1, 0, 0, gridY + 3 * 42 + 38 + 10)
-
-        -- ─── Right Panel (Info) ───
         local RightPanel = NewFrame(page, UDim2.new(0.52, -4, 0, 380), UDim2.new(0.48, 1, 0, 3), PANEL)
         RightPanel.LayoutOrder = 2
         Corner(RightPanel, 8); Stroke(RightPanel, STROKE, 1)
