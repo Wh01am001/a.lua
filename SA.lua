@@ -1,3 +1,4 @@
+
 if not getgenv then
     local _sharedEnv = {}
     getgenv = function() return _sharedEnv end
@@ -6,7 +7,7 @@ end
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 
-_G.AIMBOT_CFG = _G.AIMBOT_CFG or {
+getgenv().AIMBOT_CFG = getgenv().AIMBOT_CFG or {
     Enabled = false,
     DrawFov = false,
     VisibleCheck = false,
@@ -26,7 +27,7 @@ _G.AIMBOT_CFG = _G.AIMBOT_CFG or {
     Keybind = nil
 }
 
-_G.KILLAURA_CFG = _G.KILLAURA_CFG or {
+getgenv().KILLAURA_CFG = getgenv().KILLAURA_CFG or {
     Enabled = false,
     MaxDist = 300,
     Delay = 100,
@@ -35,19 +36,19 @@ _G.KILLAURA_CFG = _G.KILLAURA_CFG or {
     Keybind = Enum.KeyCode.None
 }
 
-_G.HITBOX_CFG = _G.HITBOX_CFG or {
+getgenv().HITBOX_CFG = getgenv().HITBOX_CFG or {
     Enabled = false,
     Size = 10,
     Part = "head"
 }
 
-_G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
+getgenv().TRIGGERBOT_CFG = getgenv().TRIGGERBOT_CFG or {
     Enabled = false,
     Keybind = Enum.KeyCode.T,
     Mode = "Legit"
 }
 
-_G.SILENT_CFG = _G.SILENT_CFG or {
+getgenv().SILENT_CFG = getgenv().SILENT_CFG or {
     Enabled = false,
     Wallbang = false,
     FOV = 150,
@@ -56,7 +57,7 @@ _G.SILENT_CFG = _G.SILENT_CFG or {
     Keybind = Enum.KeyCode.None
 }
 
-_G.GUN_MODS_CFG = _G.GUN_MODS_CFG or {
+getgenv().GUN_MODS_CFG = getgenv().GUN_MODS_CFG or {
     NoRecoil = false,
     NoSpread = false,
     RapidFire = false,
@@ -64,12 +65,12 @@ _G.GUN_MODS_CFG = _G.GUN_MODS_CFG or {
     InfiniteAmmo = false
 }
 
-_G.AM_CFG = _G.AM_CFG or {
+getgenv().AM_CFG = getgenv().AM_CFG or {
     Enabled = false,
     Mode = "3v3"
 }
 
-_G.WORLD_CFG = _G.WORLD_CFG or {}
+getgenv().WORLD_CFG = getgenv().WORLD_CFG or {}
 for k, v in pairs({
     FullBright = false,
     NoFog = false,
@@ -83,11 +84,11 @@ for k, v in pairs({
     KillSoundId = "8904888220",
     KillSoundVolume = 100
 }) do
-    if _G.WORLD_CFG[k] == nil then
-        _G.WORLD_CFG[k] = v
+    if getgenv().WORLD_CFG[k] == nil then
+        getgenv().WORLD_CFG[k] = v
     end
 end
-_G.LOCAL_PLAYER_CFG = _G.LOCAL_PLAYER_CFG or {
+getgenv().LOCAL_PLAYER_CFG = getgenv().LOCAL_PLAYER_CFG or {
     SpeedEnabled = false,
     Speed = 16,
     SpeedKey = "None",
@@ -98,7 +99,7 @@ _G.LOCAL_PLAYER_CFG = _G.LOCAL_PLAYER_CFG or {
     InvisKey = "None"
 }
 
-_G.FUN_CFG = _G.FUN_CFG or {
+getgenv().FUN_CFG = getgenv().FUN_CFG or {
     GravityEnabled = false,
     GravityValue = 196.2,
     InfJump = false,
@@ -106,7 +107,7 @@ _G.FUN_CFG = _G.FUN_CFG or {
     SpinSpeed = 50
 }
 
-_G.PREFERENCES_CFG = _G.PREFERENCES_CFG or {
+getgenv().PREFERENCES_CFG = getgenv().PREFERENCES_CFG or {
     IgnoredPlayers = {}
 }
 
@@ -122,25 +123,24 @@ local CoreGui = game:GetService("CoreGui")
 local GAME_IDS = {
     MurderVsSheriff = {
         Lobbies = {
+            [135856908115931] = true,
+            [124848751642883] = true
+        },
+        Arenas = {
             [92876937625630] = true,
             [101617670515690] = true,
             [74084441161738] = true
-        },
-        Arenas = {
-            [123627218337521] = true,
-            [124848751642883] = true,
-            [135856908115931] = true
         }
     },
     Hitmark = {
         [97351810896225] = true
     },
     BronxDuels = {
-        [139943061361383] = true,
-        [99362936871032] = true,
-        [85788627530413] = true,
-        [9091734830] = true,
-        [121567535120062] = false
+        [139943061361383] = true, 
+        [99362936871032] = true,  
+        [85788627530413] = true,  
+        [9091734830] = true,      
+        [121567535120062] = false 
     },
     Duelist = {
         [122310270867133] = true
@@ -203,13 +203,13 @@ local function GetGameGroup(pid)
     return tostring(pid)
 end
 
-_G.FLUX_CONNS = _G.FLUX_CONNS or {}
+getgenv().FLUX_CONNS = getgenv().FLUX_CONNS or {}
 
 local function NormalizeIgnoredPlayers()
-    local prefs = _G.PREFERENCES_CFG
+    local prefs = getgenv().PREFERENCES_CFG
     if type(prefs) ~= "table" then
         prefs = {}
-        _G.PREFERENCES_CFG = prefs
+        getgenv().PREFERENCES_CFG = prefs
     end
 
     local rawIgnored = prefs.IgnoredPlayers
@@ -275,10 +275,10 @@ local function CleanOld()
         end
     end)
 
-    for _, c in pairs(_G.FLUX_CONNS) do
+    for _, c in pairs(getgenv().FLUX_CONNS) do
         pcall(function() c:Disconnect() end)
     end
-    _G.FLUX_CONNS = {}
+    getgenv().FLUX_CONNS = {}
 
     for _, v in pairs(CoreGui:GetChildren()) do
         if v.Name == "FluxUI" or v.Name == "MobileToggle" or v.Name == "NotifySG" or v.Name == "ESP_HOLDER" then
@@ -294,8 +294,8 @@ local function CleanOld()
     pcall(function() RunService:UnbindFromRenderStep("FluxAimbot") end)
     pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
 
-    if _G.ESP_CACHE then
-        for target, e in pairs(_G.ESP_CACHE) do
+    if getgenv().ESP_CACHE then
+        for target, e in pairs(getgenv().ESP_CACHE) do
             pcall(function() e.FRM:Destroy() end)
             pcall(function() e.BOX:Destroy() end)
             pcall(function() e.FILL:Destroy() end)
@@ -303,37 +303,37 @@ local function CleanOld()
             if e.TCHAM then pcall(function() e.TCHAM:Destroy() end) end
         end
     end
-    _G.ESP_CACHE = {}
-    pcall(function() if _G.ESP_LOOP then _G.ESP_LOOP:Disconnect() end end)
+    getgenv().ESP_CACHE = {}
+    pcall(function() if getgenv().ESP_LOOP then getgenv().ESP_LOOP:Disconnect() end end)
     pcall(function() if FOV_CIRCLE then FOV_CIRCLE:Destroy() end end)
 end
 CleanOld()
 
 local isRmbDown = false
-table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(input)
+table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(input)
     if getgenv().FLUX_SESSION ~= MySession then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         isRmbDown = true
     end
 end))
-table.insert(_G.FLUX_CONNS, UIS.InputEnded:Connect(function(input)
+table.insert(getgenv().FLUX_CONNS, UIS.InputEnded:Connect(function(input)
     if getgenv().FLUX_SESSION ~= MySession then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         isRmbDown = false
     end
 end))
 
-if _G.ESP_LOOP then
-    _G.ESP_LOOP:Disconnect(); _G.ESP_LOOP = nil
+if getgenv().ESP_LOOP then
+    getgenv().ESP_LOOP:Disconnect(); getgenv().ESP_LOOP = nil
 end
 pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
-if _G.ESP_CACHE then
-    for _, e in pairs(_G.ESP_CACHE) do
+if getgenv().ESP_CACHE then
+    for _, e in pairs(getgenv().ESP_CACHE) do
         pcall(function() e.FRM:Destroy() end)
         if e.CHAM then pcall(function() e.CHAM:Destroy() end) end
         if e.TCHAM then pcall(function() e.TCHAM:Destroy() end) end
     end
-    _G.ESP_CACHE = nil
+    getgenv().ESP_CACHE = nil
 end
 
 local toggleKey = Enum.KeyCode.RightShift
@@ -343,9 +343,9 @@ local useNotifications = false
 local useWatermark = false
 local useKbHud = false
 
-_G.CUSTOM_BG_ENABLED = false
-_G.CUSTOM_BG_ID = ""
-_G.CUSTOM_BG_TRANSPARENCY = 0
+getgenv().CUSTOM_BG_ENABLED = false
+getgenv().CUSTOM_BG_ID = ""
+getgenv().CUSTOM_BG_TRANSPARENCY = 0
 
 local SidebarBgImage
 local RightBoxBgImage
@@ -362,8 +362,8 @@ local KbSG
 local uiVis = true
 local FOV_CIRCLE, silentFovCircle
 
-_G.MY_TEAM_CACHE = nil
-_G.ACTIVE_MATCH_PLAYERS = {}
+getgenv().MY_TEAM_CACHE = nil
+getgenv().ACTIVE_MATCH_PLAYERS = {}
 task.spawn(function()
     while task.wait(1.5) do
         if getgenv().FLUX_SESSION ~= MySession then break end
@@ -377,7 +377,7 @@ task.spawn(function()
                 matchPlayers[child.Name] = true
             end
             matchPlayers[LP.Name] = true
-            _G.MY_TEAM_CACHE = nil
+            getgenv().MY_TEAM_CACHE = nil
             found = true
         end
 
@@ -391,7 +391,7 @@ task.spawn(function()
                 end
 
                 local myTeam = LP:GetAttribute("Team")
-                _G.MY_TEAM_CACHE = {
+                getgenv().MY_TEAM_CACHE = {
                     FindFirstChild = function(self, name)
                         local p = game:GetService("Players"):FindFirstChild(name)
                         if p and p:GetAttribute("Team") == myTeam then
@@ -413,7 +413,7 @@ task.spawn(function()
                         local inThisGame = false
                         for _, teamFolder in pairs(alivePlayers:GetChildren()) do
                             if teamFolder:FindFirstChild(LP.Name) then
-                                _G.MY_TEAM_CACHE = teamFolder
+                                getgenv().MY_TEAM_CACHE = teamFolder
                                 inThisGame = true
                             end
                         end
@@ -430,9 +430,9 @@ task.spawn(function()
                 end
             end
         end
-        _G.ACTIVE_MATCH_PLAYERS = matchPlayers
+        getgenv().ACTIVE_MATCH_PLAYERS = matchPlayers
         if not found then
-            _G.MY_TEAM_CACHE = nil
+            getgenv().MY_TEAM_CACHE = nil
         end
     end
 end)
@@ -441,15 +441,15 @@ local function SaveUI()
     local data = {
         key = toggleKey.Name,
         smooth = useSmoothDrag,
-        bgEnabled = _G.CUSTOM_BG_ENABLED,
-        bgId = _G.CUSTOM_BG_ID,
-        bgTrans = _G.CUSTOM_BG_TRANSPARENCY,
+        bgEnabled = getgenv().CUSTOM_BG_ENABLED,
+        bgId = getgenv().CUSTOM_BG_ID,
+        bgTrans = getgenv().CUSTOM_BG_TRANSPARENCY,
         blurActive = blurActive,
         blurVal = blurVal,
         ignoredPlayers = NormalizeIgnoredPlayers(),
-        KillSoundEnabled = _G.WORLD_CFG.KillSoundEnabled,
-        KillSoundId = _G.WORLD_CFG.KillSoundId,
-        KillSoundVolume = _G.WORLD_CFG.KillSoundVolume
+        KillSoundEnabled = getgenv().WORLD_CFG.KillSoundEnabled,
+        KillSoundId = getgenv().WORLD_CFG.KillSoundId,
+        KillSoundVolume = getgenv().WORLD_CFG.KillSoundVolume
     }
     if writefile then writefile(uiConfigPath, game:GetService("HttpService"):JSONEncode(data)) end
 end
@@ -460,17 +460,17 @@ local function LoadUI()
         if ok and data then
             if data.key then toggleKey = Enum.KeyCode[data.key] or toggleKey end
             if data.smooth ~= nil then useSmoothDrag = data.smooth end
-            if data.bgEnabled ~= nil then _G.CUSTOM_BG_ENABLED = data.bgEnabled end
-            if data.bgId ~= nil then _G.CUSTOM_BG_ID = data.bgId end
-            if data.bgTrans ~= nil then _G.CUSTOM_BG_TRANSPARENCY = data.bgTrans end
+            if data.bgEnabled ~= nil then getgenv().CUSTOM_BG_ENABLED = data.bgEnabled end
+            if data.bgId ~= nil then getgenv().CUSTOM_BG_ID = data.bgId end
+            if data.bgTrans ~= nil then getgenv().CUSTOM_BG_TRANSPARENCY = data.bgTrans end
             if data.blurActive ~= nil then blurActive = data.blurActive end
             if data.blurVal ~= nil then blurVal = data.blurVal end
             if data.ignoredPlayers ~= nil then
-                _G.PREFERENCES_CFG.IgnoredPlayers = data.ignoredPlayers
+                getgenv().PREFERENCES_CFG.IgnoredPlayers = data.ignoredPlayers
             end
-            if data.KillSoundEnabled ~= nil then _G.WORLD_CFG.KillSoundEnabled = data.KillSoundEnabled end
-            if data.KillSoundId ~= nil then _G.WORLD_CFG.KillSoundId = tostring(data.KillSoundId) end
-            if data.KillSoundVolume ~= nil then _G.WORLD_CFG.KillSoundVolume = data.KillSoundVolume end
+            if data.KillSoundEnabled ~= nil then getgenv().WORLD_CFG.KillSoundEnabled = data.KillSoundEnabled end
+            if data.KillSoundId ~= nil then getgenv().WORLD_CFG.KillSoundId = tostring(data.KillSoundId) end
+            if data.KillSoundVolume ~= nil then getgenv().WORLD_CFG.KillSoundVolume = data.KillSoundVolume end
             NormalizeIgnoredPlayers()
         end
     end
@@ -478,7 +478,7 @@ end
 
 local function ApplyUIPreferences()
     if Watermark then Watermark.Visible = useWatermark end
-    if _G.FLUX_KB_HUD_SYNC then _G.FLUX_KB_HUD_SYNC() end
+    if getgenv().FLUX_KB_HUD_SYNC then getgenv().FLUX_KB_HUD_SYNC() end
     if UpdatePreview then UpdatePreview() end
     if UpdateCustomBackground then UpdateCustomBackground() end
 end
@@ -570,7 +570,7 @@ local function MakeDraggable(area, target)
 
     area.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            task.wait()
+            task.wait() 
             if getgenv()._CEN_SLD_ACTIVE or getgenv()._CEN_PKR_ACTIVE then return end
 
             dragging = true
@@ -756,7 +756,7 @@ Root                 = NewFrame(SG,
 )
 Root.BorderSizePixel = 0
 Corner(Root, 10)
-MakeDraggable(Root)
+MakeDraggable(Root) 
 
 local SnowHolder                  = Instance.new("Frame")
 SnowHolder.Name                   = "SnowHolder"
@@ -837,7 +837,7 @@ if IS_MOBILE then
             PICKER_OPEN = false
         end
     end)
-    MakeDraggable(Toggle)
+    MakeDraggable(Toggle) 
 end
 
 local NotifySG = Instance.new("ScreenGui")
@@ -994,17 +994,17 @@ local NAV_DATA = {
 
 local currentNav = nil
 local navPages = {}
-local accentFills = {}
+local accentFills = {} 
 
 local function MakeNav(data, idx)
     local btn = NewBtn(NavHolder,
         UDim2.new(1, 0, 0, 38),
         UDim2.new(0, 0, 0, 0),
-        Color3.fromRGB(30, 30, 38),
+        Color3.fromRGB(30, 30, 38), 
         data.active and 0 or 1
     )
     btn.LayoutOrder = idx
-    Corner(btn, 19)
+    Corner(btn, 19) 
 
     local dot = NewFrame(btn, UDim2.new(0, 8, 0, 8), UDim2.new(1, -20, 0.5, -4),
         data.active and ACCENT or Color3.new(1, 1, 1))
@@ -1282,6 +1282,7 @@ do
         mPages[i] = page
 
         local function IsMatchActive()
+
             if IsBronxDuels() then
                 local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
                     LP.Data.Match:FindFirstChild("Enemies")
@@ -1321,7 +1322,7 @@ do
 
             getgenv().AM_IGNORING = false
             local lastMatch = 0
-            _G.Flux_RequestMatch = function()
+            getgenv().Flux_RequestMatch = function()
                 if tick() - lastMatch < 1 then return end
                 lastMatch = tick()
 
@@ -1330,22 +1331,22 @@ do
                 if Event then
                     Event:FireServer("cancel")
                     task.wait(0.5)
-                    Event:FireServer("play", { mode = _G.AM_CFG.Mode })
+                    Event:FireServer("play", { mode = getgenv().AM_CFG.Mode })
                 end
                 task.wait(1)
                 getgenv().AM_IGNORING = false
             end
 
             local ddRow = NewFrame(AMHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            local dd = AddDropdown(ddRow, { "1v1", "2v2", "3v3" }, _G.AM_CFG.Mode, function(v)
-                _G.AM_CFG.Mode = v
-                if _G.AM_CFG.Enabled then _G.Flux_RequestMatch() end
+            local dd = AddDropdown(ddRow, { "1v1", "2v2", "3v3" }, getgenv().AM_CFG.Mode, function(v)
+                getgenv().AM_CFG.Mode = v
+                if getgenv().AM_CFG.Enabled then getgenv().Flux_RequestMatch() end
             end)
             dd.Size = UDim2.new(1, 0, 1, 0)
 
             local row = NewBtn(AMHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
             Corner(row, 5)
-            local checked = _G.AM_CFG.Enabled
+            local checked = getgenv().AM_CFG.Enabled
             local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
             Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
             local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
@@ -1355,10 +1356,10 @@ do
 
             local function ToggleState(state, silent)
                 if state ~= nil then checked = state else checked = not checked end
-                _G.AM_CFG.Enabled = checked; cbCheck.Visible = checked
+                getgenv().AM_CFG.Enabled = checked; cbCheck.Visible = checked
                 Tw(cbBg, 0.1, "Quad", "Out",
                     { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
-                if not silent and checked then _G.Flux_RequestMatch() end
+                if not silent and checked then getgenv().Flux_RequestMatch() end
             end
 
             row.MouseButton1Click:Connect(function()
@@ -1377,9 +1378,9 @@ do
                     { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
             end)
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
-                local ns = _G.AM_CFG.Enabled
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                local ns = getgenv().AM_CFG.Enabled
                 if ns == nil then ns = checked end
                 ToggleState(ns, true)
             end)
@@ -1390,11 +1391,11 @@ do
                 oldNS = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
                     local args = { ... }
                     if not getgenv().AM_IGNORING and typeof(self) == "Instance" and self.Name == "Matchmaking" and args[1] == "cancel" then
-                        if _G.AM_CFG and _G.AM_CFG.Enabled then
+                        if getgenv().AM_CFG and getgenv().AM_CFG.Enabled then
                             task.spawn(function()
                                 task.wait(1)
-                                if _G.AM_CFG.Enabled and _G.Flux_RequestMatch then
-                                    _G.Flux_RequestMatch()
+                                if getgenv().AM_CFG.Enabled and getgenv().Flux_RequestMatch then
+                                    getgenv().Flux_RequestMatch()
                                 end
                             end)
                         end
@@ -1423,7 +1424,8 @@ do
                 "hope", "jester", "jumpStyle", "just wanna rock", "legacy", "low cortisol", "lush life",
                 "matrix", "meant", "metro man", "miss the rage", "money so big", "msg", "no hands",
                 "no the moon", "rat dance", "rather lie", "riot", "sigma walk", "snoops walk", "so nervy",
-                "stephanie", "take the l", "teeth", "tiki tiki", "unlock it", "we can go up", "wiggle", "yara aura"
+                "stephanie", "take the l", "tiki tiki", "unlock it", "we can go up", "wiggle", "yara aura","beretta","dont you wanna dance","life goes on",
+				"look at me","misery","out the way","peep","tylil dance","unhappy"
             }
             local slots = { "Slot: 1", "Slot: 2", "Slot: 3", "Slot: 4", "Slot: 5", "Slot: 6", "Slot: 7", "Slot: 8" }
 
@@ -1508,8 +1510,8 @@ do
             list.HorizontalAlignment = Enum.HorizontalAlignment.Center
             list.SortOrder = Enum.SortOrder.LayoutOrder
 
-            local toggleRow = AddCardSetting(KSHolder, "Enable Custom Sound", _G.WORLD_CFG.KillSoundEnabled, function(v)
-                _G.WORLD_CFG.KillSoundEnabled = v
+            local toggleRow = AddCardSetting(KSHolder, "Enable Custom Sound", getgenv().WORLD_CFG.KillSoundEnabled, function(v)
+                getgenv().WORLD_CFG.KillSoundEnabled = v
                 SaveUI()
             end)
             toggleRow.LayoutOrder = 1
@@ -1527,7 +1529,7 @@ do
             idTextBox.TextColor3 = TEXT
             idTextBox.PlaceholderColor3 = DIM
             idTextBox.PlaceholderText = "Roblox Sound ID..."
-            idTextBox.Text = tostring(_G.WORLD_CFG.KillSoundId)
+            idTextBox.Text = tostring(getgenv().WORLD_CFG.KillSoundId)
             idTextBox.TextSize = 11
             idTextBox.Font = Enum.Font.Gotham
             idTextBox.ClearTextOnFocus = false
@@ -1535,13 +1537,13 @@ do
 
             idTextBox.FocusLost:Connect(function()
                 local txt = idTextBox.Text:gsub("%D", "")
-                _G.WORLD_CFG.KillSoundId = txt
+                getgenv().WORLD_CFG.KillSoundId = txt
                 idTextBox.Text = txt
                 SaveUI()
             end)
 
-            local volSlider = AddCardSlider(KSHolder, "Sound Volume", 0, 200, _G.WORLD_CFG.KillSoundVolume, function(v)
-                _G.WORLD_CFG.KillSoundVolume = v
+            local volSlider = AddCardSlider(KSHolder, "Sound Volume", 0, 200, getgenv().WORLD_CFG.KillSoundVolume, function(v)
+                getgenv().WORLD_CFG.KillSoundVolume = v
                 SaveUI()
             end)
             volSlider.LayoutOrder = 3
@@ -1559,7 +1561,7 @@ do
                     if rawId ~= "" then
                         local sound = Instance.new("Sound")
                         sound.SoundId = "rbxassetid://" .. rawId
-                        sound.Volume = (_G.WORLD_CFG.KillSoundVolume or 100) / 100
+                        sound.Volume = (getgenv().WORLD_CFG.KillSoundVolume or 100) / 100
                         sound.Parent = game:GetService("SoundService")
                         sound:Play()
                         sound.Ended:Once(function()
@@ -1579,19 +1581,19 @@ do
                 Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
             end)
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
                 if not KSCard or not KSCard.Parent then return end
-                local active = _G.WORLD_CFG.KillSoundEnabled
+                local active = getgenv().WORLD_CFG.KillSoundEnabled
                 local cbBg = toggleRow:FindFirstChildOfClass("Frame")
                 local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                 if cbCheck then cbCheck.Visible = active end
                 if cbBg then
                     cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
                 end
-                idTextBox.Text = tostring(_G.WORLD_CFG.KillSoundId)
+                idTextBox.Text = tostring(getgenv().WORLD_CFG.KillSoundId)
 
-                local volVal = _G.WORLD_CFG.KillSoundVolume or 100
+                local volVal = getgenv().WORLD_CFG.KillSoundVolume or 100
                 local topFrame = volSlider:FindFirstChildOfClass("Frame")
                 if topFrame then
                     for _, child in ipairs(topFrame:GetChildren()) do
@@ -1863,8 +1865,8 @@ do
 
             local speedCheck, speedSlider
             if IsMurderVsSheriff() or IsDuelist() then
-                speedCheck = AddCardSetting(LPHolder, "Speed Boost", _G.LOCAL_PLAYER_CFG.SpeedEnabled, function(v)
-                    _G.LOCAL_PLAYER_CFG.SpeedEnabled = v
+                speedCheck = AddCardSetting(LPHolder, "Speed Boost", getgenv().LOCAL_PLAYER_CFG.SpeedEnabled, function(v)
+                    getgenv().LOCAL_PLAYER_CFG.SpeedEnabled = v
                     local char = LP.Character
                     local hum = char and char:FindFirstChildOfClass("Humanoid")
                     if hum and not v then
@@ -1874,74 +1876,74 @@ do
                             hum.WalkSpeed = 16
                         end
                     end
-                end, _G.LOCAL_PLAYER_CFG.SpeedKey, function(k)
-                    _G.LOCAL_PLAYER_CFG.SpeedKey = k.Name
+                end, getgenv().LOCAL_PLAYER_CFG.SpeedKey, function(k)
+                    getgenv().LOCAL_PLAYER_CFG.SpeedKey = k.Name
                 end)
                 speedCheck.LayoutOrder = 1
 
-                speedSlider = AddCardSlider(LPHolder, "Walk Speed", 16, 40, _G.LOCAL_PLAYER_CFG.Speed, function(v)
-                    _G.LOCAL_PLAYER_CFG.Speed = v
+                speedSlider = AddCardSlider(LPHolder, "Walk Speed", 16, 40, getgenv().LOCAL_PLAYER_CFG.Speed, function(v)
+                    getgenv().LOCAL_PLAYER_CFG.Speed = v
                 end)
                 speedSlider.LayoutOrder = 2
             end
 
-            local flyCheck = AddCardSetting(LPHolder, "Player Fly", _G.LOCAL_PLAYER_CFG.FlyEnabled, function(v)
-                _G.LOCAL_PLAYER_CFG.FlyEnabled = v
-            end, _G.LOCAL_PLAYER_CFG.FlyKey, function(k)
-                _G.LOCAL_PLAYER_CFG.FlyKey = k.Name
+            local flyCheck = AddCardSetting(LPHolder, "Player Fly", getgenv().LOCAL_PLAYER_CFG.FlyEnabled, function(v)
+                getgenv().LOCAL_PLAYER_CFG.FlyEnabled = v
+            end, getgenv().LOCAL_PLAYER_CFG.FlyKey, function(k)
+                getgenv().LOCAL_PLAYER_CFG.FlyKey = k.Name
             end)
             flyCheck.LayoutOrder = 3
 
-            local flySlider = AddCardSlider(LPHolder, "Fly Speed", 0, 1000, _G.LOCAL_PLAYER_CFG.FlySpeed, function(v)
-                _G.LOCAL_PLAYER_CFG.FlySpeed = v
+            local flySlider = AddCardSlider(LPHolder, "Fly Speed", 0, 1000, getgenv().LOCAL_PLAYER_CFG.FlySpeed, function(v)
+                getgenv().LOCAL_PLAYER_CFG.FlySpeed = v
             end)
             flySlider.LayoutOrder = 4
 
             local invisCheck
             if not IsBronxDuels() and not IsDuelist() then
-                invisCheck = AddCardSetting(LPHolder, "Invisibility", _G.LOCAL_PLAYER_CFG.InvisEnabled, function(v)
-                    _G.LOCAL_PLAYER_CFG.InvisEnabled = v
-                end, _G.LOCAL_PLAYER_CFG.InvisKey, function(k)
-                    _G.LOCAL_PLAYER_CFG.InvisKey = k.Name
-                    if _G.FLUX_UPDATE_KB_HUD then pcall(_G.FLUX_UPDATE_KB_HUD) end
+                invisCheck = AddCardSetting(LPHolder, "Invisibility", getgenv().LOCAL_PLAYER_CFG.InvisEnabled, function(v)
+                    getgenv().LOCAL_PLAYER_CFG.InvisEnabled = v
+                end, getgenv().LOCAL_PLAYER_CFG.InvisKey, function(k)
+                    getgenv().LOCAL_PLAYER_CFG.InvisKey = k.Name
+                    if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
                 end)
                 invisCheck.LayoutOrder = 5
             end
 
             local infCheck, spinCheck, spinSlider, gravCheck, gravSlider
             if IsHitmark() or IsDuelist() then
-                infCheck = AddCardSetting(LPHolder, "Infinite Jump", _G.FUN_CFG.InfJump, function(v)
-                    _G.FUN_CFG.InfJump = v
+                infCheck = AddCardSetting(LPHolder, "Infinite Jump", getgenv().FUN_CFG.InfJump, function(v)
+                    getgenv().FUN_CFG.InfJump = v
                 end)
                 infCheck.LayoutOrder = 10
 
-                spinCheck = AddCardSetting(LPHolder, "Spinbot", _G.FUN_CFG.Spinbot, function(v)
-                    _G.FUN_CFG.Spinbot = v
+                spinCheck = AddCardSetting(LPHolder, "Spinbot", getgenv().FUN_CFG.Spinbot, function(v)
+                    getgenv().FUN_CFG.Spinbot = v
                 end)
                 spinCheck.LayoutOrder = 11
 
-                spinSlider = AddCardSlider(LPHolder, "Spin Speed", 10, 100, _G.FUN_CFG.SpinSpeed, function(v)
-                    _G.FUN_CFG.SpinSpeed = v
+                spinSlider = AddCardSlider(LPHolder, "Spin Speed", 10, 100, getgenv().FUN_CFG.SpinSpeed, function(v)
+                    getgenv().FUN_CFG.SpinSpeed = v
                 end)
                 spinSlider.LayoutOrder = 12
             end
 
             if IsHitmark() then
-                gravCheck = AddCardSetting(LPHolder, "Custom Gravity", _G.FUN_CFG.GravityEnabled, function(v)
-                    _G.FUN_CFG.GravityEnabled = v
+                gravCheck = AddCardSetting(LPHolder, "Custom Gravity", getgenv().FUN_CFG.GravityEnabled, function(v)
+                    getgenv().FUN_CFG.GravityEnabled = v
                 end)
                 gravCheck.LayoutOrder = 13
 
-                gravSlider = AddCardSlider(LPHolder, "Gravity Value", 0, 500, _G.FUN_CFG.GravityValue, function(v)
-                    _G.FUN_CFG.GravityValue = v
+                gravSlider = AddCardSlider(LPHolder, "Gravity Value", 0, 500, getgenv().FUN_CFG.GravityValue, function(v)
+                    getgenv().FUN_CFG.GravityValue = v
                 end)
                 gravSlider.LayoutOrder = 14
             end
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
                 if (IsMurderVsSheriff() or IsDuelist()) and speedCheck and speedSlider then
-                    local active = _G.LOCAL_PLAYER_CFG.SpeedEnabled
+                    local active = getgenv().LOCAL_PLAYER_CFG.SpeedEnabled
                     local cbBg = speedCheck:FindFirstChildOfClass("Frame")
                     local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                     if cbCheck then cbCheck.Visible = active end
@@ -1952,10 +1954,10 @@ do
                     local kbBox = speedCheck:FindFirstChild("KeybindBox")
                     local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
                     if bindLbl then
-                        bindLbl.Text = tostring(_G.LOCAL_PLAYER_CFG.SpeedKey)
+                        bindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.SpeedKey)
                     end
 
-                    local speedVal = _G.LOCAL_PLAYER_CFG.Speed
+                    local speedVal = getgenv().LOCAL_PLAYER_CFG.Speed
                     local topFrame = speedSlider:FindFirstChildOfClass("Frame")
                     if topFrame then
                         for _, child in ipairs(topFrame:GetChildren()) do
@@ -1976,7 +1978,7 @@ do
                     end
                 end
 
-                local fActive = _G.LOCAL_PLAYER_CFG.FlyEnabled
+                local fActive = getgenv().LOCAL_PLAYER_CFG.FlyEnabled
                 local fCbBg = flyCheck:FindFirstChildOfClass("Frame")
                 local fCbCheck = fCbBg and fCbBg:FindFirstChildOfClass("TextLabel")
                 if fCbCheck then fCbCheck.Visible = fActive end
@@ -1987,10 +1989,10 @@ do
                 local fKbBox = flyCheck:FindFirstChild("KeybindBox")
                 local fBindLbl = fKbBox and fKbBox:FindFirstChild("BindLabel")
                 if fBindLbl then
-                    fBindLbl.Text = tostring(_G.LOCAL_PLAYER_CFG.FlyKey)
+                    fBindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.FlyKey)
                 end
 
-                local flyVal = _G.LOCAL_PLAYER_CFG.FlySpeed
+                local flyVal = getgenv().LOCAL_PLAYER_CFG.FlySpeed
                 local fTopFrame = flySlider:FindFirstChildOfClass("Frame")
                 if fTopFrame then
                     for _, child in ipairs(fTopFrame:GetChildren()) do
@@ -2011,7 +2013,7 @@ do
                 end
 
                 if invisCheck then
-                    local iActive = _G.LOCAL_PLAYER_CFG.InvisEnabled
+                    local iActive = getgenv().LOCAL_PLAYER_CFG.InvisEnabled
                     local iCbBg = invisCheck:FindFirstChildOfClass("Frame")
                     local iCbCheck = iCbBg and iCbBg:FindFirstChildOfClass("TextLabel")
                     if iCbCheck then iCbCheck.Visible = iActive end
@@ -2022,13 +2024,13 @@ do
                     local iKbBox = invisCheck:FindFirstChild("KeybindBox")
                     local iBindLbl = iKbBox and iKbBox:FindFirstChild("BindLabel")
                     if iBindLbl then
-                        iBindLbl.Text = tostring(_G.LOCAL_PLAYER_CFG.InvisKey)
+                        iBindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.InvisKey)
                     end
                 end
 
                 if IsHitmark() or IsDuelist() then
                     if infCheck then
-                        local active = _G.FUN_CFG.InfJump
+                        local active = getgenv().FUN_CFG.InfJump
                         local cbBg = infCheck:FindFirstChildOfClass("Frame")
                         local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                         if cbCheck then cbCheck.Visible = active end
@@ -2037,7 +2039,7 @@ do
                         end
                     end
                     if spinCheck then
-                        local active = _G.FUN_CFG.Spinbot
+                        local active = getgenv().FUN_CFG.Spinbot
                         local cbBg = spinCheck:FindFirstChildOfClass("Frame")
                         local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                         if cbCheck then cbCheck.Visible = active end
@@ -2046,7 +2048,7 @@ do
                         end
                     end
                     if spinSlider then
-                        local val = _G.FUN_CFG.SpinSpeed
+                        local val = getgenv().FUN_CFG.SpinSpeed
                         local topFrame = spinSlider:FindFirstChildOfClass("Frame")
                         if topFrame then
                             for _, child in ipairs(topFrame:GetChildren()) do
@@ -2067,7 +2069,7 @@ do
                         end
                     end
                     if gravCheck then
-                        local active = _G.FUN_CFG.GravityEnabled
+                        local active = getgenv().FUN_CFG.GravityEnabled
                         local cbBg = gravCheck:FindFirstChildOfClass("Frame")
                         local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                         if cbCheck then cbCheck.Visible = active end
@@ -2076,7 +2078,7 @@ do
                         end
                     end
                     if gravSlider then
-                        local val = _G.FUN_CFG.GravityValue
+                        local val = getgenv().FUN_CFG.GravityValue
                         local topFrame = gravSlider:FindFirstChildOfClass("Frame")
                         if topFrame then
                             for _, child in ipairs(topFrame:GetChildren()) do
@@ -2233,27 +2235,27 @@ for i, data in ipairs(CHECKS) do
         })
 
         if data.label == "Aimbot" then
-            _G.AIMBOT_CFG.Enabled = checked
+            getgenv().AIMBOT_CFG.Enabled = checked
         elseif data.label == "Draw Fov" then
-            _G.AIMBOT_CFG.DrawFov = checked
+            getgenv().AIMBOT_CFG.DrawFov = checked
         elseif data.label == "Visible Check" then
-            _G.AIMBOT_CFG.VisibleCheck = checked
+            getgenv().AIMBOT_CFG.VisibleCheck = checked
         elseif data.label == "Humanize Aimbot" then
-            _G.AIMBOT_CFG.Humanize = checked
+            getgenv().AIMBOT_CFG.Humanize = checked
         elseif data.label == "Ignore Dead Players" then
-            _G.AIMBOT_CFG.IgnoreDead = checked
+            getgenv().AIMBOT_CFG.IgnoreDead = checked
         end
         if not silent then NOTIFY(data.label, checked and "Enabled" or "Disabled", 2) end
     end
 
-    _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-    table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+    getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+    table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
         local ns = checked
         if data.label == "Aimbot" then
-            ns = _G.AIMBOT_CFG.Enabled
+            ns = getgenv().AIMBOT_CFG.Enabled
 
-            if data.badge and _G.AIMBOT_CFG.Keybind and bLbl then
-                local k = _G.AIMBOT_CFG.Keybind
+            if data.badge and getgenv().AIMBOT_CFG.Keybind and bLbl then
+                local k = getgenv().AIMBOT_CFG.Keybind
                 local name = (typeof(k) == "EnumItem" and k.Name or tostring(k):gsub("Enum.UserInputType.", ""))
                 if name ~= "None" and name ~= "" then
                     bLbl.Text = name:sub(1, 6)
@@ -2262,13 +2264,13 @@ for i, data in ipairs(CHECKS) do
                 end
             end
         elseif data.label == "Draw Fov" then
-            ns = _G.AIMBOT_CFG.DrawFov
+            ns = getgenv().AIMBOT_CFG.DrawFov
         elseif data.label == "Visible Check" then
-            ns = _G.AIMBOT_CFG.VisibleCheck
+            ns = getgenv().AIMBOT_CFG.VisibleCheck
         elseif data.label == "Humanize Aimbot" then
-            ns = _G.AIMBOT_CFG.Humanize
+            ns = getgenv().AIMBOT_CFG.Humanize
         elseif data.label == "Ignore Dead Players" then
-            ns = _G.AIMBOT_CFG.IgnoreDead
+            ns = getgenv().AIMBOT_CFG.IgnoreDead
         end
         if ns == nil then ns = checked end
         ToggleState(ns, true)
@@ -2301,17 +2303,17 @@ for i, data in ipairs(CHECKS) do
                     bLbl.TextColor3 = TEXT
                     Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
                     if data.label == "Aimbot" then
-                        _G.AIMBOT_CFG.Keybind = boundKey
-                        if _G.FLUX_UPDATE_KB_HUD then pcall(_G.FLUX_UPDATE_KB_HUD) end
+                        getgenv().AIMBOT_CFG.Keybind = boundKey
+                        if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
                     end
                     conn:Disconnect()
                 end
             end)
         end)
 
-        table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gp)
+        table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gp)
             if gp or waiting then return end
-            local currentBind = (data.label == "Aimbot") and _G.AIMBOT_CFG.Keybind or nil
+            local currentBind = (data.label == "Aimbot") and getgenv().AIMBOT_CFG.Keybind or nil
             if not currentBind then return end
 
             local match = false
@@ -2325,8 +2327,8 @@ for i, data in ipairs(CHECKS) do
 
             if match then
                 ToggleState()
-                if _G.FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                 end
             end
         end))
@@ -2342,13 +2344,13 @@ for i, data in ipairs(CHECKS) do
 end
 
 local targetPartDd = AddDropdown(LeftPanel, { "Head", "UpperTorso", "HumanoidRootPart" }, "Head", function(v)
-    _G.AIMBOT_CFG.TargetPart = v
+    getgenv().AIMBOT_CFG.TargetPart = v
 end)
 targetPartDd.Position = UDim2.new(0, 8, 0, 260)
 targetPartDd.Size = UDim2.new(0.48, -12, 0, 32)
 
 local aimModeDd = AddDropdown(LeftPanel, { "Mouse Aim", "Camera Aim" }, "Mouse Aim", function(v)
-    _G.AIMBOT_CFG.AimMode = v
+    getgenv().AIMBOT_CFG.AimMode = v
 end)
 aimModeDd.Position = UDim2.new(0.52, 4, 0, 260)
 aimModeDd.Size = UDim2.new(0.48, -12, 0, 32)
@@ -2420,7 +2422,7 @@ for i, data in ipairs(SLIDERS) do
         Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
         Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
 
-        if data.key then _G.AIMBOT_CFG[data.key] = nv end
+        if data.key then getgenv().AIMBOT_CFG[data.key] = nv end
     end
 
     track.InputBegan:Connect(function(inp)
@@ -2509,8 +2511,8 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
             table.insert(colorBtns, cBtn)
 
             cBtn.MouseButton1Click:Connect(function()
-                if _G.OpenPicker then
-                    _G.OpenPicker(cBtn.BackgroundColor3, cBtn.AbsolutePosition, function(c)
+                if getgenv().OpenPicker then
+                    getgenv().OpenPicker(cBtn.BackgroundColor3, cBtn.AbsolutePosition, function(c)
                         cBtn.BackgroundColor3 = c
                         local clrs = {}
                         for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
@@ -2550,7 +2552,7 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
                     local clrs = {}
                     for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
                     if callback then callback(checked, clrs, curBind) end
-                    if _G.FLUX_UPDATE_KB_HUD then pcall(_G.FLUX_UPDATE_KB_HUD) end
+                    if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
 
                     conn:Disconnect()
                 end
@@ -2563,13 +2565,13 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
         end)
     end
 
-    _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-    table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+    getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+    table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
         local ns = checked
         if label == "Enabled" then
-            ns = _G.ESP_CFG.Enabled
-            if hasKeybind and _G.ESP_CFG.Keybind then
-                curBind = _G.ESP_CFG.Keybind
+            ns = getgenv().ESP_CFG.Enabled
+            if hasKeybind and getgenv().ESP_CFG.Keybind then
+                curBind = getgenv().ESP_CFG.Keybind
                 local badge = row:FindFirstChild("KeybindBadge")
                 local bLbl = badge and badge:FindFirstChildOfClass("TextLabel")
                 if bLbl then
@@ -2577,43 +2579,43 @@ function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback,
                 end
             end
         elseif label == "Enable Bots" then
-            ns = _G.ESP_CFG.Bots
+            ns = getgenv().ESP_CFG.Bots
         elseif label == "Ignore Team" then
-            ns = _G.ESP_CFG.IgnoreTeam
+            ns = getgenv().ESP_CFG.IgnoreTeam
         elseif label == "Player Names" then
-            ns = _G.ESP_CFG.Names
+            ns = getgenv().ESP_CFG.Names
         elseif label == "Display Names" then
-            ns = _G.ESP_CFG.DisplayNames
+            ns = getgenv().ESP_CFG.DisplayNames
         elseif label == "Equipped Tool" then
-            ns = _G.ESP_CFG.Tools
+            ns = getgenv().ESP_CFG.Tools
         elseif label == "Distance" then
-            ns = _G.ESP_CFG.Distance
+            ns = getgenv().ESP_CFG.Distance
         elseif label == "Health Bars" then
-            ns = _G.ESP_CFG.HealthBar
+            ns = getgenv().ESP_CFG.HealthBar
         elseif label == "Health Text" then
-            ns = _G.ESP_CFG.HealthText
+            ns = getgenv().ESP_CFG.HealthText
         elseif label == "Skeleton" then
-            ns = _G.ESP_CFG.Skeleton
+            ns = getgenv().ESP_CFG.Skeleton
         elseif label == "Chams" then
-            ns = _G.ESP_CFG.Chams
+            ns = getgenv().ESP_CFG.Chams
         elseif label == "Tool Chams" then
-            ns = _G.ESP_CFG.ToolChams
+            ns = getgenv().ESP_CFG.ToolChams
         elseif label == "Snaplines" then
-            ns = _G.ESP_CFG.Snaplines
+            ns = getgenv().ESP_CFG.Snaplines
         elseif label == "Off-Screen Lines" then
-            ns = _G.ESP_CFG.OffScreen
+            ns = getgenv().ESP_CFG.OffScreen
         elseif label == "Boxes" then
-            ns = _G.ESP_CFG.Boxes
+            ns = getgenv().ESP_CFG.Boxes
         elseif label == "Fill Boxes" then
-            ns = _G.ESP_CFG.BoxFill
+            ns = getgenv().ESP_CFG.BoxFill
         elseif label == "Full Bright" then
-            ns = _G.WORLD_CFG.FullBright
+            ns = getgenv().WORLD_CFG.FullBright
         elseif label == "No Fog" then
-            ns = _G.WORLD_CFG.NoFog
+            ns = getgenv().WORLD_CFG.NoFog
         elseif label == "Atmosphere Color" then
-            ns = _G.WORLD_CFG.AtmosColor ~= nil
+            ns = getgenv().WORLD_CFG.AtmosColor ~= nil
         elseif label == "FPS Booster" then
-            ns = _G.WORLD_CFG.FPSBooster
+            ns = getgenv().WORLD_CFG.FPSBooster
         end
         if ns == nil then ns = checked end
         ToggleState(ns, true)
@@ -2791,7 +2793,7 @@ local function SETUP_COLOR_PICKER()
         end
     end)
 
-    _G.OpenPicker = function(cur, pos, cb)
+    getgenv().OpenPicker = function(cur, pos, cb)
         ch, cs, cv = cur:ToHSV()
         PICKER_CALLBACK = cb
         PICKER_MAIN.Position = UDim2.new(0, pos.X - 210, 0, pos.Y - 50)
@@ -2868,7 +2870,7 @@ do
             end)
         end
 
-        _G.FLUX_CONFIG_TAB_THEME_SYNC = function()
+        getgenv().FLUX_CONFIG_TAB_THEME_SYNC = function()
             for i, ref in ipairs(configTabBtns) do
                 if ref and ref.lbl then
                     ref.lbl.TextColor3 = (i == activeConfigTabIdx) and ACCENT or DIM
@@ -2913,13 +2915,13 @@ do
             return {
                 placeId     = game.PlaceId,
                 created     = os.date("%x %X"),
-                AIMBOT      = copy(_G.AIMBOT_CFG),
-                SILENT      = copy(_G.SILENT_CFG),
-                AM          = copy(_G.AM_CFG),
-                WORLD       = copy(_G.WORLD_CFG),
-                LOCALPLAYER = copy(_G.LOCAL_PLAYER_CFG),
-                FUN         = copy(_G.FUN_CFG),
-                ESP         = _G.ESP_CFG and copy(_G.ESP_CFG) or nil,
+                AIMBOT      = copy(getgenv().AIMBOT_CFG),
+                SILENT      = copy(getgenv().SILENT_CFG),
+                AM          = copy(getgenv().AM_CFG),
+                WORLD       = copy(getgenv().WORLD_CFG),
+                LOCALPLAYER = copy(getgenv().LOCAL_PLAYER_CFG),
+                FUN         = copy(getgenv().FUN_CFG),
+                ESP         = getgenv().ESP_CFG and copy(getgenv().ESP_CFG) or nil,
                 UI          = {
                     notifications = useNotifications,
                     watermark     = useWatermark,
@@ -2938,13 +2940,13 @@ do
                 if not src then return end
                 for k, v in pairs(src) do dst[k] = v end
             end
-            merge(_G.AIMBOT_CFG, data.AIMBOT)
-            merge(_G.SILENT_CFG, data.SILENT)
-            merge(_G.AM_CFG, data.AM)
-            merge(_G.WORLD_CFG, data.WORLD)
-            if data.LOCALPLAYER then merge(_G.LOCAL_PLAYER_CFG, data.LOCALPLAYER) end
-            if data.FUN then merge(_G.FUN_CFG, data.FUN) end
-            if data.ESP and _G.ESP_CFG then merge(_G.ESP_CFG, data.ESP) end
+            merge(getgenv().AIMBOT_CFG, data.AIMBOT)
+            merge(getgenv().SILENT_CFG, data.SILENT)
+            merge(getgenv().AM_CFG, data.AM)
+            merge(getgenv().WORLD_CFG, data.WORLD)
+            if data.LOCALPLAYER then merge(getgenv().LOCAL_PLAYER_CFG, data.LOCALPLAYER) end
+            if data.FUN then merge(getgenv().FUN_CFG, data.FUN) end
+            if data.ESP and getgenv().ESP_CFG then merge(getgenv().ESP_CFG, data.ESP) end
 
             if data.UI then
                 if data.UI.notifications ~= nil then useNotifications = data.UI.notifications end
@@ -2954,8 +2956,8 @@ do
                 if ApplyUIPreferences then ApplyUIPreferences() end
             end
 
-            if _G.FLUX_UI_UPDATE_FUNCS then
-                for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do
+            if getgenv().FLUX_UI_UPDATE_FUNCS then
+                for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do
                     pcall(f)
                 end
             end
@@ -3025,7 +3027,7 @@ do
         Corner(ddPopup, 6); Stroke(ddPopup, STROKE2, 1)
         Instance.new("UIListLayout", ddPopup).SortOrder = Enum.SortOrder.LayoutOrder
 
-        local totalLbl
+        local totalLbl 
         local function RefreshTotalCount()
             if totalLbl then
                 local configs = ListConfigs()
@@ -3050,7 +3052,7 @@ do
                     Tw(ddPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
                     task.delay(0.16, function() ddPopup.Visible = false end)
                     Tw(ddArrow, 0.15, "Quad", "Out", { Rotation = 0 })
-                    if _G.UpdateConfigDetails then _G.UpdateConfigDetails(n) end
+                    if getgenv().UpdateConfigDetails then getgenv().UpdateConfigDetails(n) end
                 end)
             end
             RefreshTotalCount()
@@ -3144,7 +3146,7 @@ do
         infoList.Size = UDim2.new(1, 0, 0, 160); infoList.TextWrapped = true; infoList.TextYAlignment = Enum
             .TextYAlignment.Top
 
-        _G.UpdateConfigDetails = function(name)
+        getgenv().UpdateConfigDetails = function(name)
             if not name then
                 infoList.Text = "No config selected"; return
             end
@@ -3529,7 +3531,7 @@ do
         end)
 
         clearBtn.MouseButton1Click:Connect(function()
-            _G.PREFERENCES_CFG.IgnoredPlayers = {}
+            getgenv().PREFERENCES_CFG.IgnoredPlayers = {}
             SaveUI()
             RefreshIgnorePlayers()
         end)
@@ -3540,15 +3542,15 @@ do
             Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
         end)
 
-        table.insert(_G.FLUX_CONNS, Players.PlayerAdded:Connect(RefreshIgnorePlayers))
-        table.insert(_G.FLUX_CONNS, Players.PlayerRemoving:Connect(function(player)
+        table.insert(getgenv().FLUX_CONNS, Players.PlayerAdded:Connect(RefreshIgnorePlayers))
+        table.insert(getgenv().FLUX_CONNS, Players.PlayerRemoving:Connect(function(player)
             if IsIgnoredPlayer(player) then
                 RefreshIgnoredCount()
             end
             RefreshIgnorePlayers()
         end))
 
-        _G.FLUX_PREFERENCES_REFRESH = RefreshIgnorePlayers
+        getgenv().FLUX_PREFERENCES_REFRESH = RefreshIgnorePlayers
         RefreshIgnorePlayers()
     end
 end
@@ -3671,6 +3673,7 @@ local function applyUITheme(name)
     end
 
     if currentNav then
+
         currentNav.sym.ImageColor3 = t.accent
         currentNav.lbl.TextColor3 = t.accent
         currentNav.dot.BackgroundColor3 = t.accent
@@ -3702,7 +3705,7 @@ local function applyUITheme(name)
     if stBtns[activeStIdx] then Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
     for _, ul in ipairs(vsLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
     if vsBtns[activeVsIdx] then Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
-    if _G.FLUX_CONFIG_TAB_THEME_SYNC then pcall(_G.FLUX_CONFIG_TAB_THEME_SYNC) end
+    if getgenv().FLUX_CONFIG_TAB_THEME_SYNC then pcall(getgenv().FLUX_CONFIG_TAB_THEME_SYNC) end
 
     for _, v in ipairs(SG:GetDescendants()) do
         if v:IsA("TextLabel") and v.Text == "✓" then
@@ -3717,8 +3720,8 @@ local function applyUITheme(name)
 
     Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
 
-    if _G.FLUX_KB_HUD_ACCENT_UPDATE then _G.FLUX_KB_HUD_ACCENT_UPDATE() end
-    if _G.FLUX_PREFERENCES_REFRESH then pcall(_G.FLUX_PREFERENCES_REFRESH) end
+    if getgenv().FLUX_KB_HUD_ACCENT_UPDATE then getgenv().FLUX_KB_HUD_ACCENT_UPDATE() end
+    if getgenv().FLUX_PREFERENCES_REFRESH then pcall(getgenv().FLUX_PREFERENCES_REFRESH) end
 end
 
 local VisualsPage = navPages["Visuals"]
@@ -3787,7 +3790,7 @@ do
     espList.Padding = UDim.new(0, 2)
     espList.Parent = espContent
 
-    _G.ESP_CFG = {
+    getgenv().ESP_CFG = {
         Enabled = false,
         Names = false,
         DisplayNames = false,
@@ -3816,13 +3819,14 @@ do
 
     AddESPSetting(espContent, "Enabled", false, 0, true,
         function(v, c, k)
-            _G.ESP_CFG.Enabled = v; if k then _G.ESP_CFG.Keybind = k end
+            getgenv().ESP_CFG.Enabled = v; if k then getgenv().ESP_CFG.Keybind = k end
         end)
     AddESPSetting(espContent, "Enable Bots", false, 0, false, function(v)
-        _G.ESP_CFG.Bots = v
+        getgenv().ESP_CFG.Bots = v
         if not v then
-            if _G.ESP_CACHE then
-                for target, e in pairs(_G.ESP_CACHE) do
+
+            if getgenv().ESP_CACHE then
+                for target, e in pairs(getgenv().ESP_CACHE) do
                     if not Players:GetPlayerFromCharacter(target) then
                         e.FRM.Visible = false
                         if e.CHAM then
@@ -3838,57 +3842,57 @@ do
     end)
 
     if IsMurderVsSheriff() or IsDuelist() then
-        AddESPSetting(espContent, "Ignore Team", false, 0, false, function(v) _G.ESP_CFG.IgnoreTeam = v end)
+        AddESPSetting(espContent, "Ignore Team", false, 0, false, function(v) getgenv().ESP_CFG.IgnoreTeam = v end)
     end
     AddESPSetting(espContent, "Player Names", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.Names = v; if c then _G.ESP_CFG.NameColor = c[1] end
+            getgenv().ESP_CFG.Names = v; if c then getgenv().ESP_CFG.NameColor = c[1] end
         end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Display Names", false, 0, false, function(v) _G.ESP_CFG.DisplayNames = v end)
+    AddESPSetting(espContent, "Display Names", false, 0, false, function(v) getgenv().ESP_CFG.DisplayNames = v end)
     AddESPSetting(espContent, "Equipped Tool", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.Tools = v; if c then _G.ESP_CFG.ToolColor = c[1] end
+            getgenv().ESP_CFG.Tools = v; if c then getgenv().ESP_CFG.ToolColor = c[1] end
         end, { Color3.new(1, 1, 1) })
     AddESPSetting(espContent, "Distance", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.Distance = v; if c then _G.ESP_CFG.DistColor = c[1] end
+            getgenv().ESP_CFG.Distance = v; if c then getgenv().ESP_CFG.DistColor = c[1] end
         end, { Color3.new(1, 1, 1) })
     AddESPSetting(espContent, "Health Bars", false, 2, false,
         function(v, c)
-            _G.ESP_CFG.HealthBar = v; if c then
-                _G.ESP_CFG.HealthColor1 = c[1]; _G.ESP_CFG.HealthColor2 = c[2]
+            getgenv().ESP_CFG.HealthBar = v; if c then
+                getgenv().ESP_CFG.HealthColor1 = c[1]; getgenv().ESP_CFG.HealthColor2 = c[2]
             end
         end, { Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0) })
-    AddESPSetting(espContent, "Health Text", false, 0, false, function(v) _G.ESP_CFG.HealthText = v end)
+    AddESPSetting(espContent, "Health Text", false, 0, false, function(v) getgenv().ESP_CFG.HealthText = v end)
     AddESPSetting(espContent, "Skeleton", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.Skeleton = v; if c then _G.ESP_CFG.SkelColor = c[1] end
+            getgenv().ESP_CFG.Skeleton = v; if c then getgenv().ESP_CFG.SkelColor = c[1] end
         end, { Color3.new(1, 1, 1) })
     AddESPSetting(espContent, "Chams", false, 2, false,
         function(v, c)
-            _G.ESP_CFG.Chams = v; if c then
-                _G.ESP_CFG.ChamColor1 = c[1]; _G.ESP_CFG.ChamColor2 = c[2]
+            getgenv().ESP_CFG.Chams = v; if c then
+                getgenv().ESP_CFG.ChamColor1 = c[1]; getgenv().ESP_CFG.ChamColor2 = c[2]
             end
         end, { Color3.new(1, 1, 1), Color3.new(1, 1, 1) })
     AddESPSetting(espContent, "Tool Chams", false, 2, false,
         function(v, c)
-            _G.ESP_CFG.ToolChams = v; if c then
-                _G.ESP_CFG.ToolChamColor1 = c[1]; _G.ESP_CFG.ToolChamColor2 = c[2]
+            getgenv().ESP_CFG.ToolChams = v; if c then
+                getgenv().ESP_CFG.ToolChamColor1 = c[1]; getgenv().ESP_CFG.ToolChamColor2 = c[2]
             end
         end, { Color3.new(1, 1, 1), Color3.new(1, 1, 1) })
     if IsDuelist() then
         AddESPSetting(espContent, "Local Gun Cham", false, 1, false,
             function(v, c)
-                _G.ESP_CFG.LocalGunCham = v; if c then
-                    _G.ESP_CFG.LocalGunChamColor1 = c[1]
+                getgenv().ESP_CFG.LocalGunCham = v; if c then
+                    getgenv().ESP_CFG.LocalGunChamColor1 = c[1]
                 end
             end, { Color3.fromRGB(0, 255, 255) })
     end
     AddESPSetting(espContent, "Snaplines", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.Snaplines = v; if c then _G.ESP_CFG.SnapColor = c[1] end
+            getgenv().ESP_CFG.Snaplines = v; if c then getgenv().ESP_CFG.SnapColor = c[1] end
         end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Off-Screen Lines", false, 0, false, function(v) _G.ESP_CFG.OffScreen = v end)
+    AddESPSetting(espContent, "Off-Screen Lines", false, 0, false, function(v) getgenv().ESP_CFG.OffScreen = v end)
 
     local pbCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 140), UDim2.new(0.48, 1, 0, 3), PANEL)
     Corner(pbCard, 8)
@@ -3905,15 +3909,15 @@ do
 
     AddESPSetting(pbContent, "Boxes", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.Boxes = v; if c then _G.ESP_CFG.BoxColor = c[1] end
+            getgenv().ESP_CFG.Boxes = v; if c then getgenv().ESP_CFG.BoxColor = c[1] end
         end, { Color3.new(1, 1, 1) })
     AddESPSetting(pbContent, "Fill Boxes", false, 1, false,
         function(v, c)
-            _G.ESP_CFG.BoxFill = v; if c then _G.ESP_CFG.FillColor = c[1] end
+            getgenv().ESP_CFG.BoxFill = v; if c then getgenv().ESP_CFG.FillColor = c[1] end
         end, { Color3.new(1, 1, 1) })
     AddESPSetting(pbContent, "Animated Boxes", false, 0, false,
         function(v)
-            _G.ESP_CFG.AnimBoxFill = v
+            getgenv().ESP_CFG.AnimBoxFill = v
         end)
 
     local vsCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 260), UDim2.new(0.48, 1, 0, 153), PANEL)
@@ -3963,7 +3967,7 @@ do
         b.MouseLeave:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
         b.MouseButton1Click:Connect(function()
             fontSel.Text = "Text Font: " .. f
-            _G.ESP_CFG.FontName = f
+            getgenv().ESP_CFG.FontName = f
             fontOpen = false
             Tw(fontPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
             task.delay(0.16, function() fontPop.Visible = false end)
@@ -4039,13 +4043,13 @@ do
         end)
     end
 
-    AddVSSlider(vsContent, "Text Size", 8, 24, 11, "", function(v) _G.ESP_CFG.FontSize = v end)
-    AddVSSlider(vsContent, "Max Render Distance", 50, 2000, 500, "st", function(v) _G.ESP_CFG.MaxDistance = v end)
+    AddVSSlider(vsContent, "Text Size", 8, 24, 11, "", function(v) getgenv().ESP_CFG.FontSize = v end)
+    AddVSSlider(vsContent, "Max Render Distance", 50, 2000, 500, "st", function(v) getgenv().ESP_CFG.MaxDistance = v end)
 
     local tracerRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
     Corner(tracerRow, 6)
     Stroke(tracerRow, STROKE2, 1)
-    local tracerSel = NewLabel(tracerRow, "Tracer Origin: " .. _G.ESP_CFG.TracerOrigin, 11, TEXT)
+    local tracerSel = NewLabel(tracerRow, "Tracer Origin: " .. getgenv().ESP_CFG.TracerOrigin, 11, TEXT)
     tracerSel.Position = UDim2.new(0, 10, 0, 0)
     tracerSel.Size = UDim2.new(1, -30, 1, 0)
     local tracerArr = Instance.new("ImageLabel", tracerRow)
@@ -4076,7 +4080,7 @@ do
         b.MouseLeave:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
         b.MouseButton1Click:Connect(function()
             tracerSel.Text = "Tracer Origin: " .. t
-            _G.ESP_CFG.TracerOrigin = t
+            getgenv().ESP_CFG.TracerOrigin = t
             tracerOpen = false
             Tw(tracerPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
             task.delay(0.16, function() tracerPop.Visible = false end)
@@ -4120,15 +4124,15 @@ local R6_BONES = {
     { "Head",  "Torso" }, { "Torso", "Left Arm" }, { "Torso", "Right Arm" },
     { "Torso", "Left Leg" }, { "Torso", "Right Leg" }
 }
-if _G.ESP_CACHE then
-    for _, obj in pairs(_G.ESP_CACHE) do
+if getgenv().ESP_CACHE then
+    for _, obj in pairs(getgenv().ESP_CACHE) do
         if obj.FRM then obj.FRM:Destroy() end
         if obj.CHAM then obj.CHAM:Destroy() end
         if obj.TCHAM then obj.TCHAM:Destroy() end
     end
 end
 local CACHE = {}
-_G.ESP_CACHE = CACHE
+getgenv().ESP_CACHE = CACHE
 local LOCAL_GUN_CACHE = { Mats = {}, Colors = {}, Highlights = {}, LastTool = nil }
 
 local function MK_ESP(p)
@@ -4169,7 +4173,7 @@ local function MK_ESP(p)
     end
 
     E.FILL.BorderSizePixel = 0
-    E.FILL.BackgroundTransparency = 1
+    E.FILL.BackgroundTransparency = 1 
     E.FILL.ZIndex = -1
 
     local ff1 = Instance.new("Frame", E.FILL)
@@ -4216,11 +4220,11 @@ local function MK_ESP(p)
     return E
 end
 
-_G.BOT_LIST = {}
+getgenv().BOT_LIST = {}
 task.spawn(function()
     while task.wait(1.5) do
         if getgenv().FLUX_SESSION ~= MySession then break end
-        if _G.ESP_CFG and _G.ESP_CFG.Bots then
+        if getgenv().ESP_CFG and getgenv().ESP_CFG.Bots then
             local nb = {}
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("Humanoid") then
@@ -4233,26 +4237,26 @@ task.spawn(function()
                     end
                 end
             end
-            _G.BOT_LIST = nb
+            getgenv().BOT_LIST = nb
         else
-            _G.BOT_LIST = {}
+            getgenv().BOT_LIST = {}
         end
     end
 end)
 
 local function UPD_ESP()
     local cam = workspace.CurrentCamera
-    local myTeamFolder = _G.MY_TEAM_CACHE
+    local myTeamFolder = getgenv().MY_TEAM_CACHE
 
     local allPlayers = Players:GetPlayers()
     local valid_targets = {}
 
-    local hasActiveMatch = (_G.ACTIVE_MATCH_PLAYERS and next(_G.ACTIVE_MATCH_PLAYERS) ~= nil)
+    local hasActiveMatch = (getgenv().ACTIVE_MATCH_PLAYERS and next(getgenv().ACTIVE_MATCH_PLAYERS) ~= nil)
     for i = 1, #allPlayers do
         local p = allPlayers[i]
         if p ~= LP and not IsIgnoredPlayer(p) then
-            if not hasActiveMatch or _G.ACTIVE_MATCH_PLAYERS[p.Name] then
-                if _G.ESP_CFG and _G.ESP_CFG.IgnoreTeam then
+            if not hasActiveMatch or getgenv().ACTIVE_MATCH_PLAYERS[p.Name] then
+                if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
                     local isTeammate = false
                     if IsBronxDuels() or IsDuelist() then
                         local myTeam = LP:GetAttribute("DuelsTeam")
@@ -4278,8 +4282,8 @@ local function UPD_ESP()
         end
     end
 
-    if _G.ESP_CFG.Bots then
-        local bots = _G.BOT_LIST or {}
+    if getgenv().ESP_CFG.Bots then
+        local bots = getgenv().BOT_LIST or {}
         for i = 1, #bots do
             valid_targets[bots[i]] = true
         end
@@ -4305,8 +4309,8 @@ local function UPD_ESP()
         end
     end
 
-    local fontCache = Enum.Font[_G.ESP_CFG.FontName or "GothamBold"]
-    local fontSizeCache = _G.ESP_CFG.FontSize or 11
+    local fontCache = Enum.Font[getgenv().ESP_CFG.FontName or "GothamBold"]
+    local fontSizeCache = getgenv().ESP_CFG.FontSize or 11
 
     for p, _ in pairs(valid_targets) do
         local E = CACHE[p]
@@ -4341,8 +4345,8 @@ local function UPD_ESP()
                 (C:IsDescendantOf(workspace)) and
                 not (C:GetAttribute("Downed") or C:GetAttribute("IsDead"))
 
-            if _G.ESP_CFG.Enabled and isAlive then
-                E.FRM.Visible = vis or (_G.ESP_CFG.OffScreen and _G.ESP_CFG.Snaplines)
+            if getgenv().ESP_CFG.Enabled and isAlive then
+                E.FRM.Visible = vis or (getgenv().ESP_CFG.OffScreen and getgenv().ESP_CFG.Snaplines)
 
                 if E.FRM.Visible then
                     local fovFactor = 2 * math.tan(math.rad(cam.FieldOfView / 2))
@@ -4350,13 +4354,14 @@ local function UPD_ESP()
                     local s_x = s_y * 0.7
 
                     if IsDuelist() then
+
                         s_y = (5.91 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
                         s_x = (3.00 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
                     end
 
                     local x, y = pos.X - s_x / 2, pos.Y - s_y / 2
 
-                    if _G.ESP_CFG.Chams then
+                    if getgenv().ESP_CFG.Chams then
                         if not E.CHAM or E.CHAM.Parent ~= C then
                             if E.CHAM then E.CHAM:Destroy() end
                             E.CHAM = Instance.new("Highlight", C)
@@ -4368,13 +4373,13 @@ local function UPD_ESP()
                                 if not E.CharCache.Mats then E.CharCache.Mats = {} end
                                 if not E.CharCache.Mats[part] then E.CharCache.Mats[part] = part.Material end
                                 part.Material = Enum.Material.ForceField
-                                part.Color = _G.ESP_CFG.ChamColor1 or Color3.new(1, 1, 1)
+                                part.Color = getgenv().ESP_CFG.ChamColor1 or Color3.new(1, 1, 1)
                             end
                         end
                         E.IsMaterialCham = true
 
-                        E.CHAM.FillTransparency = 1
-                        E.CHAM.OutlineColor = _G.ESP_CFG.ChamColor2 or Color3.new(1, 1, 1)
+                        E.CHAM.FillTransparency = 1 
+                        E.CHAM.OutlineColor = getgenv().ESP_CFG.ChamColor2 or Color3.new(1, 1, 1)
                         E.CHAM.OutlineTransparency = 0
                         E.CHAM.Enabled = true
                     elseif E.CHAM or E.IsMaterialCham then
@@ -4390,7 +4395,7 @@ local function UPD_ESP()
                     end
 
                     local tool = C:FindFirstChildOfClass("Tool")
-                    if _G.ESP_CFG.ToolChams and tool then
+                    if getgenv().ESP_CFG.ToolChams and tool then
                         if not E.TCHAM or E.TCHAM.Parent ~= tool then
                             if E.TCHAM then E.TCHAM:Destroy() end
                             E.TCHAM = Instance.new("Highlight", tool)
@@ -4402,13 +4407,13 @@ local function UPD_ESP()
                                 if not E.CharCache.ToolMats then E.CharCache.ToolMats = {} end
                                 if not E.CharCache.ToolMats[part] then E.CharCache.ToolMats[part] = part.Material end
                                 part.Material = Enum.Material.ForceField
-                                part.Color = _G.ESP_CFG.ToolChamColor1 or Color3.new(1, 1, 1)
+                                part.Color = getgenv().ESP_CFG.ToolChamColor1 or Color3.new(1, 1, 1)
                             end
                         end
                         E.IsToolMatCham = true
 
                         E.TCHAM.FillTransparency = 1
-                        E.TCHAM.OutlineColor = _G.ESP_CFG.ToolChamColor2 or Color3.new(1, 1, 1)
+                        E.TCHAM.OutlineColor = getgenv().ESP_CFG.ToolChamColor2 or Color3.new(1, 1, 1)
                         E.TCHAM.OutlineTransparency = 0
                         E.TCHAM.Enabled = true
                     elseif E.TCHAM or E.IsToolMatCham then
@@ -4424,30 +4429,31 @@ local function UPD_ESP()
                     end
 
                     if vis then
-                        E.NAME.Visible = _G.ESP_CFG.Names and dist <= _G.ESP_CFG.MaxDistance
+
+                        E.NAME.Visible = getgenv().ESP_CFG.Names and dist <= getgenv().ESP_CFG.MaxDistance
                         if E.NAME.Visible then
-                            E.NAME.Text = (isPlayer and _G.ESP_CFG.DisplayNames) and p.DisplayName or p.Name
+                            E.NAME.Text = (isPlayer and getgenv().ESP_CFG.DisplayNames) and p.DisplayName or p.Name
                             if not isPlayer then E.NAME.Text = "[BOT] " .. p.Name end
                             E.NAME.Position = UDim2.new(0, x, 0, y - 16)
                             E.NAME.Size = UDim2.new(0, s_x, 0, 14)
-                            E.NAME.TextColor3 = _G.ESP_CFG.NameColor or Color3.new(1, 1, 1)
+                            E.NAME.TextColor3 = getgenv().ESP_CFG.NameColor or Color3.new(1, 1, 1)
                             if E.NAME.Font ~= fontCache then E.NAME.Font = fontCache end
                             if E.NAME.TextSize ~= fontSizeCache then E.NAME.TextSize = fontSizeCache end
                         end
 
                         local hp_per = math.clamp(HUM.Health / HUM.MaxHealth, 0, 1)
-                        E.BAR_BG.Visible = _G.ESP_CFG.HealthBar and dist <= _G.ESP_CFG.MaxDistance
+                        E.BAR_BG.Visible = getgenv().ESP_CFG.HealthBar and dist <= getgenv().ESP_CFG.MaxDistance
                         if E.BAR_BG.Visible then
                             E.BAR_BG.Position = UDim2.new(0, x - 6, 0, y)
                             E.BAR_BG.Size = UDim2.new(0, 3, 0, s_y)
                             E.BAR_FL.Size = UDim2.new(1, 0, hp_per, 0)
                             E.BAR_FL.Position = UDim2.new(0, 0, 1 - hp_per, 0)
                             E.BAR_GRAD.Color = ColorSequence.new(
-                                _G.ESP_CFG.HealthColor1 or Color3.fromRGB(255, 0, 0),
-                                _G.ESP_CFG.HealthColor2 or Color3.fromRGB(0, 255, 0))
+                                getgenv().ESP_CFG.HealthColor1 or Color3.fromRGB(255, 0, 0),
+                                getgenv().ESP_CFG.HealthColor2 or Color3.fromRGB(0, 255, 0))
                         end
 
-                        E.HEALTH_TXT.Visible = _G.ESP_CFG.HealthText and dist <= _G.ESP_CFG.MaxDistance
+                        E.HEALTH_TXT.Visible = getgenv().ESP_CFG.HealthText and dist <= getgenv().ESP_CFG.MaxDistance
                         if E.HEALTH_TXT.Visible then
                             E.HEALTH_TXT.Text = math.floor(HUM.Health)
                             E.HEALTH_TXT.Position = UDim2.new(0, x - 40, 0, y + s_y * (1 - hp_per) - 6)
@@ -4456,41 +4462,42 @@ local function UPD_ESP()
                             if E.HEALTH_TXT.TextSize ~= fontSizeCache then E.HEALTH_TXT.TextSize = fontSizeCache end
                         end
 
-                        E.DIST.Visible = _G.ESP_CFG.Distance and dist <= _G.ESP_CFG.MaxDistance
+                        E.DIST.Visible = getgenv().ESP_CFG.Distance and dist <= getgenv().ESP_CFG.MaxDistance
                         if E.DIST.Visible then
                             E.DIST.Text = math.floor(dist) .. "m"
                             E.DIST.Position = UDim2.new(0, x, 0, y + s_y + 2)
                             E.DIST.Size = UDim2.new(0, s_x, 0, 12)
-                            E.DIST.TextColor3 = _G.ESP_CFG.DistColor or Color3.new(1, 1, 1)
+                            E.DIST.TextColor3 = getgenv().ESP_CFG.DistColor or Color3.new(1, 1, 1)
                             if E.DIST.Font ~= fontCache then E.DIST.Font = fontCache end
                             if E.DIST.TextSize ~= fontSizeCache then E.DIST.TextSize = fontSizeCache end
                         end
 
-                        E.WEAP.Visible = _G.ESP_CFG.Tools and dist <= _G.ESP_CFG.MaxDistance
+                        E.WEAP.Visible = getgenv().ESP_CFG.Tools and dist <= getgenv().ESP_CFG.MaxDistance
                         if E.WEAP.Visible then
                             E.WEAP.Text = tool and tool.Name or "None"
                             E.WEAP.Position = UDim2.new(0, x, 0, y + s_y + (E.DIST.Visible and 14 or 2))
                             E.WEAP.Size = UDim2.new(0, s_x, 0, 12)
-                            E.WEAP.TextColor3 = _G.ESP_CFG.ToolColor or Color3.new(1, 1, 1)
+                            E.WEAP.TextColor3 = getgenv().ESP_CFG.ToolColor or Color3.new(1, 1, 1)
                             if E.WEAP.Font ~= fontCache then E.WEAP.Font = fontCache end
                             if E.WEAP.TextSize ~= fontSizeCache then E.WEAP.TextSize = fontSizeCache end
                         end
 
-                        local b_vis = _G.ESP_CFG.Boxes and dist <= _G.ESP_CFG.MaxDistance
+                        local b_vis = getgenv().ESP_CFG.Boxes and dist <= getgenv().ESP_CFG.MaxDistance
                         E.BOX.Visible = b_vis
                         if b_vis then
                             E.BOX.Position = UDim2.new(0, x, 0, y)
                             E.BOX.Size = UDim2.new(0, s_x, 0, s_y)
 
-                            local color = _G.ESP_CFG.BoxColor or Color3.new(1, 1, 1)
+                            local color = getgenv().ESP_CFG.BoxColor or Color3.new(1, 1, 1)
 
                             local len = math.clamp(s_x * 0.25, 2, 60)
-                            if _G.ESP_CFG.AnimBoxFill then
+                            if getgenv().ESP_CFG.AnimBoxFill then
+
                                 local pulse = 0.25 + math.sin(tick() * 4) * 0.1
                                 len = math.clamp(s_x * pulse, 2, 60)
                             end
 
-                            local t = 1
+                            local t = 1 
 
                             E.BOX_LINES[1].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[1].l.Position = UDim2.new(0, 0,
                                 0, 0)
@@ -4519,26 +4526,26 @@ local function UPD_ESP()
                             end
                         end
 
-                        local f_vis = _G.ESP_CFG.BoxFill and dist <= _G.ESP_CFG.MaxDistance
+                        local f_vis = getgenv().ESP_CFG.BoxFill and dist <= getgenv().ESP_CFG.MaxDistance
                         E.FILL.Visible = f_vis
                         if f_vis then
                             E.FILL.Position = UDim2.new(0, x, 0, y)
                             E.FILL.Size = UDim2.new(0, s_x, 0, s_y)
-                            local fillC = _G.ESP_CFG.FillColor or Color3.new(1, 1, 1)
+                            local fillC = getgenv().ESP_CFG.FillColor or Color3.new(1, 1, 1)
 
                             local ff1 = E.FILL:FindFirstChild("FF1")
                             local ff2 = E.FILL:FindFirstChild("FF2")
 
-                            if _G.ESP_CFG.AnimBoxFill then
+                            if getgenv().ESP_CFG.AnimBoxFill then
                                 E.FILL.BackgroundTransparency = 1
                                 if ff1 then ff1.Visible = true end
                                 if ff2 then ff2.Visible = true end
 
                                 local seq = NumberSequence.new({
                                     NumberSequenceKeypoint.new(0, 0.95),
-                                    NumberSequenceKeypoint.new(0.3, 0.4),
+                                    NumberSequenceKeypoint.new(0.3, 0.4), 
                                     NumberSequenceKeypoint.new(0.5, 0.95),
-                                    NumberSequenceKeypoint.new(0.7, 0.4),
+                                    NumberSequenceKeypoint.new(0.7, 0.4), 
                                     NumberSequenceKeypoint.new(1, 0.95)
                                 })
 
@@ -4571,7 +4578,7 @@ local function UPD_ESP()
                         for i, bone in ipairs(bones) do
                             local seg = E.SKEL[i]
                             if seg then
-                                seg.Visible = _G.ESP_CFG.Skeleton
+                                seg.Visible = getgenv().ESP_CFG.Skeleton
                                 if seg.Visible then
                                     local b1, b2 = C:FindFirstChild(bone[1]), C:FindFirstChild(bone[2])
                                     if b1 and b2 then
@@ -4581,7 +4588,7 @@ local function UPD_ESP()
                                         seg.Size = UDim2.new(0, d.Magnitude, 0, 1)
                                         seg.Position = UDim2.new(0, (v1.X + v2.X) / 2, 0, (v1.Y + v2.Y) / 2)
                                         seg.Rotation = math.deg(math.atan2(d.Y, d.X))
-                                        seg.BackgroundColor3 = _G.ESP_CFG.SkelColor or Color3.new(1, 1, 1)
+                                        seg.BackgroundColor3 = getgenv().ESP_CFG.SkelColor or Color3.new(1, 1, 1)
                                     else
                                         seg.Visible = false
                                     end
@@ -4589,15 +4596,16 @@ local function UPD_ESP()
                             end
                         end
                     else
+
                         E.NAME.Visible = false; E.BAR_BG.Visible = false; E.HEALTH_TXT.Visible = false;
                         E.DIST.Visible = false; E.WEAP.Visible = false; E.BOX.Visible = false; E.FILL.Visible = false
                         for _, s in ipairs(E.SKEL) do s.Visible = false end
                     end
 
                     if E.SLINE then
-                        if _G.ESP_CFG.Snaplines and (vis or _G.ESP_CFG.OffScreen) and dist <= _G.ESP_CFG.MaxDistance then
+                        if getgenv().ESP_CFG.Snaplines and (vis or getgenv().ESP_CFG.OffScreen) and dist <= getgenv().ESP_CFG.MaxDistance then
                             local start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y)
-                            local origin = _G.ESP_CFG.TracerOrigin or "Bottom"
+                            local origin = getgenv().ESP_CFG.TracerOrigin or "Bottom"
 
                             if origin == "Center" then
                                 start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
@@ -4626,7 +4634,7 @@ local function UPD_ESP()
                             E.SLINE.Size = UDim2.new(0, 1, 0, mag)
                             E.SLINE.Position = UDim2.new(0, start_pos.X + (diff.X / 2), 0, start_pos.Y + (diff.Y / 2))
                             E.SLINE.Rotation = math.deg(math.atan2(diff.Y, diff.X)) - 90
-                            E.SLINE.BackgroundColor3 = _G.ESP_CFG.SnapColor or Color3.new(1, 1, 1)
+                            E.SLINE.BackgroundColor3 = getgenv().ESP_CFG.SnapColor or Color3.new(1, 1, 1)
                         else
                             E.SLINE.Visible = false
                         end
@@ -4679,7 +4687,8 @@ local function UPD_LOCAL_GUN()
     local localChar = LP.Character
     local localTool = localChar and localChar:FindFirstChildOfClass("Tool")
 
-    if _G.ESP_CFG and _G.ESP_CFG.LocalGunCham and localTool then
+    if getgenv().ESP_CFG and getgenv().ESP_CFG.LocalGunCham and localTool then
+
         if LOCAL_GUN_CACHE.LastTool ~= localTool then
             CLEAN_LOCAL_GUN()
             LOCAL_GUN_CACHE.LastTool = localTool
@@ -4692,7 +4701,7 @@ local function UPD_LOCAL_GUN()
                     LOCAL_GUN_CACHE.Colors[part] = part.Color
                 end
                 part.Material = Enum.Material.ForceField
-                part.Color = _G.ESP_CFG.LocalGunChamColor1 or Color3.fromRGB(0, 255, 255)
+                part.Color = getgenv().ESP_CFG.LocalGunChamColor1 or Color3.fromRGB(0, 255, 255)
             end
         end
 
@@ -4714,10 +4723,11 @@ RunService:BindToRenderStep("FluxESP", 2001, function()
         pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
         return
     end
-    if _G.ESP_CFG and _G.ESP_CFG.Enabled then
+    if getgenv().ESP_CFG and getgenv().ESP_CFG.Enabled then
         UPD_ESP()
         UPD_LOCAL_GUN()
     else
+
         for _, E in pairs(CACHE) do
             if E.FRM then E.FRM.Visible = false end
             if E.CHAM then E.CHAM.Enabled = false end
@@ -4761,7 +4771,7 @@ for _, obj in pairs(Lighting:GetDescendants()) do
 end
 
 AddESPSetting(woContent, "Full Bright", false, 0, false, function(v)
-    _G.WORLD_CFG.FullBright = v
+    getgenv().WORLD_CFG.FullBright = v
     if not v then
         Lighting.Brightness = ORIG_LIGHT.Brightness
         Lighting.ClockTime = ORIG_LIGHT.ClockTime
@@ -4772,7 +4782,7 @@ AddESPSetting(woContent, "Full Bright", false, 0, false, function(v)
 end)
 
 AddESPSetting(woContent, "No Fog", false, 0, false, function(v)
-    _G.WORLD_CFG.NoFog = v
+    getgenv().WORLD_CFG.NoFog = v
     if not v then
         Lighting.FogEnd = ORIG_LIGHT.Fog
         for obj, dens in pairs(ORIG_LIGHT.AtmosDensities) do
@@ -4785,19 +4795,19 @@ end)
 
 AddESPSetting(woContent, "Atmosphere Color", false, 1, false, function(v, c)
     if v and c then
-        _G.WORLD_CFG.AtmosColor = c[1]
+        getgenv().WORLD_CFG.AtmosColor = c[1]
         NOTIFY("World", "Atmosphere Color Updated", 1.5)
     else
-        _G.WORLD_CFG.AtmosColor = nil
+        getgenv().WORLD_CFG.AtmosColor = nil
         Lighting.Ambient = ORIG_LIGHT.Ambient
     end
-end, { _G.WORLD_CFG.AtmosColor or Color3.fromRGB(200, 200, 200) })
+end, { getgenv().WORLD_CFG.AtmosColor or Color3.fromRGB(200, 200, 200) })
 
-AddESPSetting(woContent, "FPS Booster", _G.WORLD_CFG.FPSBooster, 0, false, function(v)
-    _G.WORLD_CFG.FPSBooster = v
+AddESPSetting(woContent, "FPS Booster", getgenv().WORLD_CFG.FPSBooster, 0, false, function(v)
+    getgenv().WORLD_CFG.FPSBooster = v
     if v then
-        if not _G.FPS_BOOSTER_EXECUTED then
-            _G.FPS_BOOSTER_EXECUTED = true
+        if not getgenv().FPS_BOOSTER_EXECUTED then
+            getgenv().FPS_BOOSTER_EXECUTED = true
             NOTIFY("System", "Executing FPS Booster...", 2)
             task.spawn(function()
                 pcall(function()
@@ -4810,8 +4820,8 @@ AddESPSetting(woContent, "FPS Booster", _G.WORLD_CFG.FPSBooster, 0, false, funct
     end
 end)
 
-AddVSSlider(woContent, "Exposure", 0, 5, 1, "", function(v) _G.WORLD_CFG.Exposure = v end)
-AddVSSlider(woContent, "Brightness", 0, 5, 1, "", function(v) _G.WORLD_CFG.Brightness = v end)
+AddVSSlider(woContent, "Exposure", 0, 5, 1, "", function(v) getgenv().WORLD_CFG.Exposure = v end)
+AddVSSlider(woContent, "Brightness", 0, 5, 1, "", function(v) getgenv().WORLD_CFG.Brightness = v end)
 
 local exCard = NewFrame(worldPage, UDim2.new(0.52, -4, 0, 200), UDim2.new(0.48, 1, 0, 3), PANEL)
 Corner(exCard, 8)
@@ -4826,18 +4836,18 @@ local exContent = NewFrame(exCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0,
 local exList = Instance.new("UIListLayout", exContent)
 exList.Padding = UDim.new(0, 2)
 
-AddESPSetting(exContent, "Custom FOV", _G.WORLD_CFG.FOVEnabled, 0, false, function(v)
-    _G.WORLD_CFG.FOVEnabled = v
+AddESPSetting(exContent, "Custom FOV", getgenv().WORLD_CFG.FOVEnabled, 0, false, function(v)
+    getgenv().WORLD_CFG.FOVEnabled = v
     if not v then
         pcall(function() workspace.CurrentCamera.FieldOfView = 70 end)
     else
-        pcall(function() workspace.CurrentCamera.FieldOfView = _G.WORLD_CFG.FOV or 70 end)
+        pcall(function() workspace.CurrentCamera.FieldOfView = getgenv().WORLD_CFG.FOV or 70 end)
     end
 end)
 
 AddVSSlider(exContent, "Field of View", 0, 400, 70, "", function(v)
-    _G.WORLD_CFG.FOV = v
-    if _G.WORLD_CFG.FOVEnabled then
+    getgenv().WORLD_CFG.FOV = v
+    if getgenv().WORLD_CFG.FOVEnabled then
         pcall(function() workspace.CurrentCamera.FieldOfView = v end)
     end
 end)
@@ -4886,7 +4896,7 @@ local skyLoopIdx = 1
 local function applySky(asset)
     local s = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
 
-    if not _G.WORLD_CFG.EnableSkybox or not asset or asset == "Default" then
+    if not getgenv().WORLD_CFG.EnableSkybox or not asset or asset == "Default" then
         if origSky then
             s.SkyboxBk = skyCache.Bk; s.SkyboxDn = skyCache.Dn; s.SkyboxFt = skyCache.Ft
             s.SkyboxLf = skyCache.Lf; s.SkyboxRt = skyCache.Rt; s.SkyboxUp = skyCache.Up
@@ -4897,14 +4907,14 @@ local function applySky(asset)
     end
 
     if typeof(asset) == "table" then
-        if asset.Bk then
+        if asset.Bk then 
             s.SkyboxBk = asset.Bk
             s.SkyboxDn = asset.Dn
             s.SkyboxFt = asset.Ft
             s.SkyboxLf = asset.Lf
             s.SkyboxRt = asset.Rt
             s.SkyboxUp = asset.Up
-        else
+        else 
             s.SkyboxBk = asset[skyLoopIdx]
             s.SkyboxDn = asset[skyLoopIdx]
             s.SkyboxFt = asset[skyLoopIdx]
@@ -4912,7 +4922,7 @@ local function applySky(asset)
             s.SkyboxRt = asset[skyLoopIdx]
             s.SkyboxUp = asset[skyLoopIdx]
         end
-    else
+    else 
         s.SkyboxBk = asset; s.SkyboxDn = asset; s.SkyboxFt = asset
         s.SkyboxLf = asset; s.SkyboxRt = asset; s.SkyboxUp = asset
     end
@@ -4925,8 +4935,8 @@ do
     skyList.Padding = UDim.new(0, 4)
 
     AddESPSetting(skyContainer, "Enable Custom Sky", false, 0, false, function(v)
-        _G.WORLD_CFG.EnableSkybox = v
-        local asset = (_G.WORLD_CFG.Skybox == "Default") and "Default" or SKY_ASSETS[_G.WORLD_CFG.Skybox]
+        getgenv().WORLD_CFG.EnableSkybox = v
+        local asset = (getgenv().WORLD_CFG.Skybox == "Default") and "Default" or SKY_ASSETS[getgenv().WORLD_CFG.Skybox]
         applySky(asset)
     end)
 
@@ -4936,7 +4946,7 @@ do
     local skyDd = AddDropdown(skyRow,
         { "Default", "Sponge Bob", "Purple Nebula", "Night Stars", "Cyberpunk", "Space", "Cartoony" }, "Default",
         function(v)
-            _G.WORLD_CFG.Skybox = v
+            getgenv().WORLD_CFG.Skybox = v
             if v ~= "Sponge Bob" then
                 applySky(v == "Default" and "Default" or SKY_ASSETS[v])
             end
@@ -4968,8 +4978,8 @@ end)
 RefreshCameraCache()
 
 local function ForceFOV()
-    if not _G.WORLD_CFG.FOVEnabled then return end
-    local targetFOV = _G.WORLD_CFG.FOV or 70
+    if not getgenv().WORLD_CFG.FOVEnabled then return end
+    local targetFOV = getgenv().WORLD_CFG.FOV or 70
     if targetFOV <= 0 then return end
 
     for _, cam in pairs(CAMERA_CACHE) do
@@ -4988,7 +4998,7 @@ RunService:BindToRenderStep("ForceFOV_OMEGA", 2000, function()
     ForceFOV()
 end)
 
-table.insert(_G.FLUX_CONNS, RunService.Heartbeat:Connect(function()
+table.insert(getgenv().FLUX_CONNS, RunService.Heartbeat:Connect(function()
     if getgenv().FLUX_SESSION ~= MySession then return end
     ForceFOV()
 end))
@@ -4998,7 +5008,7 @@ task.spawn(function()
     while task.wait(0.3) do
         if not SG.Parent then break end
 
-        if _G.WORLD_CFG.Skybox == "Sponge Bob" then
+        if getgenv().WORLD_CFG.Skybox == "Sponge Bob" then
             if tick() - lastSkyTick >= 0.1 then
                 skyLoopIdx = skyLoopIdx + 1
                 if skyLoopIdx > #SKY_ASSETS["Sponge Bob"] then skyLoopIdx = 1 end
@@ -5007,33 +5017,33 @@ task.spawn(function()
             end
         end
 
-        if _G.WORLD_CFG.FullBright then
+        if getgenv().WORLD_CFG.FullBright then
             Lighting.Brightness = 2
             Lighting.ClockTime = 14
             Lighting.FogEnd = 100000
             Lighting.GlobalShadows = false
             Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
         else
-            if _G.WORLD_CFG.Brightness ~= 1 then
-                Lighting.Brightness = _G.WORLD_CFG.Brightness
+            if getgenv().WORLD_CFG.Brightness ~= 1 then
+                Lighting.Brightness = getgenv().WORLD_CFG.Brightness
             end
         end
 
-        if _G.WORLD_CFG.NoFog then
+        if getgenv().WORLD_CFG.NoFog then
             Lighting.FogEnd = 100000
             for _, v in pairs(Lighting:GetDescendants()) do
                 if v:IsA("Atmosphere") then v.Density = 0 end
             end
         end
 
-        if _G.WORLD_CFG.Exposure ~= 0 then
-            Lighting.ExposureCompensation = _G.WORLD_CFG.Exposure
+        if getgenv().WORLD_CFG.Exposure ~= 0 then
+            Lighting.ExposureCompensation = getgenv().WORLD_CFG.Exposure
         else
             Lighting.ExposureCompensation = ORIG_LIGHT.Exposure
         end
 
-        if _G.WORLD_CFG.AtmosColor then
-            Lighting.Ambient = _G.WORLD_CFG.AtmosColor
+        if getgenv().WORLD_CFG.AtmosColor then
+            Lighting.Ambient = getgenv().WORLD_CFG.AtmosColor
         else
             Lighting.Ambient = ORIG_LIGHT.Ambient
         end
@@ -5146,8 +5156,9 @@ do
                 })
             end
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+
                 if label == "Enable Notifications" then
                     checked = useNotifications
                 elseif label == "Enable Watermark" then
@@ -5212,7 +5223,7 @@ do
             KbTitle.Name = "SectionTitle"
             KbTitle.Size = UDim2.new(1, -10, 1, 0)
             KbTitle.Position = UDim2.new(0, 10, 0, 0)
-            table.insert(accentFills, KbGrad)
+            table.insert(accentFills, KbGrad) 
 
             local KbContent = NewFrame(KbWin, UDim2.new(1, -16, 1, -36), UDim2.new(0, 8, 0, 34), BG, 1)
             local KbList = Instance.new("UIListLayout", KbContent)
@@ -5235,48 +5246,48 @@ do
 
                 table.insert(binds, { action = "Toggle UI", key = toggleKey and toggleKey.Name or "RightShift" })
 
-                if _G.AIMBOT_CFG and _G.AIMBOT_CFG.Keybind then
-                    local k = _G.AIMBOT_CFG.Keybind
+                if getgenv().AIMBOT_CFG and getgenv().AIMBOT_CFG.Keybind then
+                    local k = getgenv().AIMBOT_CFG.Keybind
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
                     if kName ~= "None" and kName ~= "" then
                         table.insert(binds, { action = "Aimbot", key = kName })
                     end
                 end
 
-                if _G.ESP_CFG and _G.ESP_CFG.Keybind then
-                    local k = _G.ESP_CFG.Keybind
+                if getgenv().ESP_CFG and getgenv().ESP_CFG.Keybind then
+                    local k = getgenv().ESP_CFG.Keybind
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
                     if kName ~= "None" and kName ~= "" then
                         table.insert(binds, { action = "ESP Toggle", key = kName })
                     end
                 end
 
-                if _G.IK_CFG and _G.IK_CFG.Keybind then
-                    local k = _G.IK_CFG.Keybind
+                if getgenv().IK_CFG and getgenv().IK_CFG.Keybind then
+                    local k = getgenv().IK_CFG.Keybind
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
                     if kName ~= "None" and kName ~= "" then
                         table.insert(binds, { action = "Insta Kill", key = kName })
                     end
                 end
 
-                if _G.LOCAL_PLAYER_CFG and _G.LOCAL_PLAYER_CFG.SpeedKey then
-                    local k = _G.LOCAL_PLAYER_CFG.SpeedKey
+                if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.SpeedKey then
+                    local k = getgenv().LOCAL_PLAYER_CFG.SpeedKey
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
                     if kName ~= "None" and kName ~= "" then
                         table.insert(binds, { action = "Speed Boost", key = kName })
                     end
                 end
 
-                if _G.LOCAL_PLAYER_CFG and _G.LOCAL_PLAYER_CFG.FlyKey then
-                    local k = _G.LOCAL_PLAYER_CFG.FlyKey
+                if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.FlyKey then
+                    local k = getgenv().LOCAL_PLAYER_CFG.FlyKey
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
                     if kName ~= "None" and kName ~= "" then
                         table.insert(binds, { action = "Player Fly", key = kName })
                     end
                 end
 
-                if _G.LOCAL_PLAYER_CFG and _G.LOCAL_PLAYER_CFG.InvisKey then
-                    local k = _G.LOCAL_PLAYER_CFG.InvisKey
+                if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.InvisKey then
+                    local k = getgenv().LOCAL_PLAYER_CFG.InvisKey
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
                     if kName ~= "None" and kName ~= "" then
                         table.insert(binds, { action = "Invisibility", key = kName })
@@ -5313,7 +5324,7 @@ do
                 local rowCount = math.max(1, #binds)
                 KbWin.Size = UDim2.new(0, 220, 0, 28 + rowCount * 30 + (rowCount - 1) * 4 + 12)
             end
-            _G.FLUX_UPDATE_KB_HUD = BuildKbRows
+            getgenv().FLUX_UPDATE_KB_HUD = BuildKbRows
 
             local kbAccentProxy = {
                 update = function()
@@ -5325,7 +5336,7 @@ do
                     KbTitle.TextColor3 = ACCENT
                 end
             }
-            _G.FLUX_KB_HUD_ACCENT_UPDATE = function() kbAccentProxy.update() end
+            getgenv().FLUX_KB_HUD_ACCENT_UPDATE = function() kbAccentProxy.update() end
 
             task.spawn(function()
                 while true do
@@ -5347,10 +5358,10 @@ do
                 end)
             end
 
-            _G.FLUX_KB_HUD_SYNC = function()
+            getgenv().FLUX_KB_HUD_SYNC = function()
                 if KbWin then KbWin.Visible = uiVis and useKbHud and not IS_MOBILE end
             end
-            _G.FLUX_KB_HUD_GUI = KbSG
+            getgenv().FLUX_KB_HUD_GUI = KbSG
 
             if useKbHud and not IS_MOBILE then
                 KbWin.Visible = uiVis
@@ -5477,7 +5488,7 @@ do
             local function AddSilentToggle(label, cfg)
                 local row = NewBtn(SCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
                 Corner(row, 5)
-                local checked = _G.SILENT_CFG[cfg]
+                local checked = getgenv().SILENT_CFG[cfg]
                 local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
                 Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
                 local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
@@ -5492,7 +5503,7 @@ do
 
                 local function ToggleState(state)
                     if state ~= nil then checked = state else checked = not checked end
-                    _G.SILENT_CFG[cfg] = checked; cbCheck.Visible = checked
+                    getgenv().SILENT_CFG[cfg] = checked; cbCheck.Visible = checked
                     Tw(cbBg, 0.1, "Quad", "Out",
                         { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
                 end
@@ -5507,9 +5518,9 @@ do
                         { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
                 end)
 
-                _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-                table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
-                    local ns = _G.SILENT_CFG[cfg]
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    local ns = getgenv().SILENT_CFG[cfg]
                     if ns == nil then ns = checked end
                     ToggleState(ns)
                 end)
@@ -5517,17 +5528,17 @@ do
                 return row
             end
 
-            _G.SILENT_CFG.Keybind = _G.SILENT_CFG.Keybind or Enum.KeyCode.None
-            local silentCheck = AddCardSetting(SCheckHolder, "Enable Silent Aim", _G.SILENT_CFG.Enabled, function(v)
-                _G.SILENT_CFG.Enabled = v
-            end, _G.SILENT_CFG.Keybind, function(k)
-                _G.SILENT_CFG.Keybind = k
+            getgenv().SILENT_CFG.Keybind = getgenv().SILENT_CFG.Keybind or Enum.KeyCode.None
+            local silentCheck = AddCardSetting(SCheckHolder, "Enable Silent Aim", getgenv().SILENT_CFG.Enabled, function(v)
+                getgenv().SILENT_CFG.Enabled = v
+            end, getgenv().SILENT_CFG.Keybind, function(k)
+                getgenv().SILENT_CFG.Keybind = k
             end)
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
                 if silentCheck then
-                    local active = _G.SILENT_CFG.Enabled
+                    local active = getgenv().SILENT_CFG.Enabled
                     local cbBg = silentCheck:FindFirstChildOfClass("Frame")
                     local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                     if cbCheck then cbCheck.Visible = active end
@@ -5539,7 +5550,7 @@ do
                     local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
                     if bindLbl then
                         local keyName = "None"
-                        local kb = _G.SILENT_CFG.Keybind
+                        local kb = getgenv().SILENT_CFG.Keybind
                         if kb then
                             if typeof(kb) == "EnumItem" then
                                 keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
@@ -5554,14 +5565,14 @@ do
 
             AddSilentToggle("Wallbang", "Wallbang")
             AddSilentToggle("Show FOV Circle", "DrawFov")
-            AddCardSlider(SSliderHolder, "Hit Chance", 0, 100, _G.SILENT_CFG.HitChance,
-                function(v) _G.SILENT_CFG.HitChance = v end)
-            AddCardSlider(SSliderHolder, "Silent FOV", 0, 400, _G.SILENT_CFG.FOV, function(v) _G.SILENT_CFG.FOV = v end)
-            AddDropdown(SSliderHolder, { "Head", "UpperTorso", "HumanoidRootPart", "Random" }, _G.SILENT_CFG.TargetPart,
-                function(v) _G.SILENT_CFG.TargetPart = v end)
+            AddCardSlider(SSliderHolder, "Hit Chance", 0, 100, getgenv().SILENT_CFG.HitChance,
+                function(v) getgenv().SILENT_CFG.HitChance = v end)
+            AddCardSlider(SSliderHolder, "Silent FOV", 0, 400, getgenv().SILENT_CFG.FOV, function(v) getgenv().SILENT_CFG.FOV = v end)
+            AddDropdown(SSliderHolder, { "Head", "UpperTorso", "HumanoidRootPart", "Random" }, getgenv().SILENT_CFG.TargetPart,
+                function(v) getgenv().SILENT_CFG.TargetPart = v end)
 
             local function BuildInstaKillCard()
-                _G.IK_CFG = _G.IK_CFG or { Enabled = false, Mode = "Keybind", Keybind = "G" }
+                getgenv().IK_CFG = getgenv().IK_CFG or { Enabled = false, Mode = "Keybind", Keybind = "G" }
                 local IKCard = NewFrame(SilentPage, UDim2.new(0.46, -5, 0, 120), UDim2.new(0.54, 0, 0, 0), PANEL)
                 Corner(IKCard, 8); Stroke(IKCard, STROKE, 1)
                 local IKTitle = NewLabel(IKCard, "Insta Kill Settings", 13, TEXT, true)
@@ -5572,7 +5583,7 @@ do
                 local function AddIKToggleWithBind(label, cfg)
                     local row = NewBtn(IKCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
                     Corner(row, 5)
-                    local checked = _G.IK_CFG[cfg]
+                    local checked = getgenv().IK_CFG[cfg]
                     local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
                         Color3.fromRGB(36, 36, 48))
                     Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
@@ -5588,7 +5599,7 @@ do
                     fit.Parent = rowLbl
 
                     row.MouseButton1Click:Connect(function()
-                        checked = not checked; _G.IK_CFG[cfg] = checked; cbCheck.Visible = checked
+                        checked = not checked; getgenv().IK_CFG[cfg] = checked; cbCheck.Visible = checked
                         Tw(cbBg, 0.1, "Quad", "Out",
                             { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
                     end)
@@ -5606,7 +5617,7 @@ do
                             Color3.fromRGB(45, 45, 55), 1)
                         kbBox.Name = "KeybindBox"
                         Corner(kbBox, 4); Stroke(kbBox, STROKE2, 1)
-                        local bindLbl = NewLabel(kbBox, _G.IK_CFG.Keybind, 10, TEXT, false, Enum.TextXAlignment.Center)
+                        local bindLbl = NewLabel(kbBox, getgenv().IK_CFG.Keybind, 10, TEXT, false, Enum.TextXAlignment.Center)
                         bindLbl.Size = UDim2.new(1, 0, 1, 0)
 
                         local waiting = false
@@ -5620,11 +5631,11 @@ do
                             local conn; conn = UIS.InputBegan:Connect(function(inp, gpe)
                                 if gpe or inp.UserInputType ~= Enum.UserInputType.Keyboard then return end
                                 waiting = false
-                                _G.IK_CFG.Keybind = inp.KeyCode.Name
+                                getgenv().IK_CFG.Keybind = inp.KeyCode.Name
                                 bindLbl.Text = inp.KeyCode.Name
                                 bindLbl.TextColor3 = TEXT
                                 Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-                                if _G.FLUX_UPDATE_KB_HUD then pcall(_G.FLUX_UPDATE_KB_HUD) end
+                                if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
                                 conn:Disconnect()
                             end)
                         end)
@@ -5632,15 +5643,15 @@ do
                 end
                 AddIKToggleWithBind("Enable Insta Kill", "Enabled")
                 local ddRow = NewFrame(IKCheckHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-                local dd = AddDropdown(ddRow, { "Keybind", "Auto Kill" }, _G.IK_CFG.Mode, function(v)
-                    _G.IK_CFG.Mode = v
+                local dd = AddDropdown(ddRow, { "Keybind", "Auto Kill" }, getgenv().IK_CFG.Mode, function(v)
+                    getgenv().IK_CFG.Mode = v
                     NOTIFY("Insta Kill", "Mode: " .. v, 2)
                 end)
                 dd.Size = UDim2.new(1, 0, 1, 0)
             end
 
             local function BuildGunsModsCard(parentCol)
-                _G.GUN_MODS_CFG = _G.GUN_MODS_CFG or {
+                getgenv().GUN_MODS_CFG = getgenv().GUN_MODS_CFG or {
                     NoRecoil = false,
                     NoSpread = false,
                     RapidFire = false,
@@ -5670,9 +5681,9 @@ do
 
                     local row = NewBtn(GMCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
                     Corner(row, 5)
-                    local checked = not isLocked and _G.GUN_MODS_CFG[cfg]
+                    local checked = not isLocked and getgenv().GUN_MODS_CFG[cfg]
                     if isLocked then
-                        _G.GUN_MODS_CFG[cfg] = false
+                        getgenv().GUN_MODS_CFG[cfg] = false
                     end
 
                     local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
@@ -5692,7 +5703,7 @@ do
 
                     if not isLocked then
                         row.MouseButton1Click:Connect(function()
-                            checked = not checked; _G.GUN_MODS_CFG[cfg] = checked; cbCheck.Visible = checked
+                            checked = not checked; getgenv().GUN_MODS_CFG[cfg] = checked; cbCheck.Visible = checked
                             Tw(cbBg, 0.1, "Quad", "Out",
                                 { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
                         end)
@@ -5747,10 +5758,10 @@ do
                         local lbl1 = NewLabel(ddRow1, "Equip KillFX", 13, TEXT)
                         lbl1.Size = UDim2.new(0.4, 0, 1, 0)
                         local ddContainer1 = NewFrame(ddRow1, UDim2.new(0.6, 0, 1, 0), UDim2.new(0.4, 0, 0, 0), PANEL, 1)
-                        local currentFX = _G.CURRENT_KILLFX or "None"
+                        local currentFX = getgenv().CURRENT_KILLFX or "None"
                         local dd1 = AddDropdown(ddContainer1,
                             { "None", "Swirl Purple", "Sparks", "Confetti", "Booster", "Virus" }, currentFX, function(v)
-                                _G.CURRENT_KILLFX = v
+                                getgenv().CURRENT_KILLFX = v
                                 if v ~= "None" then
                                     pcall(function()
                                         local Event = game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent
@@ -5768,9 +5779,9 @@ do
                         local ddContainer2 = NewFrame(ddRow2, UDim2.new(0.6, 0, 1, 0), UDim2.new(0.4, 0, 0, 0), PANEL, 1)
                         local matSkins = { "Default", "Neon Cyan", "Neon Pink", "Neon Green", "ForceField Cyan",
                             "ForceField Pink", "Solid Gold", "Glass", "Ice" }
-                        local currentMat = _G.CURRENT_VISUAL_MAT or "Default"
+                        local currentMat = getgenv().CURRENT_VISUAL_MAT or "Default"
                         local dd2 = AddDropdown(ddContainer2, matSkins, currentMat, function(v)
-                            _G.CURRENT_VISUAL_MAT = v
+                            getgenv().CURRENT_VISUAL_MAT = v
                         end)
                         dd2.Size = UDim2.new(1, 0, 0, 32)
                         dd2.Position = UDim2.new(0, 0, 0.5, -16)
@@ -5789,7 +5800,8 @@ do
 
     ; (function()
         local KAPage = tabPages[3]
-        if IsHitmark() or IsDuelist() or IsMurderVsSheriff() then
+        if IsHitmark() or IsDuelist() then
+
             local LeftCol = NewFrame(KAPage, UDim2.new(0.53, -5, 1, 0), nil, BG, 1)
             LeftCol.LayoutOrder = 1
             local LeftColLayout = Instance.new("UIListLayout", LeftCol)
@@ -5811,17 +5823,17 @@ do
             local KHolder = NewFrame(KCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
             Instance.new("UIListLayout", KHolder).Padding = UDim.new(0, 6)
 
-            _G.KILLAURA_CFG.Keybind = _G.KILLAURA_CFG.Keybind or Enum.KeyCode.None
-            local kaCheck = AddCardSetting(KHolder, "Enable Auto Kill Aura", _G.KILLAURA_CFG.Enabled, function(v)
-                _G.KILLAURA_CFG.Enabled = v
-            end, _G.KILLAURA_CFG.Keybind, function(k)
-                _G.KILLAURA_CFG.Keybind = k
+            getgenv().KILLAURA_CFG.Keybind = getgenv().KILLAURA_CFG.Keybind or Enum.KeyCode.None
+            local kaCheck = AddCardSetting(KHolder, "Enable Auto Kill Aura", getgenv().KILLAURA_CFG.Enabled, function(v)
+                getgenv().KILLAURA_CFG.Enabled = v
+            end, getgenv().KILLAURA_CFG.Keybind, function(k)
+                getgenv().KILLAURA_CFG.Keybind = k
             end)
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
                 if kaCheck then
-                    local active = _G.KILLAURA_CFG.Enabled
+                    local active = getgenv().KILLAURA_CFG.Enabled
                     local cbBg = kaCheck:FindFirstChildOfClass("Frame")
                     local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                     if cbCheck then cbCheck.Visible = active end
@@ -5833,7 +5845,7 @@ do
                     local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
                     if bindLbl then
                         local keyName = "None"
-                        local kb = _G.KILLAURA_CFG.Keybind
+                        local kb = getgenv().KILLAURA_CFG.Keybind
                         if kb then
                             if typeof(kb) == "EnumItem" then
                                 keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
@@ -5851,7 +5863,7 @@ do
             local wcbBg = NewFrame(wrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
             Corner(wcbBg, 3); Stroke(wcbBg, STROKE2, 1)
             local wcbCheck = NewLabel(wcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            wcbCheck.Size = UDim2.new(1, 0, 1, 0); wcbCheck.Visible = _G.KILLAURA_CFG.Wallbang
+            wcbCheck.Size = UDim2.new(1, 0, 1, 0); wcbCheck.Visible = getgenv().KILLAURA_CFG.Wallbang
             local wrowLbl = NewLabel(wrow, "Shoot through Walls (Wallbang)", 13, TEXT)
             wrowLbl.Size = UDim2.new(1, -40, 1, 0); wrowLbl.Position = UDim2.new(0, 35, 0, 0)
             wrowLbl.TextScaled = true
@@ -5861,85 +5873,83 @@ do
             wFit.Parent = wrowLbl
 
             wrow.MouseButton1Click:Connect(function()
-                _G.KILLAURA_CFG.Wallbang = not _G.KILLAURA_CFG.Wallbang
-                wcbCheck.Visible = _G.KILLAURA_CFG.Wallbang
+                getgenv().KILLAURA_CFG.Wallbang = not getgenv().KILLAURA_CFG.Wallbang
+                wcbCheck.Visible = getgenv().KILLAURA_CFG.Wallbang
                 Tw(wcbBg, 0.1, "Quad", "Out",
                     {
-                        BackgroundColor3 = _G.KILLAURA_CFG.Wallbang and Color3.fromRGB(48, 50, 70) or
+                        BackgroundColor3 = getgenv().KILLAURA_CFG.Wallbang and Color3.fromRGB(48, 50, 70) or
                             Color3.fromRGB(36, 36, 48)
                     })
             end)
 
-            AddCardSlider(KHolder, "Kill Aura Radius (Studs)", 10, 1000, _G.KILLAURA_CFG.MaxDist, function(val)
-                _G.KILLAURA_CFG.MaxDist = val
+            AddCardSlider(KHolder, "Kill Aura Radius (Studs)", 10, 1000, getgenv().KILLAURA_CFG.MaxDist, function(val)
+                getgenv().KILLAURA_CFG.MaxDist = val
             end)
 
-            _G.KILLAURA_CFG.AuraType = _G.KILLAURA_CFG.AuraType or "Legit"
+            getgenv().KILLAURA_CFG.AuraType = getgenv().KILLAURA_CFG.AuraType or "Legit"
             local ddRowType = NewFrame(KHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            local ddType = AddDropdown(ddRowType, { "Legit", "Blatant", "Tele Kill" }, _G.KILLAURA_CFG.AuraType,
+            local ddType = AddDropdown(ddRowType, { "Legit", "Blatant", "Tele Kill" }, getgenv().KILLAURA_CFG.AuraType,
                 function(v)
-                    _G.KILLAURA_CFG.AuraType = v
+                    getgenv().KILLAURA_CFG.AuraType = v
                     NOTIFY("Kill Aura", "Type: " .. v, 2)
                 end)
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
-            if not IsMurderVsSheriff() then
-                local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
-                TCard.LayoutOrder = 2
-                Corner(TCard, 8); Stroke(TCard, STROKE, 1)
-                local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
-                TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
+            local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
+            TCard.LayoutOrder = 2
+            Corner(TCard, 8); Stroke(TCard, STROKE, 1)
+            local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
+            TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-                local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-                local TLayout = Instance.new("UIListLayout", THolder)
-                TLayout.Padding = UDim.new(0, 6)
-                TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+            local TLayout = Instance.new("UIListLayout", THolder)
+            TLayout.Padding = UDim.new(0, 6)
+            TLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-                _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
-                local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
-                    _G.TRIGGERBOT_CFG.Enabled = v
-                end, _G.TRIGGERBOT_CFG.Keybind, function(k)
-                    _G.TRIGGERBOT_CFG.Keybind = k
-                end)
-                triggerCheck.LayoutOrder = 1
+            getgenv().TRIGGERBOT_CFG.Keybind = getgenv().TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
+            local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", getgenv().TRIGGERBOT_CFG.Enabled, function(v)
+                getgenv().TRIGGERBOT_CFG.Enabled = v
+            end, getgenv().TRIGGERBOT_CFG.Keybind, function(k)
+                getgenv().TRIGGERBOT_CFG.Keybind = k
+            end)
+            triggerCheck.LayoutOrder = 1
 
-                _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
-                local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-                ddRowTB.LayoutOrder = 2
-                local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
-                    _G.TRIGGERBOT_CFG.Mode = v
-                    NOTIFY("Trigger Bot", "Mode: " .. v, 2)
-                end)
-                ddTB.Size = UDim2.new(1, 0, 1, 0)
+            getgenv().TRIGGERBOT_CFG.Mode = getgenv().TRIGGERBOT_CFG.Mode or "Legit"
+            local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+            ddRowTB.LayoutOrder = 2
+            local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, getgenv().TRIGGERBOT_CFG.Mode, function(v)
+                getgenv().TRIGGERBOT_CFG.Mode = v
+                NOTIFY("Trigger Bot", "Mode: " .. v, 2)
+            end)
+            ddTB.Size = UDim2.new(1, 0, 1, 0)
 
-                _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-                table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
-                    if triggerCheck then
-                        local active = _G.TRIGGERBOT_CFG.Enabled
-                        local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
-                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                        if cbCheck then cbCheck.Visible = active end
-                        if cbBg then
-                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                        end
-
-                        local kbBox = triggerCheck:FindFirstChild("KeybindBox")
-                        local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
-                        if bindLbl then
-                            local keyName = "None"
-                            local kb = _G.TRIGGERBOT_CFG.Keybind
-                            if kb then
-                                if typeof(kb) == "EnumItem" then
-                                    keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
-                                else
-                                    keyName = tostring(kb)
-                                end
-                            end
-                            bindLbl.Text = keyName
-                        end
+            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                if triggerCheck then
+                    local active = getgenv().TRIGGERBOT_CFG.Enabled
+                    local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
+                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                    if cbCheck then cbCheck.Visible = active end
+                    if cbBg then
+                        cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
                     end
-                end)
-            end
+
+                    local kbBox = triggerCheck:FindFirstChild("KeybindBox")
+                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                    if bindLbl then
+                        local keyName = "None"
+                        local kb = getgenv().TRIGGERBOT_CFG.Keybind
+                        if kb then
+                            if typeof(kb) == "EnumItem" then
+                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                            else
+                                keyName = tostring(kb)
+                            end
+                        end
+                        bindLbl.Text = keyName
+                    end
+                end
+            end)
 
             if IsDuelist() then
                 local HCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
@@ -5960,8 +5970,8 @@ do
                     Color3.fromRGB(36, 36, 48))
                 Corner(hcbBg, 3); Stroke(hcbBg, STROKE2, 1)
                 local hcbCheck = NewLabel(hcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-                hcbCheck.Size = UDim2.new(1, 0, 1, 0); hcbCheck.Visible = _G.HITBOX_CFG.Enabled
-                if _G.HITBOX_CFG.Enabled then
+                hcbCheck.Size = UDim2.new(1, 0, 1, 0); hcbCheck.Visible = getgenv().HITBOX_CFG.Enabled
+                if getgenv().HITBOX_CFG.Enabled then
                     hcbBg.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
                 end
                 local hrowLbl = NewLabel(hrow, "Enable HitBox Expander", 13, TEXT)
@@ -5973,11 +5983,11 @@ do
                 hFit.Parent = hrowLbl
 
                 hrow.MouseButton1Click:Connect(function()
-                    _G.HITBOX_CFG.Enabled = not _G.HITBOX_CFG.Enabled
-                    hcbCheck.Visible = _G.HITBOX_CFG.Enabled
+                    getgenv().HITBOX_CFG.Enabled = not getgenv().HITBOX_CFG.Enabled
+                    hcbCheck.Visible = getgenv().HITBOX_CFG.Enabled
                     Tw(hcbBg, 0.1, "Quad", "Out",
                         {
-                            BackgroundColor3 = _G.HITBOX_CFG.Enabled and Color3.fromRGB(255, 60, 60) or
+                            BackgroundColor3 = getgenv().HITBOX_CFG.Enabled and Color3.fromRGB(255, 60, 60) or
                                 Color3.fromRGB(36, 36, 48)
                         })
                 end)
@@ -5990,15 +6000,15 @@ do
                         { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
                 end)
 
-                local sliderRow = AddCardSlider(HHolder, "Hitbox Size", 1, 50, _G.HITBOX_CFG.Size, function(val)
-                    _G.HITBOX_CFG.Size = val
+                local sliderRow = AddCardSlider(HHolder, "Hitbox Size", 1, 50, getgenv().HITBOX_CFG.Size, function(val)
+                    getgenv().HITBOX_CFG.Size = val
                 end)
                 sliderRow.LayoutOrder = 2
 
                 local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
                 ddRowPart.LayoutOrder = 3
-                local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, _G.HITBOX_CFG.Part, function(v)
-                    _G.HITBOX_CFG.Part = v
+                local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, getgenv().HITBOX_CFG.Part, function(v)
+                    getgenv().HITBOX_CFG.Part = v
                     NOTIFY("Hitbox Part", "Part: " .. v, 2)
                 end)
                 ddPart.Size = UDim2.new(1, 0, 1, 0)
@@ -6016,7 +6026,7 @@ do
         g.Name = "GlassLayer"
         g.Size = UDim2.new(1, 0, 1, 0)
         g.BackgroundTransparency = 1
-        g.Image = "rbxassetid://10881905308"
+        g.Image = "rbxassetid://10881905308" 
         g.ImageTransparency = 1
         g.ScaleType = Enum.ScaleType.Slice
         g.SliceCenter = Rect.new(49, 49, 450, 450)
@@ -6040,7 +6050,7 @@ do
 
         local panelTrans = blurActive and (strength * 0.7) or 0
 
-        Tw(Root, 0.1, "Linear", "Out", { BackgroundTransparency = 1 })
+        Tw(Root, 0.1, "Linear", "Out", { BackgroundTransparency = 1 }) 
         Tw(Sidebar, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
         Tw(RightBox, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
     end
@@ -6060,7 +6070,7 @@ do
 
         local previewImageLabel
         UpdatePreview = function()
-            local id = _G.CUSTOM_BG_ID
+            local id = getgenv().CUSTOM_BG_ID
             if previewImageLabel then
                 local asset = GetImageAsset(id)
                 if asset ~= "" then
@@ -6073,9 +6083,9 @@ do
         end
 
         UpdateCustomBackground = function()
-            local enabled = _G.CUSTOM_BG_ENABLED
-            local id = _G.CUSTOM_BG_ID
-            local trans = _G.CUSTOM_BG_TRANSPARENCY or 0
+            local enabled = getgenv().CUSTOM_BG_ENABLED
+            local id = getgenv().CUSTOM_BG_ID
+            local trans = getgenv().CUSTOM_BG_TRANSPARENCY or 0
 
             if SidebarBgImage and RightBoxBgImage then
                 if enabled and id ~= "" then
@@ -6127,15 +6137,15 @@ do
         idTextBox.TextColor3 = TEXT
         idTextBox.PlaceholderColor3 = DIM
         idTextBox.PlaceholderText = "Roblox ID..."
-        idTextBox.Text = _G.CUSTOM_BG_ID or ""
+        idTextBox.Text = getgenv().CUSTOM_BG_ID or ""
         idTextBox.TextSize = 11
         idTextBox.Font = Enum.Font.Gotham
         idTextBox.ClearTextOnFocus = false
         idTextBox.Parent = tbWrap
 
-        local enableBgToggle = AddCardSetting(customBgContent, "Enable Background", _G.CUSTOM_BG_ENABLED, function(v)
-            _G.CUSTOM_BG_ENABLED = v
-            _G.CUSTOM_BG_ID = idTextBox.Text
+        local enableBgToggle = AddCardSetting(customBgContent, "Enable Background", getgenv().CUSTOM_BG_ENABLED, function(v)
+            getgenv().CUSTOM_BG_ENABLED = v
+            getgenv().CUSTOM_BG_ID = idTextBox.Text
             UpdatePreview()
             UpdateCustomBackground()
             SaveUI()
@@ -6156,17 +6166,17 @@ do
         previewImageLabel.Parent = previewContainer
 
         idTextBox.FocusLost:Connect(function()
-            _G.CUSTOM_BG_ID = idTextBox.Text
+            getgenv().CUSTOM_BG_ID = idTextBox.Text
             UpdatePreview()
-            if _G.CUSTOM_BG_ENABLED then
+            if getgenv().CUSTOM_BG_ENABLED then
                 UpdateCustomBackground()
             end
             SaveUI()
         end)
 
-        local opacitySlider = AddCardSlider(customBgContent, "Background Opacity", 0, 100, _G.CUSTOM_BG_TRANSPARENCY or 0,
+        local opacitySlider = AddCardSlider(customBgContent, "Background Opacity", 0, 100, getgenv().CUSTOM_BG_TRANSPARENCY or 0,
             function(v)
-                _G.CUSTOM_BG_TRANSPARENCY = v
+                getgenv().CUSTOM_BG_TRANSPARENCY = v
                 UpdateCustomBackground()
                 SaveUI()
             end)
@@ -6186,13 +6196,13 @@ do
     end).LayoutOrder = 3
 
     ; (function()
-        _G.FLUX_SNOW_ACTIVE = false
+        getgenv().FLUX_SNOW_ACTIVE = false
 
         local function CreateFlake()
             local f = Instance.new("Frame")
             f.Size = UDim2.new(0, math.random(2, 3), 0, math.random(2, 3))
             f.BackgroundColor3 = Color3.new(1, 1, 1)
-            f.BackgroundTransparency = 1
+            f.BackgroundTransparency = 1 
             f.BorderSizePixel = 0
             Corner(f, 10)
             f.Parent = SnowHolder
@@ -6201,11 +6211,11 @@ do
 
         local function RunSnow()
             task.spawn(function()
-                while _G.FLUX_SNOW_ACTIVE do
+                while getgenv().FLUX_SNOW_ACTIVE do
                     if getgenv().FLUX_SESSION ~= MySession then break end
                     local f = CreateFlake()
                     local startX = 0.05 + (math.random() * 0.9)
-                    f.Position = UDim2.new(startX, 0, 0, 0)
+                    f.Position = UDim2.new(startX, 0, 0, 0) 
 
                     local duration = math.random(4, 7)
                     local drift = (math.random() - 0.5) * 0.1
@@ -6220,6 +6230,7 @@ do
                         duration,
                         true,
                         function()
+
                             local t = Tw(f, 0.4, "Linear", "Out", { BackgroundTransparency = 1 })
                             task.wait(0.4)
                             f:Destroy()
@@ -6231,7 +6242,7 @@ do
         end
 
         AddCardSetting(bgList.Parent, "Enable Snow", false, function(v)
-            _G.FLUX_SNOW_ACTIVE = v
+            getgenv().FLUX_SNOW_ACTIVE = v
             if v then RunSnow() end
         end).LayoutOrder = 2
     end)()
@@ -6257,13 +6268,13 @@ do
             NOTIFY("System", "Unloading script...", 2)
 
             getgenv().FLUX_SESSION = nil
-            _G.FLUX_SNOW_ACTIVE = false
+            getgenv().FLUX_SNOW_ACTIVE = false
 
-            if _G.FLUX_CONNS then
-                for _, c in pairs(_G.FLUX_CONNS) do
+            if getgenv().FLUX_CONNS then
+                for _, c in pairs(getgenv().FLUX_CONNS) do
                     pcall(function() c:Disconnect() end)
                 end
-                _G.FLUX_CONNS = {}
+                getgenv().FLUX_CONNS = {}
             end
 
             task.wait(0.3)
@@ -6272,26 +6283,26 @@ do
             pcall(function() RunService:UnbindFromRenderStep("ForceFOV_OMEGA") end)
             if FOV_CIRCLE then pcall(function() FOV_CIRCLE:Destroy() end) end
 
-            if _G.ESP_LOOP then
-                _G.ESP_LOOP:Disconnect(); _G.ESP_LOOP = nil
+            if getgenv().ESP_LOOP then
+                getgenv().ESP_LOOP:Disconnect(); getgenv().ESP_LOOP = nil
             end
-            if _G.ESP_CACHE then
-                for _, e in pairs(_G.ESP_CACHE) do
+            if getgenv().ESP_CACHE then
+                for _, e in pairs(getgenv().ESP_CACHE) do
                     pcall(function() e.FRM:Destroy() end)
                     pcall(function() e.BOX:Destroy() end)
                     pcall(function() e.FILL:Destroy() end)
                     if e.CHAM then pcall(function() e.CHAM:Destroy() end) end
                     if e.TCHAM then pcall(function() e.TCHAM:Destroy() end) end
                 end
-                _G.ESP_CACHE = nil
+                getgenv().ESP_CACHE = nil
             end
 
-            if _G.FLUX_KB_HUD_GUI then
-                pcall(function() _G.FLUX_KB_HUD_GUI:Destroy() end)
-                _G.FLUX_KB_HUD_GUI = nil
+            if getgenv().FLUX_KB_HUD_GUI then
+                pcall(function() getgenv().FLUX_KB_HUD_GUI:Destroy() end)
+                getgenv().FLUX_KB_HUD_GUI = nil
             end
 
-            if _G.SILENT_CFG then _G.SILENT_CFG.Enabled = false end
+            if getgenv().SILENT_CFG then getgenv().SILENT_CFG.Enabled = false end
             if silentFovCircle then pcall(function() silentFovCircle:Destroy() end) end
 
             pcall(function() ESP_HOLDER:Destroy() end)
@@ -6505,7 +6516,7 @@ end
                 local ob = NewBtn(srvScroll, UDim2.new(1, 0, 0, srvOptH), nil, Color3.fromRGB(45, 45, 60), 1)
                 ob.LayoutOrder = i
                 ob.ZIndex = 501
-                local t = string.format("%d/%d Players | Ping: %d", sv.playing, sv.maxPlayers, sv.ping)
+                local t = string.format("%d/%d Players | Ping: %dms", sv.playing, sv.maxPlayers, sv.ping)
                 local ol = NewLabel(ob, t, 11, TEXT)
                 ol.Position = UDim2.new(0, 10, 0, 0)
                 ol.Size = UDim2.new(1, -10, 1, 0)
@@ -6518,8 +6529,7 @@ end
                     srvSelLbl.Text = "Joining..."
                     srvClose()
                     pcall(function()
-                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, sv.id,
-                            game.Players.LocalPlayer)
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, sv.id, LP)
                     end)
                 end)
             end
@@ -6681,7 +6691,7 @@ UIS.InputBegan:Connect(function(inp, gp)
                 PICKER_OPEN = false
             end
         end
-        if _G.FLUX_KB_HUD_SYNC then _G.FLUX_KB_HUD_SYNC() end
+        if getgenv().FLUX_KB_HUD_SYNC then getgenv().FLUX_KB_HUD_SYNC() end
     end
 end)
 
@@ -6692,66 +6702,59 @@ FOV_CIRCLE.Visible = false
 FOV_CIRCLE.Color = ACCENT
 FOV_CIRCLE.Thickness = 1
 FOV_CIRCLE.NumSides = 64
-FOV_CIRCLE.Radius = _G.AIMBOT_CFG.FOV
+FOV_CIRCLE.Radius = getgenv().AIMBOT_CFG.FOV
 FOV_CIRCLE.Filled = false
 
 local ignoreSilentRay = false
 
 local function IsPositionVisible(origin, targetPos, targetChar, cam)
-    if not (origin and targetPos and targetChar and cam) then return false end
-    local success, visible = pcall(function()
-        local direction = targetPos - origin
-        local distance = direction.Magnitude
-        local dirUnit = direction.Unit
+    local direction = targetPos - origin
+    local distance = direction.Magnitude
+    local dirUnit = direction.Unit
 
-        local rayParams = RaycastParams.new()
-        rayParams.FilterType = Enum.RaycastFilterType.Exclude
-        local ignoreList = { LP.Character or targetChar, targetChar, cam }
-        rayParams.FilterDescendantsInstances = ignoreList
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    local ignoreList = { LP.Character, targetChar, cam }
+    rayParams.FilterDescendantsInstances = ignoreList
 
-        local isBronx = false
-        if type(IsBronxDuels) == "function" then
-            isBronx = IsBronxDuels()
+    local isBronx = IsBronxDuels()
+    local currentOrigin = origin
+    local remainingDist = distance
+    local isVis = false
+    local maxSteps = isBronx and 5 or 1
+
+    for step = 1, maxSteps do
+        ignoreSilentRay = true
+        local res = workspace:Raycast(currentOrigin, dirUnit * remainingDist, rayParams)
+        ignoreSilentRay = false
+
+        if not res then
+            isVis = true
+            break
         end
-        local currentOrigin = origin
-        local remainingDist = distance
-        local isVis = false
-        local maxSteps = isBronx and 5 or 1
 
-        for step = 1, maxSteps do
-            ignoreSilentRay = true
-            local res = workspace:Raycast(currentOrigin, dirUnit * remainingDist, rayParams)
-            ignoreSilentRay = false
+        local hit = res.Instance
+        if hit:IsDescendantOf(targetChar) then
+            isVis = true
+            break
+        end
 
-            if not res then
+        if isBronx and (hit.CanCollide == false or hit.Transparency > 0.9 or hit.Name == "Bullet" or hit.Name == "Handle" or hit:IsA("Accessory") or hit:IsA("Tool")) then
+            local currentFilter = rayParams.FilterDescendantsInstances
+            table.insert(currentFilter, hit)
+            rayParams.FilterDescendantsInstances = currentFilter
+
+            currentOrigin = res.Position + dirUnit * 0.01
+            remainingDist = (targetPos - currentOrigin).Magnitude
+            if remainingDist < 0.05 then
                 isVis = true
                 break
             end
-
-            local hit = res.Instance
-            if hit:IsDescendantOf(targetChar) then
-                isVis = true
-                break
-            end
-
-            if isBronx and (hit.CanCollide == false or hit.Transparency > 0.9 or hit.Name == "Bullet" or hit.Name == "Handle" or hit:IsA("Accessory") or hit:IsA("Tool")) then
-                local currentFilter = rayParams.FilterDescendantsInstances
-                table.insert(currentFilter, hit)
-                rayParams.FilterDescendantsInstances = currentFilter
-
-                currentOrigin = res.Position + dirUnit * 0.01
-                remainingDist = (targetPos - currentOrigin).Magnitude
-                if remainingDist < 0.05 then
-                    isVis = true
-                    break
-                end
-            else
-                break
-            end
+        else
+            break
         end
-        return isVis
-    end)
-    return success and visible
+    end
+    return isVis
 end
 
 local function GetTarget()
@@ -6759,21 +6762,21 @@ local function GetTarget()
     local mousePos = UIS:GetMouseLocation()
     local screenCenter = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
 
-    local refPos = (_G.AIMBOT_CFG.AimMode == "Camera Aim") and screenCenter or mousePos
+    local refPos = (getgenv().AIMBOT_CFG.AimMode == "Camera Aim") and screenCenter or mousePos
 
     local target = nil
-    local dist = _G.AIMBOT_CFG.FOV
+    local dist = getgenv().AIMBOT_CFG.FOV
 
     local function check(char)
         if not char or char == LP.Character then return end
         if IsIgnoredCharacter(char) then return end
-        local targetPartName = _G.AIMBOT_CFG.TargetPart
+        local targetPartName = getgenv().AIMBOT_CFG.TargetPart
         local hrp = char:FindFirstChild(targetPartName) or char:FindFirstChild("HumanoidRootPart") or
             char:FindFirstChild("Head")
         if not hrp then return end
 
         local hum = char:FindFirstChildOfClass("Humanoid")
-        if _G.AIMBOT_CFG.IgnoreDead and hum then
+        if getgenv().AIMBOT_CFG.IgnoreDead and hum then
             if hum.Health <= 0.1 or char:GetAttribute("Downed") then return end
         end
 
@@ -6786,12 +6789,12 @@ local function GetTarget()
 
         local mag = (Vector2.new(pos.X, pos.Y) - refPos).Magnitude
         if mag < dist then
-            if _G.AIMBOT_CFG.VisibleCheck then
+            if getgenv().AIMBOT_CFG.VisibleCheck then
                 if not IsPositionVisible(cam.CFrame.Position, hrp.Position, char, cam) then return end
             end
 
             local worldDist = (cam.CFrame.Position - hrp.Position).Magnitude
-            if worldDist <= _G.AIMBOT_CFG.MaxDist then
+            if worldDist <= getgenv().AIMBOT_CFG.MaxDist then
                 dist = mag
                 target = char
             end
@@ -6799,17 +6802,17 @@ local function GetTarget()
     end
 
     local players = Players:GetPlayers()
-    local hasActiveMatch = (_G.ACTIVE_MATCH_PLAYERS and next(_G.ACTIVE_MATCH_PLAYERS) ~= nil)
+    local hasActiveMatch = (getgenv().ACTIVE_MATCH_PLAYERS and next(getgenv().ACTIVE_MATCH_PLAYERS) ~= nil)
     for i = 1, #players do
         local p = players[i]
         if p ~= LP then
-            if not hasActiveMatch or _G.ACTIVE_MATCH_PLAYERS[p.Name] then
+            if not hasActiveMatch or getgenv().ACTIVE_MATCH_PLAYERS[p.Name] then
                 check(p.Character)
             end
         end
     end
 
-    local bots = _G.BOT_LIST or {}
+    local bots = getgenv().BOT_LIST or {}
     for i = 1, #bots do
         check(bots[i])
     end
@@ -6826,32 +6829,32 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
     local mouse = UIS:GetMouseLocation()
     local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
 
-    if _G.AIMBOT_CFG.DrawFov then
+    if getgenv().AIMBOT_CFG.DrawFov then
         FOV_CIRCLE.Visible = true
-        FOV_CIRCLE.Radius = _G.AIMBOT_CFG.FOV
-        FOV_CIRCLE.Position = (_G.AIMBOT_CFG.AimMode == "Camera Aim") and center or mouse
+        FOV_CIRCLE.Radius = getgenv().AIMBOT_CFG.FOV
+        FOV_CIRCLE.Position = (getgenv().AIMBOT_CFG.AimMode == "Camera Aim") and center or mouse
         FOV_CIRCLE.Color = ACCENT
     else
         FOV_CIRCLE.Visible = false
     end
 
-    if _G.AIMBOT_CFG.Enabled and isRmbDown then
+    if getgenv().AIMBOT_CFG.Enabled and isRmbDown then
         local targetChar = GetTarget()
         if targetChar then
-            local targetPart = targetChar:FindFirstChild(_G.AIMBOT_CFG.TargetPart) or
+            local targetPart = targetChar:FindFirstChild(getgenv().AIMBOT_CFG.TargetPart) or
                 targetChar:FindFirstChild("HumanoidRootPart")
             if targetPart then
                 local aimPos = targetPart.Position
                 local dist = (cam.CFrame.Position - aimPos).Magnitude
 
-                if _G.AIMBOT_CFG.Prediction then
+                if getgenv().AIMBOT_CFG.Prediction then
                     local targetVel = targetPart.Velocity
                     local selfVel = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")) and
                         LP.Character.HumanoidRootPart.Velocity or Vector3.new(0, 0, 0)
                     local relativeVel = targetVel - selfVel
 
                     local distFactor = dist / 100
-                    local predictOffset = relativeVel * (_G.AIMBOT_CFG.PredictionAmount * distFactor)
+                    local predictOffset = relativeVel * (getgenv().AIMBOT_CFG.PredictionAmount * distFactor)
 
                     local dropComp = Vector3.new(0, (distFactor * distFactor) * 0.15, 0)
                     aimPos = aimPos + predictOffset + dropComp
@@ -6860,20 +6863,21 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
                 local tPos, _ = cam:WorldToViewportPoint(aimPos)
                 local tVector = Vector2.new(tPos.X, tPos.Y)
 
-                local s = 21 - (_G.AIMBOT_CFG.HitChance / 5)
+                local s = 21 - (getgenv().AIMBOT_CFG.HitChance / 5)
                 s = math.max(1, s)
 
-                if _G.AIMBOT_CFG.AimMode == "Mouse Aim" then
-                    local rcsOffset = _G.AIMBOT_CFG.RCS and Vector2.new(0, _G.AIMBOT_CFG.RCSAmount * 2.5) or
+                if getgenv().AIMBOT_CFG.AimMode == "Mouse Aim" then
+                    local rcsOffset = getgenv().AIMBOT_CFG.RCS and Vector2.new(0, getgenv().AIMBOT_CFG.RCSAmount * 2.5) or
                         Vector2.new(0, 0)
                     local diff = (tVector - mouse) + rcsOffset
                     if mousemoverel then
                         mousemoverel(diff.X / (s * 1.5), diff.Y / (s * 1.5))
                     end
                 else
+
                     local targetCF = CFrame.lookAt(cam.CFrame.Position, aimPos)
-                    if _G.AIMBOT_CFG.RCS then
-                        targetCF = targetCF * CFrame.Angles(math.rad(-_G.AIMBOT_CFG.RCSAmount), 0, 0)
+                    if getgenv().AIMBOT_CFG.RCS then
+                        targetCF = targetCF * CFrame.Angles(math.rad(-getgenv().AIMBOT_CFG.RCSAmount), 0, 0)
                     end
 
                     if s <= 1.1 then
@@ -6891,7 +6895,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     silentFovCircle = Drawing.new("Circle")
     silentFovCircle.Thickness = 1.5
     silentFovCircle.NumSides = 60
-    silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
+    silentFovCircle.Radius = getgenv().SILENT_CFG.FOV or 150
     silentFovCircle.Filled = false
     silentFovCircle.Visible = false
     silentFovCircle.ZIndex = 999
@@ -6905,9 +6909,9 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             silentFovConn:Disconnect()
             return
         end
-        if _G.SILENT_CFG.Enabled and _G.SILENT_CFG.DrawFov then
+        if getgenv().SILENT_CFG.Enabled and getgenv().SILENT_CFG.DrawFov then
             silentFovCircle.Visible = true
-            silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
+            silentFovCircle.Radius = getgenv().SILENT_CFG.FOV or 150
             silentFovCircle.Position = UIS:GetMouseLocation()
         else
             silentFovCircle.Visible = false
@@ -6918,18 +6922,18 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         local cam = workspace.CurrentCamera
         local mousePos = UIS:GetMouseLocation()
         local target = nil
-        local dist = _G.SILENT_CFG.FOV
+        local dist = getgenv().SILENT_CFG.FOV
 
         local tsFolder = workspace:FindFirstChild("TargetShoots")
         if tsFolder then
             for _, child in pairs(tsFolder:GetChildren()) do
                 if child:IsA("BasePart") and child.Name == "TargetShoot" then
                     local pos, vis = cam:WorldToViewportPoint(child.Position)
-                    if vis or _G.SILENT_CFG.Wallbang then
+                    if vis or getgenv().SILENT_CFG.Wallbang then
                         local mag = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
                         if mag < dist then
                             local isVisible = true
-                            if not _G.SILENT_CFG.Wallbang then
+                            if not getgenv().SILENT_CFG.Wallbang then
                                 isVisible = IsPositionVisible(cam.CFrame.Position, child.Position, child, cam)
                             end
 
@@ -6943,7 +6947,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
         end
 
-        if target then return target end
+        if target then return target end 
 
         local function check(char)
             if not char or char == LP.Character then return end
@@ -6954,16 +6958,18 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                     return
                 end
                 if IsBronxDuels() or IsDuelist() then
+
                     local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
                         LP.Data.Match:FindFirstChild("Enemies")
                     if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
                         if not enemiesFolder:FindFirstChild(p.Name) then
-                            return
+                            return 
                         end
                     else
-                        if _G.ESP_CFG and _G.ESP_CFG.IgnoreTeam then
+
+                        if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
                             if p.Team and LP.Team and p.Team == LP.Team then
-                                return
+                                return 
                             end
                             local myTeam = LP:GetAttribute("DuelsTeam")
                             local theirTeam = p:GetAttribute("DuelsTeam")
@@ -6972,21 +6978,21 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
                             if myMatch and theirMatch and myMatch == theirMatch then
                                 if myTeam and theirTeam and myTeam == theirTeam then
-                                    return
+                                    return 
                                 end
                             end
                         end
                     end
                 else
-                    local myTeamFolder = _G.MY_TEAM_CACHE
+                    local myTeamFolder = getgenv().MY_TEAM_CACHE
                     local isTeammate = myTeamFolder and myTeamFolder:FindFirstChild(p.Name)
-                    if isTeammate and _G.ESP_CFG and _G.ESP_CFG.IgnoreTeam then
+                    if isTeammate and getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
                         return
                     end
                 end
             end
 
-            local targetPartName = _G.SILENT_CFG and _G.SILENT_CFG.TargetPart or "Head"
+            local targetPartName = getgenv().SILENT_CFG and getgenv().SILENT_CFG.TargetPart or "Head"
             local hrp = char:FindFirstChild(targetPartName) or char:FindFirstChild("HumanoidRootPart") or
                 char:FindFirstChild("Head")
             if not hrp then return end
@@ -7000,12 +7006,12 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             if IsBronxDuels() or IsDuelist() then
                 if pos.Z <= 0 then return end
             else
-                if not _G.SILENT_CFG.Wallbang and not vis then return end
+                if not getgenv().SILENT_CFG.Wallbang and not vis then return end
             end
 
             local mag = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
             if mag < dist then
-                if not _G.SILENT_CFG.Wallbang then
+                if not getgenv().SILENT_CFG.Wallbang then
                     if not IsPositionVisible(cam.CFrame.Position, hrp.Position, char, cam) then return end
                 end
 
@@ -7015,17 +7021,17 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
 
         local players = Players:GetPlayers()
-        local hasActiveMatch = (_G.ACTIVE_MATCH_PLAYERS and next(_G.ACTIVE_MATCH_PLAYERS) ~= nil)
+        local hasActiveMatch = (getgenv().ACTIVE_MATCH_PLAYERS and next(getgenv().ACTIVE_MATCH_PLAYERS) ~= nil)
         for i = 1, #players do
             local p = players[i]
             if p ~= LP then
-                if not hasActiveMatch or _G.ACTIVE_MATCH_PLAYERS[p.Name] then
+                if not hasActiveMatch or getgenv().ACTIVE_MATCH_PLAYERS[p.Name] then
                     check(p.Character)
                 end
             end
         end
 
-        local bots = _G.BOT_LIST or {}
+        local bots = getgenv().BOT_LIST or {}
         for i = 1, #bots do
             check(bots[i])
         end
@@ -7050,7 +7056,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             isGettingTarget = false
             if ok then
                 cachedTarget = res
-                cacheExpire = now + 0.05
+                cacheExpire = now + 0.05 
             else
                 warn("Error in GetSilentTarget: " .. tostring(res))
                 return nil
@@ -7062,10 +7068,11 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     end
 
     mt.__index = function(self, k)
-        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+        local hookActive = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)
         if not checkcaller() and hookActive then
             if typeof(self) == "Instance" and self:IsA("Camera") then
                 if k == "CFrame" or k == "cf" then
+
                     if IsHitmark() or IsBronxDuels() or IsDuelist() then
                         return oldIndex(self, k)
                     end
@@ -7078,7 +7085,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                         end
                     end
 
-                    local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+                    local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
                     if target then
                         local hitPos = nil
                         if target:IsA("BasePart") then
@@ -7088,7 +7095,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                             local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
                                 target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
                             if rootT then
-                                local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                local tp = target:FindFirstChild(getgenv().SILENT_CFG.TargetPart)
                                 hitPos = tp and tp.Position or rootT.Position
                             end
                         end
@@ -7107,7 +7114,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
     mt.__namecall = function(self, ...)
         local method = getnamecallmethod()
-        local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
+        local hookActive = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)
 
         if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
             return
@@ -7118,8 +7125,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
             if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
                 local chance = math.random(1, 100)
-                if chance <= (_G.SILENT_CFG.HitChance or 100) then
-                    local target = _G.KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+                if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
+                    local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
 
                     if target then
                         local hitPos = nil
@@ -7131,17 +7138,18 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                                 target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
 
                             if rootT then
-                                local tp = target:FindFirstChild(_G.SILENT_CFG.TargetPart)
+                                local tp = target:FindFirstChild(getgenv().SILENT_CFG.TargetPart)
                                 hitPos = tp and tp.Position or rootT.Position
                             end
                         end
 
                         if hitPos then
+
                             args[2] = (hitPos - args[1]).Unit * 10000
 
-                            local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
-                                (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
-                                (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
+                            local doWallbang = (getgenv().KILLAURA_ACTIVE_TARGET ~= nil) and
+                                (getgenv().KILLAURA_CFG and getgenv().KILLAURA_CFG.Wallbang) or
+                                (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Wallbang)
                             if doWallbang then
                                 local params = args[3]
                                 local newParams = RaycastParams.new()
@@ -7168,7 +7176,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
     setreadonly(mt, true)
 
-    _G.FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
+    getgenv().FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
         local hrp = target:FindFirstChild("HumanoidRootPart")
         if hrp then
@@ -7188,7 +7196,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return nil
     end
 
-    _G.FLUX_GET_SILENT_TARGET_HIT_POSITION = function(target)
+    getgenv().FLUX_GET_SILENT_TARGET_HIT_POSITION = function(target)
         if not target then
             return nil
         end
@@ -7197,7 +7205,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return target.Position
         end
 
-        local targetPartName = (_G.SILENT_CFG and _G.SILENT_CFG.TargetPart) or "Head"
+        local targetPartName = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.TargetPart) or "Head"
         if targetPartName == "Random" then
             local parts = { "Head", "UpperTorso", "HumanoidRootPart" }
             targetPartName = parts[math.random(1, #parts)]
@@ -7210,8 +7218,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return targetPart and targetPart.Position or nil
     end
 
-    _G.FLUX_TRY_REDIRECT_VISUALIZE_BULLET = function(oldFireServerFn, remote, ...)
-        if not (_G.SILENT_CFG and _G.SILENT_CFG.Enabled and _G.SILENT_CFG.Wallbang) then
+    getgenv().FLUX_TRY_REDIRECT_VISUALIZE_BULLET = function(oldFireServerFn, remote, ...)
+        if not (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled and getgenv().SILENT_CFG.Wallbang) then
             return false
         end
 
@@ -7220,8 +7228,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return false
         end
 
-        local attachment = _G.FLUX_GET_TARGET_ROOT_ATTACHMENT(target)
-        local hitPos = attachment and _G.FLUX_GET_SILENT_TARGET_HIT_POSITION(target)
+        local attachment = getgenv().FLUX_GET_TARGET_ROOT_ATTACHMENT(target)
+        local hitPos = attachment and getgenv().FLUX_GET_SILENT_TARGET_HIT_POSITION(target)
         local cam = workspace.CurrentCamera
         if not attachment or not hitPos or not cam then
             return false
@@ -7242,9 +7250,9 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return true, oldFireServerFn(remote, table.unpack(args, 1, args.n))
     end
 
-    _G.FLUX_OLD_FIRESERVER = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
+    getgenv().FLUX_OLD_FIRESERVER = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
         if checkcaller() or typeof(self) ~= "Instance" then
-            return _G.FLUX_OLD_FIRESERVER(self, ...)
+            return getgenv().FLUX_OLD_FIRESERVER(self, ...)
         end
 
         if self.Name == "AD" then
@@ -7252,29 +7260,29 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
 
         if self.Name == "VisualizeBullet" then
-            local handled, result = _G.FLUX_TRY_REDIRECT_VISUALIZE_BULLET(_G.FLUX_OLD_FIRESERVER, self, ...)
+            local handled, result = getgenv().FLUX_TRY_REDIRECT_VISUALIZE_BULLET(getgenv().FLUX_OLD_FIRESERVER, self, ...)
             if handled then
                 return result
             end
         end
 
-        if self.Name == "kill" and _G.IK_CFG and _G.IK_CFG.Enabled then
+        if self.Name == "kill" and getgenv().IK_CFG and getgenv().IK_CFG.Enabled then
             task.defer(function()
-                local fireInstakill = _G.FLUX_FIRE_INSTAKILL
+                local fireInstakill = getgenv().FLUX_FIRE_INSTAKILL
                 if type(fireInstakill) == "function" then
                     pcall(fireInstakill, true)
                 end
             end)
         end
 
-        return _G.FLUX_OLD_FIRESERVER(self, ...)
+        return getgenv().FLUX_OLD_FIRESERVER(self, ...)
     end)
 
-    _G.FLUX_GET_IK_ROOT = function(char)
+    getgenv().FLUX_GET_IK_ROOT = function(char)
         return char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
     end
 
-    _G.FLUX_FIND_IK_ENEMY_FROM_ATTRIBUTES = function(myRoot)
+    getgenv().FLUX_FIND_IK_ENEMY_FROM_ATTRIBUTES = function(myRoot)
         local myGame = LP:GetAttribute("Game")
         local myTeam = LP:GetAttribute("Team")
         if not myRoot or not myGame or myGame == "nothing" or myGame == "" or myGame == "Lobby" or not myTeam or myTeam == "nothing" then
@@ -7286,15 +7294,12 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LP and not IsIgnoredPlayer(player) and player:GetAttribute("Game") == myGame and player:GetAttribute("Team") ~= myTeam then
-                local enemyRoot = _G.FLUX_GET_IK_ROOT(player.Character)
+                local enemyRoot = getgenv().FLUX_GET_IK_ROOT(player.Character)
                 if enemyRoot then
-                    local enemyHum = player.Character:FindFirstChildOfClass("Humanoid")
-                    if enemyHum and enemyHum.Health > 0 and not player.Character:GetAttribute("Downed") then
-                        local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                        if dist < closestDist then
-                            closestDist = dist
-                            closestEnemy = player
-                        end
+                    local dist = (myRoot.Position - enemyRoot.Position).Magnitude
+                    if dist < closestDist then
+                        closestDist = dist
+                        closestEnemy = player
                     end
                 end
             end
@@ -7303,7 +7308,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return closestEnemy
     end
 
-    _G.FLUX_FIND_IK_ENEMY_FROM_RUNNING_GAMES = function(myRoot)
+    getgenv().FLUX_FIND_IK_ENEMY_FROM_RUNNING_GAMES = function(myRoot)
         if not myRoot then
             return nil
         end
@@ -7349,16 +7354,12 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 for _, child in ipairs(teamFolder:GetChildren()) do
                     local enemyPlayer = Players:FindFirstChild(child.Name)
                     if enemyPlayer and not IsIgnoredPlayer(enemyPlayer) then
-                        local enemyRoot = _G.FLUX_GET_IK_ROOT(enemyPlayer.Character)
+                        local enemyRoot = getgenv().FLUX_GET_IK_ROOT(enemyPlayer.Character)
                         if enemyRoot then
-                            local enemyHum = enemyPlayer.Character and
-                                enemyPlayer.Character:FindFirstChildOfClass("Humanoid")
-                            if enemyHum and enemyHum.Health > 0 and not enemyPlayer.Character:GetAttribute("Downed") then
-                                local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                                if dist < closestDist then
-                                    closestDist = dist
-                                    closestEnemy = enemyPlayer
-                                end
+                            local dist = (myRoot.Position - enemyRoot.Position).Magnitude
+                            if dist < closestDist then
+                                closestDist = dist
+                                closestEnemy = enemyPlayer
                             end
                         end
                     end
@@ -7369,7 +7370,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return closestEnemy
     end
 
-    _G.FLUX_CAN_FIRE_IK_ON = function(enemyPlayer)
+    getgenv().FLUX_CAN_FIRE_IK_ON = function(enemyPlayer)
         if not enemyPlayer or IsIgnoredPlayer(enemyPlayer) then
             return false
         end
@@ -7380,19 +7381,15 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         local theirTeam = enemyPlayer:GetAttribute("Team")
         local myHum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
 
-        local theirChar = enemyPlayer.Character
-        local theirHum = theirChar and theirChar:FindFirstChildOfClass("Humanoid")
-        local isAlive = theirHum and theirHum.Health > 0 and not theirChar:GetAttribute("Downed")
-
-        return myGame and theirGame == myGame and theirTeam ~= myTeam and myHum and myHum.Health > 0 and isAlive
+        return myGame and theirGame == myGame and theirTeam ~= myTeam and myHum and myHum.Health > 0
     end
 
-    _G.FLUX_FIRE_INSTAKILL = function(silent)
-        if not _G.IK_CFG or not _G.IK_CFG.Enabled then return end
+    getgenv().FLUX_FIRE_INSTAKILL = function(silent)
+        if not getgenv().IK_CFG or not getgenv().IK_CFG.Enabled then return end
 
-        local myRoot = _G.FLUX_GET_IK_ROOT(LP.Character)
-        local closestEnemy = _G.FLUX_FIND_IK_ENEMY_FROM_ATTRIBUTES(myRoot) or
-            _G.FLUX_FIND_IK_ENEMY_FROM_RUNNING_GAMES(myRoot)
+        local myRoot = getgenv().FLUX_GET_IK_ROOT(LP.Character)
+        local closestEnemy = getgenv().FLUX_FIND_IK_ENEMY_FROM_ATTRIBUTES(myRoot) or
+            getgenv().FLUX_FIND_IK_ENEMY_FROM_RUNNING_GAMES(myRoot)
 
         if not closestEnemy then
             if not silent then
@@ -7403,21 +7400,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
         local ok, result = pcall(function()
             local rs = game:GetService("ReplicatedStorage")
-
-            local knife
-            local netModule = rs:FindFirstChild("Packages") and rs.Packages:FindFirstChild("Net")
-            if netModule then
-                local success, netLib = pcall(require, netModule)
-                if success and netLib and type(netLib) == "table" and netLib.RemoteEvent then
-                    pcall(function()
-                        knife = netLib:RemoteEvent("KnifeKill")
-                    end)
-                end
-            end
-
-            if not knife and netModule then
-                knife = netModule:FindFirstChild("RE/90a36310509693bb2666729f57fed59e2e5e6a8ebc0835a3e35c43e1d47eb32e")
-            end
+            local remotesModule = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
+            local knife = remotesModule and require(remotesModule).KnifeKill
 
             if not knife then
                 if not silent then
@@ -7426,14 +7410,14 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 return
             end
 
-            if not _G.FLUX_CAN_FIRE_IK_ON(closestEnemy) then
+            if not getgenv().FLUX_CAN_FIRE_IK_ON(closestEnemy) then
                 if not silent then
                     NOTIFY("InstaKill", "Team/Game check failed!", 2)
                 end
                 return
             end
 
-            knife:FireServer("bb15e94b-1af0-48fe-be2b-b2f9e007565a", closestEnemy)
+            knife:FireServer(closestEnemy)
             if not silent then
                 NOTIFY("InstaKill", "Fired on " .. closestEnemy.Name, 2)
             end
@@ -7444,12 +7428,12 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
     end
 
-    table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(input, gpe)
+    table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(input, gpe)
         if gpe then return end
-        if _G.IK_CFG and _G.IK_CFG.Enabled and _G.IK_CFG.Mode == "Keybind" then
-            local keyName = _G.IK_CFG.Keybind or "G"
+        if getgenv().IK_CFG and getgenv().IK_CFG.Enabled and getgenv().IK_CFG.Mode == "Keybind" then
+            local keyName = getgenv().IK_CFG.Keybind or "G"
             if input.KeyCode == Enum.KeyCode[keyName] then
-                _G.FLUX_FIRE_INSTAKILL()
+                getgenv().FLUX_FIRE_INSTAKILL()
             end
         end
     end))
@@ -7458,21 +7442,22 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         while true do
             task.wait(0.1)
             if getgenv().FLUX_SESSION ~= MySession then break end
-            if _G.IK_CFG and _G.IK_CFG.Enabled and _G.IK_CFG.Mode == "Auto Kill" then
-                _G.FLUX_FIRE_INSTAKILL()
+            if getgenv().IK_CFG and getgenv().IK_CFG.Enabled and getgenv().IK_CFG.Mode == "Auto Kill" then
+                getgenv().FLUX_FIRE_INSTAKILL()
             end
         end
     end)
 end
 
 ; (function()
-    table.insert(_G.FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
+
+    table.insert(getgenv().FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
         local hum = char:WaitForChild("Humanoid", 5)
-        if hum and _G.LOCAL_PLAYER_CFG.SpeedEnabled and (IsMurderVsSheriff() or IsDuelist()) then
+        if hum and getgenv().LOCAL_PLAYER_CFG.SpeedEnabled and (IsMurderVsSheriff() or IsDuelist()) then
             if IsDuelist() then
-                hum:SetAttribute("ForceSpeed", _G.LOCAL_PLAYER_CFG.Speed)
+                hum:SetAttribute("ForceSpeed", getgenv().LOCAL_PLAYER_CFG.Speed)
             else
-                hum.WalkSpeed = _G.LOCAL_PLAYER_CFG.Speed
+                hum.WalkSpeed = getgenv().LOCAL_PLAYER_CFG.Speed
             end
         end
     end))
@@ -7485,14 +7470,14 @@ end
             local char = LP.Character
             local hum = char and char:FindFirstChildOfClass("Humanoid")
             if hum and (IsMurderVsSheriff() or IsDuelist()) then
-                if _G.LOCAL_PLAYER_CFG.SpeedEnabled then
+                if getgenv().LOCAL_PLAYER_CFG.SpeedEnabled then
                     if IsDuelist() then
-                        if hum:GetAttribute("ForceSpeed") ~= _G.LOCAL_PLAYER_CFG.Speed then
-                            hum:SetAttribute("ForceSpeed", _G.LOCAL_PLAYER_CFG.Speed)
+                        if hum:GetAttribute("ForceSpeed") ~= getgenv().LOCAL_PLAYER_CFG.Speed then
+                            hum:SetAttribute("ForceSpeed", getgenv().LOCAL_PLAYER_CFG.Speed)
                         end
                     else
-                        if hum.WalkSpeed ~= _G.LOCAL_PLAYER_CFG.Speed then
-                            hum.WalkSpeed = _G.LOCAL_PLAYER_CFG.Speed
+                        if hum.WalkSpeed ~= getgenv().LOCAL_PLAYER_CFG.Speed then
+                            hum.WalkSpeed = getgenv().LOCAL_PLAYER_CFG.Speed
                         end
                     end
                 else
@@ -7534,11 +7519,12 @@ end
             end
         end
 
-        if _G.LOCAL_PLAYER_CFG.FlyEnabled then
+        if getgenv().LOCAL_PLAYER_CFG.FlyEnabled then
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root or not humanoid then return end
 
             if IsHitmark() then
+
                 flyGyro = Instance.new("BodyGyro")
                 flyGyro.P = 9e4
                 flyGyro.D = 1e3
@@ -7554,7 +7540,7 @@ end
                 humanoid.PlatformStand = true
 
                 flyConnection = RunService.Heartbeat:Connect(function()
-                    if getgenv().FLUX_SESSION ~= MySession or not _G.LOCAL_PLAYER_CFG.FlyEnabled then
+                    if getgenv().FLUX_SESSION ~= MySession or not getgenv().LOCAL_PLAYER_CFG.FlyEnabled then
                         if flyConnection then
                             flyConnection:Disconnect(); flyConnection = nil
                         end
@@ -7577,7 +7563,7 @@ end
                     curHum:ChangeState(Enum.HumanoidStateType.Freefall)
 
                     local cam = workspace.CurrentCamera
-                    local speed = _G.LOCAL_PLAYER_CFG.FlySpeed or 50
+                    local speed = getgenv().LOCAL_PLAYER_CFG.FlySpeed or 50
 
                     local fwd = (UIS:IsKeyDown(Enum.KeyCode.W) and 1 or 0) - (UIS:IsKeyDown(Enum.KeyCode.S) and 1 or 0)
                     local side = (UIS:IsKeyDown(Enum.KeyCode.D) and 1 or 0) - (UIS:IsKeyDown(Enum.KeyCode.A) and 1 or 0)
@@ -7598,11 +7584,12 @@ end
                     flyVelo.Velocity = finalVelocity
                 end)
             else
+
                 flyPos = root.Position
                 humanoid.PlatformStand = true
 
                 flyConnection = RunService.Heartbeat:Connect(function()
-                    if getgenv().FLUX_SESSION ~= MySession or not _G.LOCAL_PLAYER_CFG.FlyEnabled then
+                    if getgenv().FLUX_SESSION ~= MySession or not getgenv().LOCAL_PLAYER_CFG.FlyEnabled then
                         if flyConnection then
                             flyConnection:Disconnect()
                             flyConnection = nil
@@ -7619,7 +7606,7 @@ end
                     curHum.PlatformStand = true
                     local cam = workspace.CurrentCamera
                     local cf = cam.CFrame.Rotation
-                    local speed = (_G.LOCAL_PLAYER_CFG.FlySpeed or 50) / 10
+                    local speed = (getgenv().LOCAL_PLAYER_CFG.FlySpeed or 50) / 10
                     local dir = cf:VectorToObjectSpace(curHum.MoveDirection * speed)
 
                     local direction
@@ -7650,20 +7637,20 @@ end
         end
     end
 
-    table.insert(_G.FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
+    table.insert(getgenv().FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
         task.wait(0.5)
-        if _G.LOCAL_PLAYER_CFG.FlyEnabled then
+        if getgenv().LOCAL_PLAYER_CFG.FlyEnabled then
             UpdateFlyState()
         end
     end))
 
-    local oldFlyEnabled = _G.LOCAL_PLAYER_CFG.FlyEnabled
+    local oldFlyEnabled = getgenv().LOCAL_PLAYER_CFG.FlyEnabled
     task.spawn(function()
         while true do
             task.wait(0.1)
             if getgenv().FLUX_SESSION ~= MySession then break end
-            if _G.LOCAL_PLAYER_CFG.FlyEnabled ~= oldFlyEnabled then
-                oldFlyEnabled = _G.LOCAL_PLAYER_CFG.FlyEnabled
+            if getgenv().LOCAL_PLAYER_CFG.FlyEnabled ~= oldFlyEnabled then
+                oldFlyEnabled = getgenv().LOCAL_PLAYER_CFG.FlyEnabled
                 UpdateFlyState()
             end
         end
@@ -7678,7 +7665,7 @@ end
     end
 
     local function UpdateInvisState()
-        local active = _G.LOCAL_PLAYER_CFG.InvisEnabled
+        local active = getgenv().LOCAL_PLAYER_CFG.InvisEnabled
         local char = LP.Character
         if not char then return end
 
@@ -7721,34 +7708,34 @@ end
         end
     end
 
-    table.insert(_G.FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
-        _G.LOCAL_PLAYER_CFG.InvisEnabled = false
+    table.insert(getgenv().FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
+        getgenv().LOCAL_PLAYER_CFG.InvisEnabled = false
         local invisChair = workspace:FindFirstChild("invischair")
         if invisChair then
             invisChair:Destroy()
         end
-        if _G.FLUX_UI_UPDATE_FUNCS then
-            for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+        if getgenv().FLUX_UI_UPDATE_FUNCS then
+            for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
         end
     end))
 
-    local oldInvisEnabled = _G.LOCAL_PLAYER_CFG.InvisEnabled
+    local oldInvisEnabled = getgenv().LOCAL_PLAYER_CFG.InvisEnabled
     task.spawn(function()
         while true do
             task.wait(0.1)
             if getgenv().FLUX_SESSION ~= MySession then break end
-            if _G.LOCAL_PLAYER_CFG.InvisEnabled ~= oldInvisEnabled then
-                oldInvisEnabled = _G.LOCAL_PLAYER_CFG.InvisEnabled
+            if getgenv().LOCAL_PLAYER_CFG.InvisEnabled ~= oldInvisEnabled then
+                oldInvisEnabled = getgenv().LOCAL_PLAYER_CFG.InvisEnabled
                 UpdateInvisState()
             end
         end
     end)
 
-    table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
+    table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
         if gpe then return end
 
-        if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Keybind then
-            local currentBind = _G.TRIGGERBOT_CFG.Keybind
+        if getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Keybind then
+            local currentBind = getgenv().TRIGGERBOT_CFG.Keybind
             local match = false
             if typeof(currentBind) == "EnumItem" then
                 if currentBind.EnumType == Enum.KeyCode then
@@ -7758,16 +7745,16 @@ end
                 end
             end
             if match and currentBind ~= Enum.KeyCode.None then
-                _G.TRIGGERBOT_CFG.Enabled = not _G.TRIGGERBOT_CFG.Enabled
-                NOTIFY("Trigger Bot", _G.TRIGGERBOT_CFG.Enabled and "Enabled" or "Disabled", 2)
-                if _G.FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                getgenv().TRIGGERBOT_CFG.Enabled = not getgenv().TRIGGERBOT_CFG.Enabled
+                NOTIFY("Trigger Bot", getgenv().TRIGGERBOT_CFG.Enabled and "Enabled" or "Disabled", 2)
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                 end
             end
         end
 
-        if _G.SILENT_CFG and _G.SILENT_CFG.Keybind then
-            local currentBind = _G.SILENT_CFG.Keybind
+        if getgenv().SILENT_CFG and getgenv().SILENT_CFG.Keybind then
+            local currentBind = getgenv().SILENT_CFG.Keybind
             local match = false
             if typeof(currentBind) == "EnumItem" then
                 if currentBind.EnumType == Enum.KeyCode then
@@ -7777,16 +7764,16 @@ end
                 end
             end
             if match and currentBind ~= Enum.KeyCode.None then
-                _G.SILENT_CFG.Enabled = not _G.SILENT_CFG.Enabled
-                NOTIFY("Silent Aim", _G.SILENT_CFG.Enabled and "Enabled" or "Disabled", 2)
-                if _G.FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                getgenv().SILENT_CFG.Enabled = not getgenv().SILENT_CFG.Enabled
+                NOTIFY("Silent Aim", getgenv().SILENT_CFG.Enabled and "Enabled" or "Disabled", 2)
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                 end
             end
         end
 
-        if _G.KILLAURA_CFG and _G.KILLAURA_CFG.Keybind then
-            local currentBind = _G.KILLAURA_CFG.Keybind
+        if getgenv().KILLAURA_CFG and getgenv().KILLAURA_CFG.Keybind then
+            local currentBind = getgenv().KILLAURA_CFG.Keybind
             local match = false
             if typeof(currentBind) == "EnumItem" then
                 if currentBind.EnumType == Enum.KeyCode then
@@ -7796,10 +7783,10 @@ end
                 end
             end
             if match and currentBind ~= Enum.KeyCode.None then
-                _G.KILLAURA_CFG.Enabled = not _G.KILLAURA_CFG.Enabled
-                NOTIFY("Kill Aura", _G.KILLAURA_CFG.Enabled and "Enabled" or "Disabled", 2)
-                if _G.FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                getgenv().KILLAURA_CFG.Enabled = not getgenv().KILLAURA_CFG.Enabled
+                NOTIFY("Kill Aura", getgenv().KILLAURA_CFG.Enabled and "Enabled" or "Disabled", 2)
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                 end
             end
         end
@@ -7807,49 +7794,49 @@ end
         if inp.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = inp.KeyCode.Name
 
-            if _G.LOCAL_PLAYER_CFG.SpeedKey ~= "None" and keyName == _G.LOCAL_PLAYER_CFG.SpeedKey then
+            if getgenv().LOCAL_PLAYER_CFG.SpeedKey ~= "None" and keyName == getgenv().LOCAL_PLAYER_CFG.SpeedKey then
                 if IsMurderVsSheriff() or IsDuelist() then
-                    _G.LOCAL_PLAYER_CFG.SpeedEnabled = not _G.LOCAL_PLAYER_CFG.SpeedEnabled
+                    getgenv().LOCAL_PLAYER_CFG.SpeedEnabled = not getgenv().LOCAL_PLAYER_CFG.SpeedEnabled
                     local char = LP.Character
                     local hum = char and char:FindFirstChildOfClass("Humanoid")
-                    if hum and not _G.LOCAL_PLAYER_CFG.SpeedEnabled then
+                    if hum and not getgenv().LOCAL_PLAYER_CFG.SpeedEnabled then
                         if IsDuelist() then
                             hum:SetAttribute("ForceSpeed", nil)
                         else
                             hum.WalkSpeed = 16
                         end
                     end
-                    NOTIFY("Speed Boost", _G.LOCAL_PLAYER_CFG.SpeedEnabled and "Enabled" or "Disabled", 2)
-                    if _G.FLUX_UI_UPDATE_FUNCS then
-                        for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                    NOTIFY("Speed Boost", getgenv().LOCAL_PLAYER_CFG.SpeedEnabled and "Enabled" or "Disabled", 2)
+                    if getgenv().FLUX_UI_UPDATE_FUNCS then
+                        for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                     end
                 else
                     NOTIFY("Speed Boost", "Only available in supported games!", 3)
                 end
             end
 
-            if _G.LOCAL_PLAYER_CFG.FlyKey ~= "None" and keyName == _G.LOCAL_PLAYER_CFG.FlyKey then
-                _G.LOCAL_PLAYER_CFG.FlyEnabled = not _G.LOCAL_PLAYER_CFG.FlyEnabled
+            if getgenv().LOCAL_PLAYER_CFG.FlyKey ~= "None" and keyName == getgenv().LOCAL_PLAYER_CFG.FlyKey then
+                getgenv().LOCAL_PLAYER_CFG.FlyEnabled = not getgenv().LOCAL_PLAYER_CFG.FlyEnabled
                 UpdateFlyState()
-                NOTIFY("Player Fly", _G.LOCAL_PLAYER_CFG.FlyEnabled and "Enabled" or "Disabled", 2)
-                if _G.FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                NOTIFY("Player Fly", getgenv().LOCAL_PLAYER_CFG.FlyEnabled and "Enabled" or "Disabled", 2)
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                 end
             end
 
-            if _G.LOCAL_PLAYER_CFG.InvisKey ~= "None" and keyName == _G.LOCAL_PLAYER_CFG.InvisKey then
-                _G.LOCAL_PLAYER_CFG.InvisEnabled = not _G.LOCAL_PLAYER_CFG.InvisEnabled
-                NOTIFY("Invisibility", _G.LOCAL_PLAYER_CFG.InvisEnabled and "Enabled" or "Disabled", 2)
-                if _G.FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+            if getgenv().LOCAL_PLAYER_CFG.InvisKey ~= "None" and keyName == getgenv().LOCAL_PLAYER_CFG.InvisKey then
+                getgenv().LOCAL_PLAYER_CFG.InvisEnabled = not getgenv().LOCAL_PLAYER_CFG.InvisEnabled
+                NOTIFY("Invisibility", getgenv().LOCAL_PLAYER_CFG.InvisEnabled and "Enabled" or "Disabled", 2)
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
                 end
-                if _G.FLUX_UPDATE_KB_HUD then pcall(_G.FLUX_UPDATE_KB_HUD) end
+                if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
             end
         end
     end))
 
-    table.insert(_G.FLUX_CONNS, UIS.JumpRequest:Connect(function()
-        if _G.FUN_CFG and _G.FUN_CFG.InfJump and IsHitmark() then
+    table.insert(getgenv().FLUX_CONNS, UIS.JumpRequest:Connect(function()
+        if getgenv().FUN_CFG and getgenv().FUN_CFG.InfJump and IsHitmark() then
             local char = LP.Character
             local hum = char and char:FindFirstChildOfClass("Humanoid")
             if hum then
@@ -7858,9 +7845,9 @@ end
         end
     end))
 
-    table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
+    table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
         if inp.KeyCode == Enum.KeyCode.Space then
-            if _G.FUN_CFG and _G.FUN_CFG.InfJump and IsDuelist() then
+            if getgenv().FUN_CFG and getgenv().FUN_CFG.InfJump and IsDuelist() then
                 local char = LP.Character
                 local hum = char and char:FindFirstChildOfClass("Humanoid")
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -7881,8 +7868,8 @@ end
                 break
             end
             pcall(function()
-                if _G.FUN_CFG and _G.FUN_CFG.GravityEnabled and IsHitmark() then
-                    workspace.Gravity = _G.FUN_CFG.GravityValue
+                if getgenv().FUN_CFG and getgenv().FUN_CFG.GravityEnabled and IsHitmark() then
+                    workspace.Gravity = getgenv().FUN_CFG.GravityValue
                 else
                     workspace.Gravity = 196.2
                 end
@@ -7899,7 +7886,7 @@ end
                 break
             end
             pcall(function()
-                if _G.FUN_CFG and _G.FUN_CFG.Spinbot and (IsHitmark() or IsDuelist()) then
+                if getgenv().FUN_CFG and getgenv().FUN_CFG.Spinbot and (IsHitmark() or IsDuelist()) then
                     local char = LP.Character
                     local root = char and char:FindFirstChild("HumanoidRootPart")
                     if root then
@@ -7907,10 +7894,10 @@ end
                             if spinVelo then pcall(function() spinVelo:Destroy() end) end
                             spinVelo = Instance.new("BodyAngularVelocity")
                             spinVelo.MaxTorque = Vector3.new(0, 999999, 0)
-                            spinVelo.AngularVelocity = Vector3.new(0, _G.FUN_CFG.SpinSpeed / 5, 0)
+                            spinVelo.AngularVelocity = Vector3.new(0, getgenv().FUN_CFG.SpinSpeed / 5, 0)
                             spinVelo.Parent = root
                         else
-                            spinVelo.AngularVelocity = Vector3.new(0, _G.FUN_CFG.SpinSpeed / 5, 0)
+                            spinVelo.AngularVelocity = Vector3.new(0, getgenv().FUN_CFG.SpinSpeed / 5, 0)
                         end
                     end
                 else
@@ -7956,10 +7943,11 @@ end
 
             if IsHitmark() and u3 and u6 and u11 then
                 pcall(function()
+
                     if not rawget(u6, "_oldShake") then
                         u6._oldShake = u6.Shake
                         u6.Shake = function(self, ...)
-                            if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.NoRecoil then
+                            if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.NoRecoil then
                                 return
                             end
                             return u6._oldShake(self, ...)
@@ -7975,7 +7963,7 @@ end
                         mt._oldNewIndex = mt.__newindex or rawset
                         setreadonly(mt, false)
                         mt.__newindex = function(t, k, v)
-                            if k == "MouseDelta" and _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.NoRecoil then
+                            if k == "MouseDelta" and getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.NoRecoil then
                                 local caller = debug.info(2, "n")
                                 if caller == "firegun" then
                                     return
@@ -7989,21 +7977,23 @@ end
                     local data = u11.WeaponData
 
                     if current and type(current) == "table" then
-                        if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.InfiniteAmmo then
+
+                        if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.InfiniteAmmo then
                             rawset(current, "ammo", current.clipsize or 16)
                         end
 
-                        if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic then
+                        if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.Automatic then
                             rawset(current, "firemode", "Auto")
                         end
 
-                        if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.RapidFire then
+                        if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.RapidFire then
                             rawset(current, "firedelay", 0.05)
                         end
                     end
 
                     if data and type(data) == "table" then
-                        if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.NoSpread then
+
+                        if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.NoSpread then
                             if not rawget(data, "_oldAccuracyMin") then
                                 rawset(data, "_oldAccuracyMin", data.AccuracyMin or Vector3.new(0, 0, 0))
                                 rawset(data, "_oldAccuracyMax", data.AccuracyMax or Vector3.new(0, 0, 0))
@@ -8018,7 +8008,7 @@ end
                         end
                     end
 
-                    if _G.CURRENT_VISUAL_MAT and _G.CURRENT_VISUAL_MAT ~= "Default" then
+                    if getgenv().CURRENT_VISUAL_MAT and getgenv().CURRENT_VISUAL_MAT ~= "Default" then
                         local lp = game:GetService("Players").LocalPlayer
                         if lp.Character then
                             local tool = lp.Character:FindFirstChildOfClass("Tool")
@@ -8030,7 +8020,7 @@ end
                                             local matName = "Plastic"
                                             local clr = Color3.new(1, 1, 1)
 
-                                            local sel = _G.CURRENT_VISUAL_MAT
+                                            local sel = getgenv().CURRENT_VISUAL_MAT
                                             if sel:match("Neon") then
                                                 matName = "Neon"
                                                 if sel:match("Cyan") then
@@ -8065,7 +8055,7 @@ end
                                         end
                                     end
                                     if part:IsA("SpecialMesh") then
-                                        local sel = _G.CURRENT_VISUAL_MAT
+                                        local sel = getgenv().CURRENT_VISUAL_MAT
                                         local vclr = Vector3.new(1, 1, 1)
                                         if sel:match("Cyan") then
                                             vclr = Vector3.new(0, 2, 2)
@@ -8090,18 +8080,18 @@ end)()
 
 local lastKaTime = 0
 
-table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(function()
+table.insert(getgenv().FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(function()
     if getgenv().FLUX_SESSION ~= MySession then return end
-    if not _G.KILLAURA_CFG or not _G.KILLAURA_CFG.Enabled then return end
-    if not (IsHitmark() or IsDuelist() or IsMurderVsSheriff()) then return end
+    if not getgenv().KILLAURA_CFG or not getgenv().KILLAURA_CFG.Enabled then return end
+    if not (IsHitmark() or IsDuelist()) then return end
 
-    local closestDist = _G.KILLAURA_CFG.MaxDist or 300
+    local closestDist = getgenv().KILLAURA_CFG.MaxDist or 300
     local kaTarget = nil
     local cam = workspace.CurrentCamera
     local lpChar = game.Players.LocalPlayer.Character
     if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return end
 
-    local isBlatantOrTele = (_G.KILLAURA_CFG.AuraType == "Blatant" or _G.KILLAURA_CFG.AuraType == "Tele Kill")
+    local isBlatantOrTele = (getgenv().KILLAURA_CFG.AuraType == "Blatant" or getgenv().KILLAURA_CFG.AuraType == "Tele Kill")
 
     if IsDuelist() and isBlatantOrTele then
         local inMatch = false
@@ -8130,41 +8120,21 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
         end
     end
 
-    local function isSameTeam(otherPlayer)
-        if _G.MY_TEAM_CACHE then
-            if type(_G.MY_TEAM_CACHE) == "table" and _G.MY_TEAM_CACHE.FindFirstChild then
-                if _G.MY_TEAM_CACHE:FindFirstChild(otherPlayer.Name) then
-                    return true
-                end
-            elseif typeof(_G.MY_TEAM_CACHE) == "Instance" then
-                if _G.MY_TEAM_CACHE:FindFirstChild(otherPlayer.Name) then
-                    return true
-                end
-            end
-        end
-        local myTeam = LP:GetAttribute("Team")
-        local theirTeam = otherPlayer:GetAttribute("Team")
-        if myTeam and theirTeam and myTeam ~= "nothing" and theirTeam ~= "nothing" then
-            return myTeam == theirTeam
-        end
-        if LP.Team and otherPlayer.Team then
-            return LP.Team == otherPlayer.Team
-        end
-        return false
-    end
-
     for _, p in ipairs(game.Players:GetPlayers()) do
         if p ~= game.Players.LocalPlayer and not IsIgnoredPlayer(p) and p.Character then
             local char = p.Character
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 0 and not char:GetAttribute("Downed") then
-                if not isSameTeam(p) then
+            if char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 and not char:GetAttribute("Downed") then
+                local validEnemy = true
+                if getgenv().MY_TEAM_CACHE and getgenv().MY_TEAM_CACHE:FindFirstChild(p.Name) then
+                    validEnemy = false
+                end
+
+                if validEnemy then
                     local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head")
                     if hrp then
                         local mag = (hrp.Position - lpChar.HumanoidRootPart.Position).Magnitude
                         local inView = true
-
-                        if _G.KILLAURA_CFG.AuraType == "Legit" then
+                        if getgenv().KILLAURA_CFG.AuraType == "Legit" then
                             local _, onScreen = cam:WorldToViewportPoint(hrp.Position)
                             if not onScreen then
                                 inView = false
@@ -8172,7 +8142,7 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                         end
 
                         if inView and mag < closestDist then
-                            local bypassWall = _G.KILLAURA_CFG.Wallbang or isBlatantOrTele
+                            local bypassWall = getgenv().KILLAURA_CFG.Wallbang or isBlatantOrTele
                             if bypassWall then
                                 closestDist = mag
                                 kaTarget = char
@@ -8197,7 +8167,7 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
     end
 
     if kaTarget then
-        if _G.KILLAURA_CFG.AuraType == "Tele Kill" then
+        if getgenv().KILLAURA_CFG.AuraType == "Tele Kill" then
             local targetHrp = kaTarget:FindFirstChild("HumanoidRootPart")
             local myHrp = lpChar:FindFirstChild("HumanoidRootPart")
             if targetHrp and myHrp then
@@ -8212,17 +8182,17 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
             end
         end
 
-        local delayTime = isBlatantOrTele and 0.01 or ((_G.KILLAURA_CFG.Delay or 100) / 1000)
+        local delayTime = isBlatantOrTele and 0.01 or ((getgenv().KILLAURA_CFG.Delay or 100) / 1000)
         if tick() - lastKaTime > delayTime then
             lastKaTime = tick()
             task.spawn(function()
-                local targetPart = IsDuelist() and "Head" or _G.SILENT_CFG.TargetPart
-                local hitPart = kaTarget:FindFirstChild(targetPart) or kaTarget:FindFirstChild("Head") or
-                    kaTarget:FindFirstChild("HumanoidRootPart")
-                if not hitPart then return end
+                pcall(function()
+                    local targetPart = IsDuelist() and "Head" or getgenv().SILENT_CFG.TargetPart
+                    local hitPart = kaTarget:FindFirstChild(targetPart) or kaTarget:FindFirstChild("Head") or
+                        kaTarget:FindFirstChild("HumanoidRootPart")
+                    if not hitPart then return end
 
-                if IsHitmark() then
-                    pcall(function()
+                    if IsHitmark() then
                         local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
                         local Gun2 = BridgeNet2.ClientBridge("Gun2")
                         Gun2:Fire({
@@ -8235,9 +8205,7 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                             ["timestamp"] = time(),
                             ["hitId"] = tick()
                         })
-                    end)
-                elseif IsDuelist() then
-                    pcall(function()
+                    elseif IsDuelist() then
                         local tool = lpChar:FindFirstChildOfClass("Tool")
                         local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
                             game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
@@ -8252,39 +8220,8 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                                 end
                             end
                         end
-                    end)
-                elseif IsMurderVsSheriff() then
-                    pcall(function()
-                        local rs = game:GetService("ReplicatedStorage")
-                        local gun = _G.FLUX_MVS_GUNKILL_EVENT
-                        if not gun then
-                            local netModule = rs:FindFirstChild("Packages") and rs.Packages:FindFirstChild("Net")
-                            if netModule then
-                                local success, netLib = pcall(require, netModule)
-                                if success and netLib and type(netLib) == "table" and netLib.RemoteEvent then
-                                    pcall(function()
-                                        gun = netLib:RemoteEvent("GunKill")
-                                    end)
-                                end
-                            end
-                            if not gun and netModule then
-                                gun = netModule:FindFirstChild(
-                                    "RE/b6356408cae7d8c822652d12353e8c05c64871ef5c130430fc0d1d10ecff2d94")
-                            end
-                            if gun then
-                                _G.FLUX_MVS_GUNKILL_EVENT = gun
-                            end
-                        end
-
-                        local enemyPlayer = game.Players:GetPlayerFromCharacter(kaTarget)
-                        local myHrp = lpChar:FindFirstChild("HumanoidRootPart")
-                        local targetHrp = kaTarget:FindFirstChild("HumanoidRootPart")
-                        if gun and enemyPlayer and myHrp and targetHrp then
-                            local lookVector = (targetHrp.Position - myHrp.Position).Unit
-                            gun:FireServer("9576996e-66e6-4d56-b791-f3b062eb597c", enemyPlayer, lookVector)
-                        end
-                    end)
-                end
+                    end
+                end)
             end)
         end
     end
@@ -8302,14 +8239,14 @@ task.spawn(function()
                         local old_accelXY = t.accelerateXY
 
                         t.accelerate = function(self, ...)
-                            if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.NoRecoil then
+                            if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.NoRecoil then
                                 return
                             end
                             return old_accel(self, ...)
                         end
 
                         t.accelerateXY = function(self, ...)
-                            if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.NoRecoil then
+                            if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.NoRecoil then
                                 return
                             end
                             return old_accelXY(self, ...)
@@ -8324,23 +8261,24 @@ end)
 task.spawn(function()
     while task.wait() do
         if getgenv().FLUX_SESSION ~= MySession then break end
-        if IsDuelist() and _G.GUN_MODS_CFG then
+        if IsDuelist() and getgenv().GUN_MODS_CFG then
             pcall(function()
                 local char = LP.Character
                 if char then
                     local tool = char:FindFirstChildOfClass("Tool")
                     if tool then
-                        if _G.GUN_MODS_CFG.InfiniteAmmo and tool:GetAttribute("MaxAmmo") then
+
+                        if getgenv().GUN_MODS_CFG.InfiniteAmmo and tool:GetAttribute("MaxAmmo") then
                             tool:SetAttribute("Ammo", tool:GetAttribute("MaxAmmo") or 999)
                         end
 
-                        if _G.GUN_MODS_CFG.Automatic then
+                        if getgenv().GUN_MODS_CFG.Automatic then
                             if tool:GetAttribute("Auto") ~= nil then tool:SetAttribute("Auto", true) end
                             if tool:GetAttribute("Automatic") ~= nil then tool:SetAttribute("Automatic", true) end
                             if tool:GetAttribute("FireMode") then tool:SetAttribute("FireMode", "Auto") end
                         end
 
-                        if _G.GUN_MODS_CFG.NoSpread then
+                        if getgenv().GUN_MODS_CFG.NoSpread then
                             if tool:GetAttribute("Spread") then tool:SetAttribute("Spread", 0) end
                             if tool:GetAttribute("MinSpread") then tool:SetAttribute("MinSpread", 0) end
                             if tool:GetAttribute("MaxSpread") then tool:SetAttribute("MaxSpread", 0) end
@@ -8355,14 +8293,14 @@ end)
 local WeaponsRemote = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
     game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
 if WeaponsRemote then
-    table.insert(_G.FLUX_CONNS, WeaponsRemote.OnClientEvent:Connect(function(action, ...)
+    table.insert(getgenv().FLUX_CONNS, WeaponsRemote.OnClientEvent:Connect(function(action, ...)
         if getgenv().FLUX_SESSION ~= MySession then return end
-        if IsDuelist() and action == "Confirm" and _G.WORLD_CFG and _G.WORLD_CFG.KillSoundEnabled then
-            local rawId = tostring(_G.WORLD_CFG.KillSoundId):gsub("%D", "")
+        if IsDuelist() and action == "Confirm" and getgenv().WORLD_CFG and getgenv().WORLD_CFG.KillSoundEnabled then
+            local rawId = tostring(getgenv().WORLD_CFG.KillSoundId):gsub("%D", "")
             if rawId ~= "" then
                 local sound = Instance.new("Sound")
                 sound.SoundId = "rbxassetid://" .. rawId
-                sound.Volume = (_G.WORLD_CFG.KillSoundVolume or 100) / 100
+                sound.Volume = (getgenv().WORLD_CFG.KillSoundVolume or 100) / 100
                 sound.Parent = game:GetService("SoundService")
                 sound:Play()
                 sound.Ended:Once(function()
@@ -8376,20 +8314,21 @@ if WeaponsRemote then
     end))
 end
 
-table.insert(_G.FLUX_CONNS, game:GetService("SoundService").ChildAdded:Connect(function(child)
+table.insert(getgenv().FLUX_CONNS, game:GetService("SoundService").ChildAdded:Connect(function(child)
     if getgenv().FLUX_SESSION ~= MySession then return end
-    if IsDuelist() and _G.WORLD_CFG and _G.WORLD_CFG.KillSoundEnabled and child:IsA("Sound") and child.Name:sub(1, 10) == "KillSound_" then
+    if IsDuelist() and getgenv().WORLD_CFG and getgenv().WORLD_CFG.KillSoundEnabled and child:IsA("Sound") and child.Name:sub(1, 10) == "KillSound_" then
         child:Stop()
         child:Destroy()
     end
 end))
 
 task.spawn(function()
-    local originalProps = {}
+    local originalProps = {} 
 
     while true do
         task.wait(0.1)
         if getgenv().FLUX_SESSION ~= MySession then
+
             for part, data in pairs(originalProps) do
                 pcall(function()
                     part.Size = data.Size
@@ -8407,9 +8346,9 @@ task.spawn(function()
             end
         end
 
-        if IsDuelist() and _G.HITBOX_CFG and _G.HITBOX_CFG.Enabled then
-            local size = _G.HITBOX_CFG.Size
-            local targetPartName = (_G.HITBOX_CFG.Part == "UpperTorso" and "UpperTorso" or "Head")
+        if IsDuelist() and getgenv().HITBOX_CFG and getgenv().HITBOX_CFG.Enabled then
+            local size = getgenv().HITBOX_CFG.Size
+            local targetPartName = (getgenv().HITBOX_CFG.Part == "UpperTorso" and "UpperTorso" or "Head")
             local sizeVec = Vector3.new(size, size, size)
 
             local activeParts = {}
@@ -8420,7 +8359,7 @@ task.spawn(function()
                     local hum = char:FindFirstChildOfClass("Humanoid")
                     if hum and hum.Health > 0 and not char:GetAttribute("Downed") then
                         local isEnemy = true
-                        if _G.MY_TEAM_CACHE and _G.MY_TEAM_CACHE:FindFirstChild(p.Name) then
+                        if getgenv().MY_TEAM_CACHE and getgenv().MY_TEAM_CACHE:FindFirstChild(p.Name) then
                             isEnemy = false
                         end
 
@@ -8475,6 +8414,7 @@ task.spawn(function()
                 end
             end
         else
+
             for part, data in pairs(originalProps) do
                 pcall(function()
                     part.Size = data.Size
@@ -8495,10 +8435,10 @@ local function GetTriggerBotTarget()
     if not viewportSize or viewportSize.X < 10 or viewportSize.Y < 10 then return nil end
     local screenCenter = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
 
-    local mode = _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Mode or "Legit"
-    local fovRadius = (_G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Fov)
+    local mode = getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Mode or "Legit"
+    local fovRadius = (getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Fov)
     if not fovRadius then
-        fovRadius = (mode == "Blatant") and 120 or 12
+        fovRadius = (mode == "Blatant") and 120 or 12 
     end
     local bestTarget = nil
     local bestDist = fovRadius
@@ -8521,6 +8461,7 @@ local function GetTriggerBotTarget()
 
         local dist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
         if dist < bestDist then
+
             if IsPositionVisible(cam.CFrame.Position, hitPart.Position, char, cam) then
                 bestTarget = char
                 bestDist = dist
@@ -8530,6 +8471,7 @@ local function GetTriggerBotTarget()
 
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LP then
+
             local isTeammate = false
             if IsBronxDuels() or IsDuelist() then
                 local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
@@ -8553,7 +8495,7 @@ local function GetTriggerBotTarget()
                     end
                 end
             else
-                local myTeamFolder = _G.MY_TEAM_CACHE
+                local myTeamFolder = getgenv().MY_TEAM_CACHE
                 if myTeamFolder and myTeamFolder:FindFirstChild(p.Name) then
                     isTeammate = true
                 end
@@ -8565,7 +8507,7 @@ local function GetTriggerBotTarget()
         end
     end
 
-    local bots = _G.BOT_LIST or {}
+    local bots = getgenv().BOT_LIST or {}
     for i = 1, #bots do
         checkChar(bots[i])
     end
@@ -8574,10 +8516,10 @@ local function GetTriggerBotTarget()
 end
 
 local function FireWeapon()
-    if _G.FireBind then
-        _G:FireBind("Shoot", true, false)
+    if getgenv().FireBind then
+        getgenv():FireBind("Shoot", true, false)
         task.wait(0.01)
-        _G:FireBind("Shoot", false, false)
+        getgenv():FireBind("Shoot", false, false)
     elseif mouse1click then
         mouse1click()
     elseif mouse1press and mouse1release then
@@ -8592,8 +8534,8 @@ local isTriggerPressed = false
 local function ReleaseTrigger()
     if isTriggerPressed then
         isTriggerPressed = false
-        if _G.FireBind then
-            _G:FireBind("Shoot", false, false)
+        if getgenv().FireBind then
+            getgenv():FireBind("Shoot", false, false)
         elseif mouse1release then
             mouse1release()
         end
@@ -8603,8 +8545,8 @@ end
 local function PressTrigger()
     if not isTriggerPressed then
         isTriggerPressed = true
-        if _G.FireBind then
-            _G:FireBind("Shoot", true, false)
+        if getgenv().FireBind then
+            getgenv():FireBind("Shoot", true, false)
         elseif mouse1press then
             mouse1press()
         end
@@ -8612,10 +8554,10 @@ local function PressTrigger()
 end
 
 local function TapTrigger()
-    if _G.FireBind then
-        _G:FireBind("Shoot", true, false)
+    if getgenv().FireBind then
+        getgenv():FireBind("Shoot", true, false)
         task.wait(0.01)
-        _G:FireBind("Shoot", false, false)
+        getgenv():FireBind("Shoot", false, false)
     elseif mouse1click then
         mouse1click()
     elseif mouse1press and mouse1release then
@@ -8632,7 +8574,8 @@ task.spawn(function()
             ReleaseTrigger()
             break
         end
-        if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
+        if getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Enabled then
+
             local activeTool = nil
             pcall(function()
                 local char = LP.Character
@@ -8652,22 +8595,24 @@ task.spawn(function()
 
             local targetChar = GetTriggerBotTarget()
             if targetChar then
-                local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+                local mode = getgenv().TRIGGERBOT_CFG.Mode or "Legit"
 
                 if mode == "Legit" then
+
                     local isAuto = false
                     if activeTool then
                         isAuto = activeTool:GetAttribute("Automatic") == true
                             or activeTool:GetAttribute("Auto") == true
                             or activeTool:GetAttribute("FireMode") == "Auto"
-                            or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
+                            or (getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.Automatic)
                     end
 
                     if isAuto then
                         PressTrigger()
                     else
-                        ReleaseTrigger()
-                        local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
+
+                        ReleaseTrigger() 
+                        local delay = getgenv().TRIGGERBOT_CFG.Delay or 0.05
                         if tick() - lastTriggerClick > delay then
                             lastTriggerClick = tick()
                             TapTrigger()
@@ -8721,12 +8666,13 @@ task.spawn(function()
                             end
                         end
                     else
+
                         local isAuto = false
                         if activeTool then
                             isAuto = activeTool:GetAttribute("Automatic") == true
                                 or activeTool:GetAttribute("Auto") == true
                                 or activeTool:GetAttribute("FireMode") == "Auto"
-                                or (_G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic)
+                                or (getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.Automatic)
                         end
 
                         if isAuto then
@@ -8741,9 +8687,11 @@ task.spawn(function()
                     end
                 end
             else
+
                 ReleaseTrigger()
             end
         else
+
             ReleaseTrigger()
         end
     end
