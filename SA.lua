@@ -47,7 +47,6 @@ _G.TRIGGERBOT_CFG = _G.TRIGGERBOT_CFG or {
     Mode = "Legit"
 }
 
-
 _G.SILENT_CFG = _G.SILENT_CFG or {
     Enabled = false,
     Wallbang = false,
@@ -110,7 +109,7 @@ _G.FUN_CFG = _G.FUN_CFG or {
 _G.PREFERENCES_CFG = _G.PREFERENCES_CFG or {
     IgnoredPlayers = {}
 }
--- Smooth Drag setting (initially set at top)
+
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -119,6 +118,7 @@ getgenv()._CEN_SLD_ACTIVE = false
 getgenv()._CEN_PKR_ACTIVE = false
 
 local CoreGui = game:GetService("CoreGui")
+
 local GAME_IDS = {
     MurderVsSheriff = {
         Lobbies = {
@@ -136,11 +136,11 @@ local GAME_IDS = {
         [97351810896225] = true
     },
     BronxDuels = {
-        [139943061361383] = true, -- Matchmaking
-        [99362936871032] = true,  -- The Bronx: Duels 🔫
-        [85788627530413] = true,  -- FFA
-        [9091734830] = true,      -- main
-        [121567535120062] = false -- previously found ID
+        [139943061361383] = true,
+        [99362936871032] = true,
+        [85788627530413] = true,
+        [9091734830] = true,
+        [121567535120062] = false
     },
     Duelist = {
         [122310270867133] = true
@@ -162,6 +162,7 @@ local function IsBronxDuels()
     if GAME_IDS.BronxDuels and GAME_IDS.BronxDuels[pid] then
         return true
     end
+
     local rs = game:GetService("ReplicatedStorage")
     local remotes = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
     if remotes and remotes:FindFirstChild("KnifeKill") then
@@ -261,6 +262,7 @@ local function IsIgnoredCharacter(char)
     local owner = char and Players:GetPlayerFromCharacter(char)
     return owner and IsIgnoredPlayer(owner) or false
 end
+
 local MySession = os.clock()
 getgenv().FLUX_SESSION = MySession
 
@@ -272,10 +274,12 @@ local function CleanOld()
             hum:SetAttribute("ForceSpeed", nil)
         end
     end)
+
     for _, c in pairs(_G.FLUX_CONNS) do
         pcall(function() c:Disconnect() end)
     end
     _G.FLUX_CONNS = {}
+
     for _, v in pairs(CoreGui:GetChildren()) do
         if v.Name == "FluxUI" or v.Name == "MobileToggle" or v.Name == "NotifySG" or v.Name == "ESP_HOLDER" then
             pcall(function() v:Destroy() end)
@@ -286,8 +290,10 @@ local function CleanOld()
             pcall(function() v:Destroy() end)
         end
     end
+
     pcall(function() RunService:UnbindFromRenderStep("FluxAimbot") end)
     pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
+
     if _G.ESP_CACHE then
         for target, e in pairs(_G.ESP_CACHE) do
             pcall(function() e.FRM:Destroy() end)
@@ -302,6 +308,7 @@ local function CleanOld()
     pcall(function() if FOV_CIRCLE then FOV_CIRCLE:Destroy() end end)
 end
 CleanOld()
+
 local isRmbDown = false
 table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(input)
     if getgenv().FLUX_SESSION ~= MySession then return end
@@ -315,6 +322,7 @@ table.insert(_G.FLUX_CONNS, UIS.InputEnded:Connect(function(input)
         isRmbDown = false
     end
 end))
+
 if _G.ESP_LOOP then
     _G.ESP_LOOP:Disconnect(); _G.ESP_LOOP = nil
 end
@@ -345,14 +353,15 @@ local UpdateCustomBackground
 local UpdatePreview
 local blurActive = false
 local blurVal = 0
+
 local Watermark
 local NotifySG
 local KbWin
 local KbSG
 
-
 local uiVis = true
 local FOV_CIRCLE, silentFovCircle
+
 _G.MY_TEAM_CACHE = nil
 _G.ACTIVE_MATCH_PLAYERS = {}
 task.spawn(function()
@@ -360,6 +369,7 @@ task.spawn(function()
         if getgenv().FLUX_SESSION ~= MySession then break end
         local matchPlayers = {}
         local found = false
+
         local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
             LP.Data.Match:FindFirstChild("Enemies")
         if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
@@ -370,6 +380,7 @@ task.spawn(function()
             _G.MY_TEAM_CACHE = nil
             found = true
         end
+
         if not found then
             local myGame = LP:GetAttribute("Game")
             if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" then
@@ -378,6 +389,7 @@ task.spawn(function()
                         matchPlayers[p.Name] = true
                     end
                 end
+
                 local myTeam = LP:GetAttribute("Team")
                 _G.MY_TEAM_CACHE = {
                     FindFirstChild = function(self, name)
@@ -391,6 +403,7 @@ task.spawn(function()
                 found = true
             end
         end
+
         if not found then
             local runningGames = workspace:FindFirstChild("RunningGames")
             if runningGames then
@@ -471,7 +484,6 @@ local function ApplyUIPreferences()
 end
 
 LoadUI()
-
 
 local function Tw(obj, t, es, ed, goals)
     local tween = TweenService:Create(obj,
@@ -603,10 +615,12 @@ local DIM             = Color3.fromRGB(110, 112, 130)
 local ACCENT          = Color3.fromRGB(238, 240, 255)
 local SLBG            = Color3.fromRGB(42, 42, 54)
 local SLFILL          = Color3.fromRGB(200, 204, 238)
+
 local PICKER_OPEN     = false
 local PICKER_CALLBACK = nil
 local PICKER_GUI      = nil
 local PICKER_MAIN     = nil
+
 local IS_MOBILE       = UIS.TouchEnabled and not UIS.KeyboardEnabled
 local curW            = IS_MOBILE and 600 or 900
 local curH            = IS_MOBILE and 350 or 530
@@ -718,6 +732,7 @@ function AddDropdown(parent, options, default, callback)
             close()
         end
     end)
+
     UIS.InputBegan:Connect(function(inp, gp)
         if not open or gp then return end
         if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
@@ -756,6 +771,7 @@ local Sidebar                     = NewFrame(Root,
     SIDEBAR
 )
 Corner(Sidebar, 10)
+
 Stroke(Sidebar, STROKE2, 1.2)
 local sideGrad = Instance.new("UIGradient")
 sideGrad.Rotation = 90
@@ -798,6 +814,7 @@ RightBoxBgImage.Parent = RightBox
 local rightGrad = Instance.new("UIGradient")
 rightGrad.Rotation = 90
 rightGrad.Parent = RightBox
+
 if IS_MOBILE then
     local MobileBtn = Instance.new("ScreenGui")
     MobileBtn.Name = "MobileToggle"
@@ -822,6 +839,7 @@ if IS_MOBILE then
     end)
     MakeDraggable(Toggle)
 end
+
 local NotifySG = Instance.new("ScreenGui")
 NotifySG.Name = "FluxNotify"
 NotifySG.ResetOnSpawn = false
@@ -866,6 +884,7 @@ local function NOTIFY(title, msg, dur)
     Corner(bar, 2)
 
     activeNotifs[n] = { t = tLbl, b = bar }
+
     n.Position = UDim2.new(1.5, 0, 0, 0)
     Tw(n, 0.4, "Quart", "Out", { Position = UDim2.new(0, 0, 0, 0) })
     local barTween = Tw(bar, dur, "Linear", "Out", { Size = UDim2.new(0, 0, 1, 0) })
@@ -878,6 +897,7 @@ local function NOTIFY(title, msg, dur)
         end)
     end)
 end
+
 Watermark = NewFrame(NotifySG, UDim2.new(0, 230, 0, 30), UDim2.new(0, 50, 0, 50), Color3.fromRGB(24, 24, 30))
 Watermark.Visible = useWatermark
 Corner(Watermark, 6)
@@ -913,6 +933,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         fps = frames
         frames = 0
         lastFPS = now
+
         if useWatermark and Watermark.Visible then
             local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
             wmLbl.Text = string.format("Wh01 - %d fps - %d ping", fps, ping)
@@ -1001,6 +1022,7 @@ local function MakeNav(data, idx)
     local lbl = NewLabel(btn, data.name, 13, data.active and Color3.new(1, 1, 1) or DIM, data.active)
     lbl.Size = UDim2.new(1, -65, 1, 0)
     lbl.Position = UDim2.new(0, 48, 0, 0)
+
     local catPage = NewFrame(RightBox, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
     catPage.Visible = data.active
     navPages[data.name] = catPage
@@ -1233,6 +1255,7 @@ local function AddCardSlider(parent, label, min, max, default, callback)
     end)
     return row
 end
+
 do
     local MainPage = navPages["Main"]
     local M_TAB_H = 44
@@ -1266,10 +1289,12 @@ do
                     return true
                 end
             end
+
             local myGame = LP:GetAttribute("Game")
             if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" then
                 return true
             end
+
             local runningGames = workspace:FindFirstChild("RunningGames")
             if runningGames then
                 for _, gameFolder in pairs(runningGames:GetChildren()) do
@@ -1328,7 +1353,6 @@ do
             local rowLbl = NewLabel(row, "Enable Auto Match", 13, TEXT)
             rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
 
-
             local function ToggleState(state, silent)
                 if state ~= nil then checked = state else checked = not checked end
                 _G.AM_CFG.Enabled = checked; cbCheck.Visible = checked
@@ -1359,6 +1383,7 @@ do
                 if ns == nil then ns = checked end
                 ToggleState(ns, true)
             end)
+
             if not getgenv().AM_HOOKED then
                 getgenv().AM_HOOKED = true
                 local oldNS
@@ -1488,6 +1513,7 @@ do
                 SaveUI()
             end)
             toggleRow.LayoutOrder = 1
+
             local tbWrap = NewFrame(KSHolder, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
             tbWrap.LayoutOrder = 2
             Corner(tbWrap, 5)
@@ -1513,11 +1539,13 @@ do
                 idTextBox.Text = txt
                 SaveUI()
             end)
+
             local volSlider = AddCardSlider(KSHolder, "Sound Volume", 0, 200, _G.WORLD_CFG.KillSoundVolume, function(v)
                 _G.WORLD_CFG.KillSoundVolume = v
                 SaveUI()
             end)
             volSlider.LayoutOrder = 3
+
             local testBtn = NewBtn(KSHolder, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(36, 36, 48))
             testBtn.LayoutOrder = 4
             Corner(testBtn, 6)
@@ -1550,6 +1578,7 @@ do
             testBtn.MouseLeave:Connect(function()
                 Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
             end)
+
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
                 if not KSCard or not KSCard.Parent then return end
@@ -1561,6 +1590,7 @@ do
                     cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
                 end
                 idTextBox.Text = tostring(_G.WORLD_CFG.KillSoundId)
+
                 local volVal = _G.WORLD_CFG.KillSoundVolume or 100
                 local topFrame = volSlider:FindFirstChildOfClass("Frame")
                 if topFrame then
@@ -1659,6 +1689,7 @@ do
                 Tw(row, 0.1, "Quad", "Out",
                     { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
             end)
+
             task.spawn(function()
                 local wasInMatch = false
                 while task.wait(2) do
@@ -1944,6 +1975,7 @@ do
                         knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
                     end
                 end
+
                 local fActive = _G.LOCAL_PLAYER_CFG.FlyEnabled
                 local fCbBg = flyCheck:FindFirstChildOfClass("Frame")
                 local fCbCheck = fCbBg and fCbBg:FindFirstChildOfClass("TextLabel")
@@ -1977,6 +2009,7 @@ do
                     local knobS = IS_MOBILE and 18 or 12
                     fKnobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
                 end
+
                 if invisCheck then
                     local iActive = _G.LOCAL_PLAYER_CFG.InvisEnabled
                     local iCbBg = invisCheck:FindFirstChildOfClass("Frame")
@@ -1992,6 +2025,7 @@ do
                         iBindLbl.Text = tostring(_G.LOCAL_PLAYER_CFG.InvisKey)
                     end
                 end
+
                 if IsHitmark() or IsDuelist() then
                     if infCheck then
                         local active = _G.FUN_CFG.InfJump
@@ -2079,10 +2113,10 @@ do
         BuildLocalPlayerCard()
     end
 end
+
 local CombatPage = navPages["Combat"]
 local TAB_H = 44
 local TabBar = NewFrame(CombatPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-
 
 local TabSep = NewFrame(CombatPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
 
@@ -2126,6 +2160,7 @@ for i, name in ipairs(TABS) do
 
     tb.MouseButton1Click:Connect(function()
         if activeTabIdx == i then return end
+
         tabBtns[activeTabIdx].lbl.TextColor3 = DIM
         tabBtns[activeTabIdx].lbl.Font = Enum.Font.Gotham
         tabLines[activeTabIdx].Visible = false
@@ -2172,12 +2207,14 @@ for i, data in ipairs(CHECKS) do
     Corner(row, 5)
 
     local bLbl = nil
+
     local checked = false
     if data.label == "Ignore Dead Players" then checked = true end
     local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
     Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
     local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
     cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
+
     local rowLbl = NewLabel(row, data.label, 13, TEXT)
     rowLbl.Position = UDim2.new(0, 32, 0, 0)
     local rightOffset = (data.badge and not IS_MOBILE) and -96 or -38
@@ -2194,6 +2231,7 @@ for i, data in ipairs(CHECKS) do
         Tw(cbBg, 0.1, "Quad", "Out", {
             BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
         })
+
         if data.label == "Aimbot" then
             _G.AIMBOT_CFG.Enabled = checked
         elseif data.label == "Draw Fov" then
@@ -2213,6 +2251,7 @@ for i, data in ipairs(CHECKS) do
         local ns = checked
         if data.label == "Aimbot" then
             ns = _G.AIMBOT_CFG.Enabled
+
             if data.badge and _G.AIMBOT_CFG.Keybind and bLbl then
                 local k = _G.AIMBOT_CFG.Keybind
                 local name = (typeof(k) == "EnumItem" and k.Name or tostring(k):gsub("Enum.UserInputType.", ""))
@@ -2234,7 +2273,6 @@ for i, data in ipairs(CHECKS) do
         if ns == nil then ns = checked end
         ToggleState(ns, true)
     end)
-
 
     if data.badge and not IS_MOBILE then
         local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55), 1)
@@ -2270,6 +2308,7 @@ for i, data in ipairs(CHECKS) do
                 end
             end)
         end)
+
         table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gp)
             if gp or waiting then return end
             local currentBind = (data.label == "Aimbot") and _G.AIMBOT_CFG.Keybind or nil
@@ -2339,8 +2378,8 @@ local SLIDERS = {
     { label = "RCS Intensity", min = 0, max = 5,    val = 1.0,   key = "RCSAmount" },
 }
 
-
 local activeSliders = {}
+
 for i, data in ipairs(SLIDERS) do
     local row = NewFrame(SliderHolder, UDim2.new(1, 0, 0, 52), UDim2.new(0, 0, 0, 0), PANEL, 1)
     row.LayoutOrder = i
@@ -2380,6 +2419,7 @@ for i, data in ipairs(SLIDERS) do
         valLbl.Text = string.format("%.1f", nv)
         Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
         Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
+
         if data.key then _G.AIMBOT_CFG[data.key] = nv end
     end
 
@@ -2763,12 +2803,14 @@ end
 SETUP_COLOR_PICKER()
 
 local ConfigPreferencesTabPage
+
 do
     local ConfigPage = navPages["Config"]
     if ConfigPage then
         local HS = game:GetService("HttpService")
         local CONFIG_FOLDER = "FluxConfigs"
         local AUTOLOAD_FILE = "FluxAutoload.json"
+
         local TAB_H = 44
         local TabBar = NewFrame(ConfigPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
         local TabSep = NewFrame(ConfigPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
@@ -2836,6 +2878,7 @@ do
 
         local page = configPages[1]
         ConfigPreferencesTabPage = configPages[2]
+
         local function EnsureFolder()
             if not isfolder(CONFIG_FOLDER) then makefolder(CONFIG_FOLDER) end
         end
@@ -2902,12 +2945,15 @@ do
             if data.LOCALPLAYER then merge(_G.LOCAL_PLAYER_CFG, data.LOCALPLAYER) end
             if data.FUN then merge(_G.FUN_CFG, data.FUN) end
             if data.ESP and _G.ESP_CFG then merge(_G.ESP_CFG, data.ESP) end
+
             if data.UI then
                 if data.UI.notifications ~= nil then useNotifications = data.UI.notifications end
                 if data.UI.watermark ~= nil then useWatermark = data.UI.watermark end
                 if data.UI.kbhud ~= nil then useKbHud = data.UI.kbhud end
+
                 if ApplyUIPreferences then ApplyUIPreferences() end
             end
+
             if _G.FLUX_UI_UPDATE_FUNCS then
                 for _, f in ipairs(_G.FLUX_UI_UPDATE_FUNCS) do
                     pcall(f)
@@ -2916,6 +2962,7 @@ do
 
             NOTIFY("Config", "Config loaded ✓", 2.5)
         end
+
         task.defer(function()
             local aName = GetAutoload()
             if aName then
@@ -2926,6 +2973,7 @@ do
                 end
             end
         end)
+
         local LeftPanel = NewFrame(page, UDim2.new(0.46, 0, 0, 380), UDim2.new(0, 1, 0, 3), PANEL)
         LeftPanel.LayoutOrder = 1
         Corner(LeftPanel, 8); Stroke(LeftPanel, STROKE, 1)
@@ -2937,6 +2985,7 @@ do
 
         local scroll = NewFrame(LeftPanel, UDim2.new(1, -16, 1, -42), UDim2.new(0, 8, 0, 42), BG, 1)
         Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 10)
+
         local nameCard = NewFrame(scroll, UDim2.new(1, 0, 0, 70), nil, PANEL)
         Corner(nameCard, 8)
         NewLabel(nameCard, "Config name", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
@@ -2953,9 +3002,11 @@ do
         nameBox.PlaceholderText = "Enter name..."; nameBox.Text = ""
         nameBox.TextSize = 11; nameBox.Font = Enum.Font.Gotham
         nameBox.ClearTextOnFocus = false; nameBox.Parent = nameBoxWrap
+
         local listCard = NewFrame(scroll, UDim2.new(1, 0, 0, 260), nil, PANEL)
         Corner(listCard, 8)
         NewLabel(listCard, "Config list", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
+
         local selectedConfig = nil
         local ddFrame = NewFrame(listCard, UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 26), Color3.fromRGB(32, 32, 44))
         Corner(ddFrame, 6); Stroke(ddFrame, STROKE2, 1)
@@ -2974,7 +3025,7 @@ do
         Corner(ddPopup, 6); Stroke(ddPopup, STROKE2, 1)
         Instance.new("UIListLayout", ddPopup).SortOrder = Enum.SortOrder.LayoutOrder
 
-        local totalLbl -- forward decl
+        local totalLbl
         local function RefreshTotalCount()
             if totalLbl then
                 local configs = ListConfigs()
@@ -3022,7 +3073,6 @@ do
             end
         end)
 
-        -- Buttons grid
         local gridY = 66
         local btnDefs = {
             { "Load",    "load" }, { "Overwrite", "overwrite" }, { "Delete", "delete" },
@@ -3047,7 +3097,6 @@ do
             actionBtns[def[2]] = { btn = ab, lbl = aLbl }
         end
 
-        -- Create button (Inside listCard, at the bottom)
         local createBtn = NewBtn(listCard, UDim2.new(1, -20, 0, 38), UDim2.new(0, 10, 0, gridY + 3 * 42),
             Color3.fromRGB(32, 32, 44))
         Corner(createBtn, 8)
@@ -3064,6 +3113,7 @@ do
         end)
 
         listCard.Size = UDim2.new(1, 0, 0, gridY + 3 * 42 + 38 + 10)
+
         local RightPanel = NewFrame(page, UDim2.new(0.52, -4, 0, 380), UDim2.new(0.48, 1, 0, 3), PANEL)
         RightPanel.LayoutOrder = 2
         Corner(RightPanel, 8); Stroke(RightPanel, STROKE, 1)
@@ -3110,7 +3160,6 @@ do
             local txt = "• Created: " .. (d.created or "N/A") .. "\n"
             txt = txt .. "• GameID: " .. tostring(d.placeId or "N/A") .. "\n\n"
 
-            -- Helper: list enabled booleans in a table with name mapping
             local function listEnabled(tbl, labelMap)
                 if not tbl then return "" end
                 local out = ""
@@ -3122,7 +3171,6 @@ do
                 return out
             end
 
-            -- Aimbot
             local aimbotMap = {
                 Enabled = "Aimbot",
                 DrawFov = "Draw FOV",
@@ -3135,7 +3183,6 @@ do
                 txt = txt .. "Combat:\n" .. aimbotLines
             end
 
-            -- Silent Aim
             local silentMap = {
                 Enabled = "Silent Aim",
                 AutoHead = "Auto Head",
@@ -3148,14 +3195,12 @@ do
                 txt = txt .. "Silent Aim:\n" .. silentLines
             end
 
-            -- Auto Match
             local amMap = { Enabled = "Auto Match" }
             local amLines = listEnabled(d.AM, amMap)
             if amLines ~= "" then
                 txt = txt .. "Auto Match:\n" .. amLines
             end
 
-            -- ESP
             local espMap = {
                 Enabled = "ESP",
                 Names = "Player Names",
@@ -3172,7 +3217,6 @@ do
                 txt = txt .. "ESP:\n" .. espLines
             end
 
-            -- World Visuals
             local worldMap = {
                 FullBright = "Full Bright", NoFog = "No Fog"
             }
@@ -3193,7 +3237,6 @@ do
 
         RefreshTotalCount()
 
-        -- Actions
         createBtn.MouseButton1Click:Connect(function()
             local n = nameBox.Text:match("^%s*(.-)%s*$")
             if n == "" then
@@ -3510,11 +3553,6 @@ do
     end
 end
 
-
--- Draggable already handled at initialization
-
-
--- Resize Logic
 do
     local Handle = NewBtn(Root, UDim2.new(0, 24, 0, 24), UDim2.new(1, 0, 1, 0), Color3.new(1, 1, 1), 1)
     Handle.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3584,9 +3622,6 @@ do
     end)
 end
 
--- ══ UI THEME SYSTEM ══
--- Forward declarations so applyUITheme can reference these (populated later in Settings section)
-
 local stLines = {}
 local stBtns = {}
 local activeStIdx = 1
@@ -3609,7 +3644,6 @@ local function applyUITheme(name)
     currentUITheme = name
     ACCENT = t.accent
 
-    -- Smooth Blend Transition (Cinematic Fade)
     local dur = 1.2
     local ease = "Exponential"
 
@@ -3637,7 +3671,6 @@ local function applyUITheme(name)
     end
 
     if currentNav then
-        -- Use instant update (0s) to avoid race condition with tab-switch tweens
         currentNav.sym.ImageColor3 = t.accent
         currentNav.lbl.TextColor3 = t.accent
         currentNav.dot.BackgroundColor3 = t.accent
@@ -3676,23 +3709,22 @@ local function applyUITheme(name)
             Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
         end
     end
-    -- Notifications
+
     for _, dat in pairs(activeNotifs) do
         Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
         Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
     end
-    -- Watermark
+
     Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
-    -- Keybind HUD (lives in separate ScreenGui, must be updated manually)
+
     if _G.FLUX_KB_HUD_ACCENT_UPDATE then _G.FLUX_KB_HUD_ACCENT_UPDATE() end
     if _G.FLUX_PREFERENCES_REFRESH then pcall(_G.FLUX_PREFERENCES_REFRESH) end
 end
 
--- ══════════════════ CATEGORY CONTENT: VISUALS ══════════════════
 local VisualsPage = navPages["Visuals"]
 local VS_TAB_H = 44
 local VS_TabBar = NewFrame(VisualsPage, UDim2.new(1, 0, 0, VS_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
--- MakeDraggable(VS_TabBar, Root)
+
 local VS_TabSep = NewFrame(VisualsPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, VS_TAB_H), STROKE)
 local VS_Content = NewFrame(VisualsPage, UDim2.new(1, -20, 1, -(VS_TAB_H + 20)), UDim2.new(0, 10, 0, VS_TAB_H + 10), BG,
     1)
@@ -3735,13 +3767,11 @@ for i, name in ipairs(VS_TABS) do
     end)
 end
 
--- Player Visuals Content
 do
     local espPage = vsPages[1]
     local list = Instance.new("UIListLayout")
     list.Padding = UDim.new(0, 4)
     list.Parent = NewFrame(espPage, UDim2.new(1, -20, 1, -20), UDim2.new(0, 10, 0, 10), BG, 1)
-
 
     local espCard = NewFrame(espPage, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
     Corner(espCard, 8)
@@ -3757,7 +3787,6 @@ do
     espList.Padding = UDim.new(0, 2)
     espList.Parent = espContent
 
-    -- ESP Config Placeholder
     _G.ESP_CFG = {
         Enabled = false,
         Names = false,
@@ -3792,7 +3821,6 @@ do
     AddESPSetting(espContent, "Enable Bots", false, 0, false, function(v)
         _G.ESP_CFG.Bots = v
         if not v then
-            -- Force cleanup bot visuals when disabled
             if _G.ESP_CACHE then
                 for target, e in pairs(_G.ESP_CACHE) do
                     if not Players:GetPlayerFromCharacter(target) then
@@ -3862,7 +3890,6 @@ do
         end, { Color3.new(1, 1, 1) })
     AddESPSetting(espContent, "Off-Screen Lines", false, 0, false, function(v) _G.ESP_CFG.OffScreen = v end)
 
-    -- Player Boxes Card
     local pbCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 140), UDim2.new(0.48, 1, 0, 3), PANEL)
     Corner(pbCard, 8)
     Stroke(pbCard, STROKE, 1)
@@ -3889,7 +3916,6 @@ do
             _G.ESP_CFG.AnimBoxFill = v
         end)
 
-    -- New Visual Settings Card (Moved Down)
     local vsCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 260), UDim2.new(0.48, 1, 0, 153), PANEL)
     Corner(vsCard, 8)
     Stroke(vsCard, STROKE, 1)
@@ -3903,7 +3929,6 @@ do
     local vsList = Instance.new("UIListLayout", vsContent)
     vsList.Padding = UDim.new(0, 8)
 
-    -- Font Dropdown
     local fontRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
     Corner(fontRow, 6)
     Stroke(fontRow, STROKE2, 1)
@@ -3961,7 +3986,6 @@ do
         end
     end)
 
-    -- Size Slider
     local function AddVSSlider(parent, label, min, max, default, suffix, callback)
         local row = NewFrame(parent, UDim2.new(1, 0, 0, 42), nil, BG, 1)
         local top = NewFrame(row, UDim2.new(1, 0, 0, 16), nil, BG, 1)
@@ -4018,8 +4042,6 @@ do
     AddVSSlider(vsContent, "Text Size", 8, 24, 11, "", function(v) _G.ESP_CFG.FontSize = v end)
     AddVSSlider(vsContent, "Max Render Distance", 50, 2000, 500, "st", function(v) _G.ESP_CFG.MaxDistance = v end)
 
-
-    -- Tracer Origin Dropdown (Matching Font Style)
     local tracerRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
     Corner(tracerRow, 6)
     Stroke(tracerRow, STROKE2, 1)
@@ -4079,7 +4101,6 @@ do
     end)
 end
 
--- [ ESP ENGINE ]
 local ESP_HOLDER = Instance.new("ScreenGui")
 ESP_HOLDER.Name = "ESP_HOLDER"
 ESP_HOLDER.IgnoreGuiInset = true
@@ -4148,10 +4169,9 @@ local function MK_ESP(p)
     end
 
     E.FILL.BorderSizePixel = 0
-    E.FILL.BackgroundTransparency = 1 -- La base es invisible, las capas hacen la magia
+    E.FILL.BackgroundTransparency = 1
     E.FILL.ZIndex = -1
 
-    -- Capa 1 del campo de fuerza
     local ff1 = Instance.new("Frame", E.FILL)
     ff1.Name = "FF1"
     ff1.Size = UDim2.new(1, 0, 1, 0)
@@ -4160,7 +4180,6 @@ local function MK_ESP(p)
     grad1.Name = "Gradient"
     grad1.Rotation = 45
 
-    -- Capa 2 del campo de fuerza
     local ff2 = Instance.new("Frame", E.FILL)
     ff2.Name = "FF2"
     ff2.Size = UDim2.new(1, 0, 1, 0)
@@ -4225,7 +4244,6 @@ local function UPD_ESP()
     local cam = workspace.CurrentCamera
     local myTeamFolder = _G.MY_TEAM_CACHE
 
-    -- Fast Target Collection
     local allPlayers = Players:GetPlayers()
     local valid_targets = {}
 
@@ -4267,7 +4285,6 @@ local function UPD_ESP()
         end
     end
 
-    -- Hide invalid entries (O(1) lookup)
     for target, E in pairs(CACHE) do
         if not valid_targets[target] then
             E.FRM.Visible = false
@@ -4301,7 +4318,6 @@ local function UPD_ESP()
         local isPlayer = p:IsA("Player")
         local C = isPlayer and p.Character or p
 
-        -- Cache heavy lookups per-character
         if not E.CharCache or E.CharCache.C ~= C or not E.CharCache.HUM or not E.CharCache.H then
             local hum = C and C:FindFirstChildOfClass("Humanoid")
             E.CharCache = {
@@ -4334,21 +4350,19 @@ local function UPD_ESP()
                     local s_x = s_y * 0.7
 
                     if IsDuelist() then
-                        -- Usar las medidas reales que obtuvimos del ExtentsSize para ajustar la caja
                         s_y = (5.91 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
                         s_x = (3.00 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
                     end
 
                     local x, y = pos.X - s_x / 2, pos.Y - s_y / 2
 
-                    -- Chams
                     if _G.ESP_CFG.Chams then
                         if not E.CHAM or E.CHAM.Parent ~= C then
                             if E.CHAM then E.CHAM:Destroy() end
                             E.CHAM = Instance.new("Highlight", C)
                             E.CHAM.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                         end
-                        -- Aplicar Material ForceField (Efecto de la foto)
+
                         for _, part in ipairs(C:GetDescendants()) do
                             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                                 if not E.CharCache.Mats then E.CharCache.Mats = {} end
@@ -4359,8 +4373,7 @@ local function UPD_ESP()
                         end
                         E.IsMaterialCham = true
 
-                        -- Highlight Outline
-                        E.CHAM.FillTransparency = 1 -- Transparente para que se vea el ForceField
+                        E.CHAM.FillTransparency = 1
                         E.CHAM.OutlineColor = _G.ESP_CFG.ChamColor2 or Color3.new(1, 1, 1)
                         E.CHAM.OutlineTransparency = 0
                         E.CHAM.Enabled = true
@@ -4376,7 +4389,6 @@ local function UPD_ESP()
                         end
                     end
 
-                    -- Tool Chams
                     local tool = C:FindFirstChildOfClass("Tool")
                     if _G.ESP_CFG.ToolChams and tool then
                         if not E.TCHAM or E.TCHAM.Parent ~= tool then
@@ -4384,7 +4396,7 @@ local function UPD_ESP()
                             E.TCHAM = Instance.new("Highlight", tool)
                             E.TCHAM.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                         end
-                        -- Aplicar Material ForceField a la herramienta
+
                         for _, part in ipairs(tool:GetDescendants()) do
                             if part:IsA("BasePart") then
                                 if not E.CharCache.ToolMats then E.CharCache.ToolMats = {} end
@@ -4412,7 +4424,6 @@ local function UPD_ESP()
                     end
 
                     if vis then
-                        -- Names
                         E.NAME.Visible = _G.ESP_CFG.Names and dist <= _G.ESP_CFG.MaxDistance
                         if E.NAME.Visible then
                             E.NAME.Text = (isPlayer and _G.ESP_CFG.DisplayNames) and p.DisplayName or p.Name
@@ -4424,7 +4435,6 @@ local function UPD_ESP()
                             if E.NAME.TextSize ~= fontSizeCache then E.NAME.TextSize = fontSizeCache end
                         end
 
-                        -- Health Bar
                         local hp_per = math.clamp(HUM.Health / HUM.MaxHealth, 0, 1)
                         E.BAR_BG.Visible = _G.ESP_CFG.HealthBar and dist <= _G.ESP_CFG.MaxDistance
                         if E.BAR_BG.Visible then
@@ -4437,7 +4447,6 @@ local function UPD_ESP()
                                 _G.ESP_CFG.HealthColor2 or Color3.fromRGB(0, 255, 0))
                         end
 
-                        -- Health Text
                         E.HEALTH_TXT.Visible = _G.ESP_CFG.HealthText and dist <= _G.ESP_CFG.MaxDistance
                         if E.HEALTH_TXT.Visible then
                             E.HEALTH_TXT.Text = math.floor(HUM.Health)
@@ -4447,7 +4456,6 @@ local function UPD_ESP()
                             if E.HEALTH_TXT.TextSize ~= fontSizeCache then E.HEALTH_TXT.TextSize = fontSizeCache end
                         end
 
-                        -- Distance
                         E.DIST.Visible = _G.ESP_CFG.Distance and dist <= _G.ESP_CFG.MaxDistance
                         if E.DIST.Visible then
                             E.DIST.Text = math.floor(dist) .. "m"
@@ -4458,7 +4466,6 @@ local function UPD_ESP()
                             if E.DIST.TextSize ~= fontSizeCache then E.DIST.TextSize = fontSizeCache end
                         end
 
-                        -- Tool Text
                         E.WEAP.Visible = _G.ESP_CFG.Tools and dist <= _G.ESP_CFG.MaxDistance
                         if E.WEAP.Visible then
                             E.WEAP.Text = tool and tool.Name or "None"
@@ -4469,7 +4476,6 @@ local function UPD_ESP()
                             if E.WEAP.TextSize ~= fontSizeCache then E.WEAP.TextSize = fontSizeCache end
                         end
 
-                        -- Boxes & Fill
                         local b_vis = _G.ESP_CFG.Boxes and dist <= _G.ESP_CFG.MaxDistance
                         E.BOX.Visible = b_vis
                         if b_vis then
@@ -4480,29 +4486,27 @@ local function UPD_ESP()
 
                             local len = math.clamp(s_x * 0.25, 2, 60)
                             if _G.ESP_CFG.AnimBoxFill then
-                                -- Animación de respiración de esquinas (Retícula de apuntado)
                                 local pulse = 0.25 + math.sin(tick() * 4) * 0.1
                                 len = math.clamp(s_x * pulse, 2, 60)
                             end
 
-                            local t = 1 -- thickness
+                            local t = 1
 
-                            -- Top Left
                             E.BOX_LINES[1].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[1].l.Position = UDim2.new(0, 0,
                                 0, 0)
                             E.BOX_LINES[2].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[2].l.Position = UDim2.new(0, 0,
                                 0, 0)
-                            -- Top Right
+
                             E.BOX_LINES[3].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[3].l.Position = UDim2.new(1,
                                 -len, 0, 0)
                             E.BOX_LINES[4].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[4].l.Position = UDim2.new(1, -t,
                                 0, 0)
-                            -- Bottom Left
+
                             E.BOX_LINES[5].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[5].l.Position = UDim2.new(0, 0,
                                 1, -t)
                             E.BOX_LINES[6].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[6].l.Position = UDim2.new(0, 0,
                                 1, -len)
-                            -- Bottom Right
+
                             E.BOX_LINES[7].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[7].l.Position = UDim2.new(1,
                                 -len, 1, -t)
                             E.BOX_LINES[8].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[8].l.Position = UDim2.new(1, -t,
@@ -4530,18 +4534,16 @@ local function UPD_ESP()
                                 if ff1 then ff1.Visible = true end
                                 if ff2 then ff2.Visible = true end
 
-                                -- Secuencia de ondas de energía
                                 local seq = NumberSequence.new({
                                     NumberSequenceKeypoint.new(0, 0.95),
-                                    NumberSequenceKeypoint.new(0.3, 0.4), -- Ola de energía brillante
+                                    NumberSequenceKeypoint.new(0.3, 0.4),
                                     NumberSequenceKeypoint.new(0.5, 0.95),
-                                    NumberSequenceKeypoint.new(0.7, 0.4), -- Ola de energía brillante
+                                    NumberSequenceKeypoint.new(0.7, 0.4),
                                     NumberSequenceKeypoint.new(1, 0.95)
                                 })
 
                                 local t = tick()
 
-                                -- Animar capa 1
                                 if ff1 then
                                     ff1.BackgroundColor3 = fillC
                                     local g1 = ff1:FindFirstChild("Gradient")
@@ -4550,7 +4552,6 @@ local function UPD_ESP()
                                     g1.Offset = Vector2.new(math.sin(t * 1.5) * 0.4, math.sin(t * 1.5) * 0.4)
                                 end
 
-                                -- Animar capa 2 en dirección opuesta
                                 if ff2 then
                                     ff2.BackgroundColor3 = fillC
                                     local g2 = ff2:FindFirstChild("Gradient")
@@ -4566,7 +4567,6 @@ local function UPD_ESP()
                             end
                         end
 
-                        -- Skeleton
                         local bones = HUM.RigType == Enum.HumanoidRigType.R15 and R15_BONES or R6_BONES
                         for i, bone in ipairs(bones) do
                             local seg = E.SKEL[i]
@@ -4589,13 +4589,11 @@ local function UPD_ESP()
                             end
                         end
                     else
-                        -- Off-Screen: Hide everything but snaplines
                         E.NAME.Visible = false; E.BAR_BG.Visible = false; E.HEALTH_TXT.Visible = false;
                         E.DIST.Visible = false; E.WEAP.Visible = false; E.BOX.Visible = false; E.FILL.Visible = false
                         for _, s in ipairs(E.SKEL) do s.Visible = false end
                     end
 
-                    -- Snaplines & OffScreen
                     if E.SLINE then
                         if _G.ESP_CFG.Snaplines and (vis or _G.ESP_CFG.OffScreen) and dist <= _G.ESP_CFG.MaxDistance then
                             local start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y)
@@ -4682,13 +4680,11 @@ local function UPD_LOCAL_GUN()
     local localTool = localChar and localChar:FindFirstChildOfClass("Tool")
 
     if _G.ESP_CFG and _G.ESP_CFG.LocalGunCham and localTool then
-        -- If tool changed, restore material on the previous tool
         if LOCAL_GUN_CACHE.LastTool ~= localTool then
             CLEAN_LOCAL_GUN()
             LOCAL_GUN_CACHE.LastTool = localTool
         end
 
-        -- Apply ForceField Material and Color
         for _, part in ipairs(localTool:GetDescendants()) do
             if part:IsA("BasePart") then
                 if not LOCAL_GUN_CACHE.Mats[part] then
@@ -4700,7 +4696,6 @@ local function UPD_LOCAL_GUN()
             end
         end
 
-        -- Disable any Highlights on the character and tool to prevent outline/stroke
         for _, v in ipairs(localChar:GetDescendants()) do
             if v:IsA("Highlight") then
                 if not LOCAL_GUN_CACHE.Highlights[v] then
@@ -4714,7 +4709,6 @@ local function UPD_LOCAL_GUN()
     end
 end
 
--- Shake-free ESP Loop (Bound after Camera updates to ensure maximum stability and zero latency)
 RunService:BindToRenderStep("FluxESP", 2001, function()
     if getgenv().FLUX_SESSION ~= MySession then
         pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
@@ -4724,7 +4718,6 @@ RunService:BindToRenderStep("FluxESP", 2001, function()
         UPD_ESP()
         UPD_LOCAL_GUN()
     else
-        -- Hide all if disabled
         for _, E in pairs(CACHE) do
             if E.FRM then E.FRM.Visible = false end
             if E.CHAM then E.CHAM.Enabled = false end
@@ -4734,11 +4727,7 @@ RunService:BindToRenderStep("FluxESP", 2001, function()
     end
 end)
 
--- ══════════════════ CATEGORY CONTENT: WORLD VISUAL ══════════════════
--- ══════════════════ CATEGORY CONTENT: WORLD VISUAL ══════════════════
 local worldPage = vsPages[2]
-
--- World Config already initialized at top
 
 local woCard = NewFrame(worldPage, UDim2.new(0.46, 0, 0, 320), UDim2.new(0, 1, 0, 3), PANEL)
 Corner(woCard, 8)
@@ -4753,7 +4742,6 @@ local woContent = NewFrame(woCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0,
 local woList = Instance.new("UIListLayout", woContent)
 woList.Padding = UDim.new(0, 2)
 
--- Lighting Master
 local Lighting = game:GetService("Lighting")
 local ORIG_LIGHT = {
     Shadows = Lighting.GlobalShadows,
@@ -4825,7 +4813,6 @@ end)
 AddVSSlider(woContent, "Exposure", 0, 5, 1, "", function(v) _G.WORLD_CFG.Exposure = v end)
 AddVSSlider(woContent, "Brightness", 0, 5, 1, "", function(v) _G.WORLD_CFG.Brightness = v end)
 
--- Card 2: Extras
 local exCard = NewFrame(worldPage, UDim2.new(0.52, -4, 0, 200), UDim2.new(0.48, 1, 0, 3), PANEL)
 Corner(exCard, 8)
 Stroke(exCard, STROKE, 1)
@@ -4839,7 +4826,6 @@ local exContent = NewFrame(exCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0,
 local exList = Instance.new("UIListLayout", exContent)
 exList.Padding = UDim.new(0, 2)
 
--- FOV
 AddESPSetting(exContent, "Custom FOV", _G.WORLD_CFG.FOVEnabled, 0, false, function(v)
     _G.WORLD_CFG.FOVEnabled = v
     if not v then
@@ -4856,7 +4842,6 @@ AddVSSlider(exContent, "Field of View", 0, 400, 70, "", function(v)
     end
 end)
 
--- Skybox Data
 local SKY_ASSETS = {
     ["Sponge Bob"] = {
         "rbxassetid://70654252104587", "rbxassetid://85169155668096", "rbxassetid://115749804544787",
@@ -4912,14 +4897,14 @@ local function applySky(asset)
     end
 
     if typeof(asset) == "table" then
-        if asset.Bk then -- Cubemap (Static with 6 faces)
+        if asset.Bk then
             s.SkyboxBk = asset.Bk
             s.SkyboxDn = asset.Dn
             s.SkyboxFt = asset.Ft
             s.SkyboxLf = asset.Lf
             s.SkyboxRt = asset.Rt
             s.SkyboxUp = asset.Up
-        else -- Animated
+        else
             s.SkyboxBk = asset[skyLoopIdx]
             s.SkyboxDn = asset[skyLoopIdx]
             s.SkyboxFt = asset[skyLoopIdx]
@@ -4927,7 +4912,7 @@ local function applySky(asset)
             s.SkyboxRt = asset[skyLoopIdx]
             s.SkyboxUp = asset[skyLoopIdx]
         end
-    else -- Static (Single face)
+    else
         s.SkyboxBk = asset; s.SkyboxDn = asset; s.SkyboxFt = asset
         s.SkyboxLf = asset; s.SkyboxRt = asset; s.SkyboxUp = asset
     end
@@ -4960,11 +4945,10 @@ do
     skyDd.Size = UDim2.new(1, 0, 0, 28)
 end
 
--- [ WORLD FOV ENGINE: OMEGA BYPASS ]
 local CAMERA_CACHE = {}
 local function RefreshCameraCache()
     CAMERA_CACHE = { workspace.CurrentCamera }
-    -- Search in common services where hidden cameras might live
+
     local searchIn = { workspace, game:GetService("Players"), game:GetService("StarterGui") }
     for _, service in pairs(searchIn) do
         for _, v in pairs(service:GetDescendants()) do
@@ -4975,7 +4959,6 @@ local function RefreshCameraCache()
     end
 end
 
--- Refresh cache every 5 seconds
 task.spawn(function()
     while task.wait(5) do
         if getgenv().FLUX_SESSION ~= MySession then break end
@@ -4998,8 +4981,6 @@ local function ForceFOV()
     end
 end
 
-
--- Dedicated Ultra-High Priority Loop
 RunService:BindToRenderStep("ForceFOV_OMEGA", 2000, function()
     if getgenv().FLUX_SESSION ~= MySession then
         return
@@ -5007,19 +4988,16 @@ RunService:BindToRenderStep("ForceFOV_OMEGA", 2000, function()
     ForceFOV()
 end)
 
--- Heartbeat Fallback (Ensures no escape)
 table.insert(_G.FLUX_CONNS, RunService.Heartbeat:Connect(function()
     if getgenv().FLUX_SESSION ~= MySession then return end
     ForceFOV()
 end))
 
--- Lighting Loop
 task.spawn(function()
     local lastSkyTick = tick()
     while task.wait(0.3) do
         if not SG.Parent then break end
 
-        -- Sponge Bob Animation
         if _G.WORLD_CFG.Skybox == "Sponge Bob" then
             if tick() - lastSkyTick >= 0.1 then
                 skyLoopIdx = skyLoopIdx + 1
@@ -5075,11 +5053,9 @@ Players.PlayerRemoving:Connect(function(p)
     end
 end)
 
--- ══════════════════ CATEGORY CONTENT: SETTINGS ══════════════════
 local SettingsPage = navPages["Settings"]
 local ST_TAB_H = 44
 local ST_TabBar = NewFrame(SettingsPage, UDim2.new(1, 0, 0, ST_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
--- MakeDraggable(ST_TabBar, Root)
 
 local ST_TabSep = NewFrame(SettingsPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, ST_TAB_H), STROKE)
 
@@ -5091,8 +5067,6 @@ local ST_Content = NewFrame(SettingsPage,
 
 local ST_TABS = { "UI Settings", "Server" }
 local stPages = {}
--- stBtns, stLines, activeStIdx declared above (near theme system)
-
 
 local st_x = 18
 for i, name in ipairs(ST_TABS) do
@@ -5129,11 +5103,8 @@ for i, name in ipairs(ST_TABS) do
     end)
 end
 
--- UI Settings Content
 do
     local uiPage = stPages[1]
-
-
 
     local prefHeight = UIS.KeyboardEnabled and 295 or 265
     ; (function()
@@ -5175,10 +5146,8 @@ do
                 })
             end
 
-            -- Register for external sync
             _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
             table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
-                -- Find what variable this toggle is linked to and sync
                 if label == "Enable Notifications" then
                     checked = useNotifications
                 elseif label == "Enable Watermark" then
@@ -5218,7 +5187,6 @@ do
             SaveUI()
         end)
 
-        -- ── Keybind Overlay ──────────────────────────────────────
         do
             KbSG = Instance.new("ScreenGui")
             KbSG.Name = "FluxKeybindHUD"
@@ -5236,7 +5204,6 @@ do
             KbGrad.Color = ColorSequence.new(Color3.fromRGB(15, 15, 20), Color3.fromRGB(22, 22, 30))
             KbGrad.Parent = KbWin
 
-            -- Title bar (drag area)
             local KbTitleBar = NewFrame(KbWin, UDim2.new(1, 0, 0, 28), UDim2.new(0, 0, 0, 0), Color3.fromRGB(20, 20, 28))
             Corner(KbTitleBar, 8)
             KbTitleBar.ClipsDescendants = false
@@ -5245,18 +5212,15 @@ do
             KbTitle.Name = "SectionTitle"
             KbTitle.Size = UDim2.new(1, -10, 1, 0)
             KbTitle.Position = UDim2.new(0, 10, 0, 0)
-            table.insert(accentFills, KbGrad) -- will recolor via theme
+            table.insert(accentFills, KbGrad)
 
-            -- Scrollable content area for keybind rows
             local KbContent = NewFrame(KbWin, UDim2.new(1, -16, 1, -36), UDim2.new(0, 8, 0, 34), BG, 1)
             local KbList = Instance.new("UIListLayout", KbContent)
             KbList.Padding = UDim.new(0, 4)
             KbList.SortOrder = Enum.SortOrder.LayoutOrder
 
-            -- Make title bar draggable (moves the whole KbWin)
             MakeDraggable(KbTitleBar, KbWin)
 
-            -- Build keybind rows dynamically (optimized for reuse)
             local rowPool = {}
             local function BuildKbRows()
                 local children = KbContent:GetChildren()
@@ -5268,9 +5232,9 @@ do
                 end
 
                 local binds = {}
-                -- UI Toggle
+
                 table.insert(binds, { action = "Toggle UI", key = toggleKey and toggleKey.Name or "RightShift" })
-                -- Aimbot
+
                 if _G.AIMBOT_CFG and _G.AIMBOT_CFG.Keybind then
                     local k = _G.AIMBOT_CFG.Keybind
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
@@ -5278,7 +5242,7 @@ do
                         table.insert(binds, { action = "Aimbot", key = kName })
                     end
                 end
-                -- ESP
+
                 if _G.ESP_CFG and _G.ESP_CFG.Keybind then
                     local k = _G.ESP_CFG.Keybind
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
@@ -5286,7 +5250,7 @@ do
                         table.insert(binds, { action = "ESP Toggle", key = kName })
                     end
                 end
-                -- Insta Kill
+
                 if _G.IK_CFG and _G.IK_CFG.Keybind then
                     local k = _G.IK_CFG.Keybind
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
@@ -5294,7 +5258,7 @@ do
                         table.insert(binds, { action = "Insta Kill", key = kName })
                     end
                 end
-                -- Speed Boost
+
                 if _G.LOCAL_PLAYER_CFG and _G.LOCAL_PLAYER_CFG.SpeedKey then
                     local k = _G.LOCAL_PLAYER_CFG.SpeedKey
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
@@ -5302,7 +5266,7 @@ do
                         table.insert(binds, { action = "Speed Boost", key = kName })
                     end
                 end
-                -- Player Fly
+
                 if _G.LOCAL_PLAYER_CFG and _G.LOCAL_PLAYER_CFG.FlyKey then
                     local k = _G.LOCAL_PLAYER_CFG.FlyKey
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
@@ -5310,7 +5274,7 @@ do
                         table.insert(binds, { action = "Player Fly", key = kName })
                     end
                 end
-                -- Invisibility
+
                 if _G.LOCAL_PLAYER_CFG and _G.LOCAL_PLAYER_CFG.InvisKey then
                     local k = _G.LOCAL_PLAYER_CFG.InvisKey
                     local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
@@ -5343,11 +5307,9 @@ do
                     row.Visible = true
                 end
 
-                -- Cleanup unused pooled rows
                 for _, r in ipairs(rowPool) do r:Destroy() end
                 table.clear(rowPool)
 
-                -- Resize window to fit content
                 local rowCount = math.max(1, #binds)
                 KbWin.Size = UDim2.new(0, 220, 0, 28 + rowCount * 30 + (rowCount - 1) * 4 + 12)
             end
@@ -5365,7 +5327,6 @@ do
             }
             _G.FLUX_KB_HUD_ACCENT_UPDATE = function() kbAccentProxy.update() end
 
-            -- Poll every second to keep rows fresh
             task.spawn(function()
                 while true do
                     task.wait(1)
@@ -5391,7 +5352,6 @@ do
             end
             _G.FLUX_KB_HUD_GUI = KbSG
 
-            -- Initial Sync for Loaded Settings
             if useKbHud and not IS_MOBILE then
                 KbWin.Visible = uiVis
                 BuildKbRows()
@@ -5405,7 +5365,6 @@ do
             end)
         end
 
-        -- UI Color Theme Dropdown
         local themeRow = NewFrame(list.Parent, UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 0), BG, 1)
         local themeBtn = NewBtn(themeRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
         Corner(themeBtn, 4)
@@ -5487,7 +5446,6 @@ do
         end)
     end)()
 
-    -- Background Settings Card
     local bgCard = NewFrame(uiPage, UDim2.new(0.52, -4, 0, 160), UDim2.new(0.48, 1, 0, 3), PANEL)
     Corner(bgCard, 8)
     Stroke(bgCard, STROKE, 1)
@@ -5503,9 +5461,6 @@ do
     bgList.SortOrder = Enum.SortOrder.LayoutOrder
     bgList.Parent = NewFrame(bgCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
 
-
-
-    -- ══════════════════ CATEGORY CONTENT: SILENT AIM ══════════════════
     ; (function()
         local SilentPage = tabPages[2]
         if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
@@ -5787,7 +5742,6 @@ do
                         listLayout.Padding = UDim.new(0, 4)
                         listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-                        -- 1. Equip KillFX
                         local ddRow1 = NewFrame(EXHolder, UDim2.new(1, 0, 0, 32), nil, PANEL, 1)
                         ddRow1.ZIndex = 5
                         local lbl1 = NewLabel(ddRow1, "Equip KillFX", 13, TEXT)
@@ -5807,7 +5761,6 @@ do
                         dd1.Size = UDim2.new(1, 0, 0, 32)
                         dd1.Position = UDim2.new(0, 0, 0.5, -16)
 
-                        -- 2. Visual Material Changer
                         local ddRow2 = NewFrame(EXHolder, UDim2.new(1, 0, 0, 32), nil, PANEL, 1)
                         ddRow2.ZIndex = 4
                         local lbl2 = NewLabel(ddRow2, "Weapon Skin", 13, TEXT)
@@ -5834,11 +5787,9 @@ do
         end
     end)()
 
-    -- BUILD KILL AURA PAGE
     ; (function()
         local KAPage = tabPages[3]
-        if IsHitmark() or IsDuelist() then
-            -- Column Containers for Horizontal Page Layout
+        if IsHitmark() or IsDuelist() or IsMurderVsSheriff() then
             local LeftCol = NewFrame(KAPage, UDim2.new(0.53, -5, 1, 0), nil, BG, 1)
             LeftCol.LayoutOrder = 1
             local LeftColLayout = Instance.new("UIListLayout", LeftCol)
@@ -5895,7 +5846,6 @@ do
                 end
             end)
 
-            -- Wallbang Toggle
             local wrow = NewBtn(KHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
             Corner(wrow, 5)
             local wcbBg = NewFrame(wrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
@@ -5920,12 +5870,10 @@ do
                     })
             end)
 
-            -- Range Slider
             AddCardSlider(KHolder, "Kill Aura Radius (Studs)", 10, 1000, _G.KILLAURA_CFG.MaxDist, function(val)
                 _G.KILLAURA_CFG.MaxDist = val
             end)
 
-            -- Legit vs Blatant Dropdown
             _G.KILLAURA_CFG.AuraType = _G.KILLAURA_CFG.AuraType or "Legit"
             local ddRowType = NewFrame(KHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
             local ddType = AddDropdown(ddRowType, { "Legit", "Blatant", "Tele Kill" }, _G.KILLAURA_CFG.AuraType,
@@ -5935,64 +5883,63 @@ do
                 end)
             ddType.Size = UDim2.new(1, 0, 1, 0)
 
-            -- [ TRIGGER BOT CARD ]
-            local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
-            TCard.LayoutOrder = 2
-            Corner(TCard, 8); Stroke(TCard, STROKE, 1)
-            local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
-            TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
+            if not IsMurderVsSheriff() then
+                local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
+                TCard.LayoutOrder = 2
+                Corner(TCard, 8); Stroke(TCard, STROKE, 1)
+                local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
+                TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local TLayout = Instance.new("UIListLayout", THolder)
-            TLayout.Padding = UDim.new(0, 6)
-            TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local TLayout = Instance.new("UIListLayout", THolder)
+                TLayout.Padding = UDim.new(0, 6)
+                TLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-            -- Checkbox and Keybind
-            _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
-            local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
-                _G.TRIGGERBOT_CFG.Enabled = v
-            end, _G.TRIGGERBOT_CFG.Keybind, function(k)
-                _G.TRIGGERBOT_CFG.Keybind = k
-            end)
-            triggerCheck.LayoutOrder = 1
+                _G.TRIGGERBOT_CFG.Keybind = _G.TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
+                local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", _G.TRIGGERBOT_CFG.Enabled, function(v)
+                    _G.TRIGGERBOT_CFG.Enabled = v
+                end, _G.TRIGGERBOT_CFG.Keybind, function(k)
+                    _G.TRIGGERBOT_CFG.Keybind = k
+                end)
+                triggerCheck.LayoutOrder = 1
 
-            -- Dropdown
-            _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
-            local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            ddRowTB.LayoutOrder = 2
-            local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
-                _G.TRIGGERBOT_CFG.Mode = v
-                NOTIFY("Trigger Bot", "Mode: " .. v, 2)
-            end)
-            ddTB.Size = UDim2.new(1, 0, 1, 0)
+                _G.TRIGGERBOT_CFG.Mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
+                local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                ddRowTB.LayoutOrder = 2
+                local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, _G.TRIGGERBOT_CFG.Mode, function(v)
+                    _G.TRIGGERBOT_CFG.Mode = v
+                    NOTIFY("Trigger Bot", "Mode: " .. v, 2)
+                end)
+                ddTB.Size = UDim2.new(1, 0, 1, 0)
 
-            _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
-                if triggerCheck then
-                    local active = _G.TRIGGERBOT_CFG.Enabled
-                    local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
-                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                    if cbCheck then cbCheck.Visible = active end
-                    if cbBg then
-                        cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                    end
-
-                    local kbBox = triggerCheck:FindFirstChild("KeybindBox")
-                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
-                    if bindLbl then
-                        local keyName = "None"
-                        local kb = _G.TRIGGERBOT_CFG.Keybind
-                        if kb then
-                            if typeof(kb) == "EnumItem" then
-                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
-                            else
-                                keyName = tostring(kb)
-                            end
+                _G.FLUX_UI_UPDATE_FUNCS = _G.FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(_G.FLUX_UI_UPDATE_FUNCS, function()
+                    if triggerCheck then
+                        local active = _G.TRIGGERBOT_CFG.Enabled
+                        local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
+                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                        if cbCheck then cbCheck.Visible = active end
+                        if cbBg then
+                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
                         end
-                        bindLbl.Text = keyName
+
+                        local kbBox = triggerCheck:FindFirstChild("KeybindBox")
+                        local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                        if bindLbl then
+                            local keyName = "None"
+                            local kb = _G.TRIGGERBOT_CFG.Keybind
+                            if kb then
+                                if typeof(kb) == "EnumItem" then
+                                    keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                                else
+                                    keyName = tostring(kb)
+                                end
+                            end
+                            bindLbl.Text = keyName
+                        end
                     end
-                end
-            end)
+                end)
+            end
 
             if IsDuelist() then
                 local HCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
@@ -6006,7 +5953,6 @@ do
                 HLayout.Padding = UDim.new(0, 6)
                 HLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-                -- 1. Enable Toggle
                 local hrow = NewBtn(HHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
                 hrow.LayoutOrder = 1
                 Corner(hrow, 5)
@@ -6044,13 +5990,11 @@ do
                         { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
                 end)
 
-                -- 2. Size Slider
                 local sliderRow = AddCardSlider(HHolder, "Hitbox Size", 1, 50, _G.HITBOX_CFG.Size, function(val)
                     _G.HITBOX_CFG.Size = val
                 end)
                 sliderRow.LayoutOrder = 2
 
-                -- 3. Body Part Dropdown (options: head, uptorso)
                 local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
                 ddRowPart.LayoutOrder = 3
                 local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, _G.HITBOX_CFG.Part, function(v)
@@ -6072,7 +6016,7 @@ do
         g.Name = "GlassLayer"
         g.Size = UDim2.new(1, 0, 1, 0)
         g.BackgroundTransparency = 1
-        g.Image = "rbxassetid://10881905308" -- Glassmorphism texture
+        g.Image = "rbxassetid://10881905308"
         g.ImageTransparency = 1
         g.ScaleType = Enum.ScaleType.Slice
         g.SliceCenter = Rect.new(49, 49, 450, 450)
@@ -6087,7 +6031,6 @@ do
     local gSide = AddGlass(Sidebar)
     local gRight = AddGlass(RightBox)
 
-
     local function UpdateBlur()
         local strength = blurVal / 100
         local glassTarget = blurActive and (1 - strength * 0.6) or 1
@@ -6097,7 +6040,7 @@ do
 
         local panelTrans = blurActive and (strength * 0.7) or 0
 
-        Tw(Root, 0.1, "Linear", "Out", { BackgroundTransparency = 1 }) -- Keep Root transparent to avoid black box
+        Tw(Root, 0.1, "Linear", "Out", { BackgroundTransparency = 1 })
         Tw(Sidebar, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
         Tw(RightBox, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
     end
@@ -6157,7 +6100,6 @@ do
             if UpdateBlur then UpdateBlur() end
         end
 
-        -- Custom Background Settings Card (Left Column, below prefCard)
         local customBgCard = NewFrame(uiPage, UDim2.new(0.46, 0, 0, 220), UDim2.new(0, 1, 0, prefHeight + 10), PANEL)
         Corner(customBgCard, 8)
         Stroke(customBgCard, STROKE, 1)
@@ -6172,7 +6114,6 @@ do
         customBgList.Padding = UDim.new(0, 6)
         customBgList.SortOrder = Enum.SortOrder.LayoutOrder
 
-        -- TextBox wrapper (defined early to reference in toggle)
         local tbWrap = NewFrame(customBgContent, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
         tbWrap.LayoutOrder = 2
         Corner(tbWrap, 5)
@@ -6192,7 +6133,6 @@ do
         idTextBox.ClearTextOnFocus = false
         idTextBox.Parent = tbWrap
 
-        -- 1. Enable Toggle
         local enableBgToggle = AddCardSetting(customBgContent, "Enable Background", _G.CUSTOM_BG_ENABLED, function(v)
             _G.CUSTOM_BG_ENABLED = v
             _G.CUSTOM_BG_ID = idTextBox.Text
@@ -6202,7 +6142,6 @@ do
         end)
         enableBgToggle.LayoutOrder = 1
 
-        -- 3. Stretched Preview Container (Full Width)
         local previewContainer = NewFrame(customBgContent, UDim2.new(1, 0, 0, 70), nil, Color3.fromRGB(15, 15, 20))
         previewContainer.LayoutOrder = 3
         Corner(previewContainer, 6)
@@ -6216,7 +6155,6 @@ do
         Corner(previewImageLabel, 4)
         previewImageLabel.Parent = previewContainer
 
-        -- Automatic update when focus lost
         idTextBox.FocusLost:Connect(function()
             _G.CUSTOM_BG_ID = idTextBox.Text
             UpdatePreview()
@@ -6226,7 +6164,6 @@ do
             SaveUI()
         end)
 
-        -- 4. Opacity Slider
         local opacitySlider = AddCardSlider(customBgContent, "Background Opacity", 0, 100, _G.CUSTOM_BG_TRANSPARENCY or 0,
             function(v)
                 _G.CUSTOM_BG_TRANSPARENCY = v
@@ -6255,7 +6192,7 @@ do
             local f = Instance.new("Frame")
             f.Size = UDim2.new(0, math.random(2, 3), 0, math.random(2, 3))
             f.BackgroundColor3 = Color3.new(1, 1, 1)
-            f.BackgroundTransparency = 1 -- Start invisible
+            f.BackgroundTransparency = 1
             f.BorderSizePixel = 0
             Corner(f, 10)
             f.Parent = SnowHolder
@@ -6268,16 +6205,14 @@ do
                     if getgenv().FLUX_SESSION ~= MySession then break end
                     local f = CreateFlake()
                     local startX = 0.05 + (math.random() * 0.9)
-                    f.Position = UDim2.new(startX, 0, 0, 0) -- Start at the very top edge
+                    f.Position = UDim2.new(startX, 0, 0, 0)
 
                     local duration = math.random(4, 7)
                     local drift = (math.random() - 0.5) * 0.1
                     local targetTrans = math.random(3, 6) / 10
 
-                    -- Fade in at the start
                     Tw(f, 0.5, "Linear", "Out", { BackgroundTransparency = targetTrans })
 
-                    -- Fall animation
                     f:TweenPosition(
                         UDim2.new(startX + drift, 0, 0.98, 0),
                         Enum.EasingDirection.In,
@@ -6285,7 +6220,6 @@ do
                         duration,
                         true,
                         function()
-                            -- Fade out at the bottom
                             local t = Tw(f, 0.4, "Linear", "Out", { BackgroundTransparency = 1 })
                             task.wait(0.4)
                             f:Destroy()
@@ -6302,7 +6236,6 @@ do
         end).LayoutOrder = 2
     end)()
 
-    -- Panic Button Card
     ; (function()
         local panicCard = NewFrame(uiPage, UDim2.new(0.52, -4, 0, 80), UDim2.new(0.48, 1, 0, 173), PANEL)
         Corner(panicCard, 8)
@@ -6323,11 +6256,9 @@ do
         unloadBtn.MouseButton1Click:Connect(function()
             NOTIFY("System", "Unloading script...", 2)
 
-            -- Set session to nil to instantly terminate all background task while-loops
             getgenv().FLUX_SESSION = nil
             _G.FLUX_SNOW_ACTIVE = false
 
-            -- Disconnect all game and input connections
             if _G.FLUX_CONNS then
                 for _, c in pairs(_G.FLUX_CONNS) do
                     pcall(function() c:Disconnect() end)
@@ -6337,7 +6268,6 @@ do
 
             task.wait(0.3)
 
-            -- Master UNLOAD
             pcall(function() RunService:UnbindFromRenderStep("FluxAimbot") end)
             pcall(function() RunService:UnbindFromRenderStep("ForceFOV_OMEGA") end)
             if FOV_CIRCLE then pcall(function() FOV_CIRCLE:Destroy() end) end
@@ -6356,13 +6286,11 @@ do
                 _G.ESP_CACHE = nil
             end
 
-            -- Keybind HUD Cleanup
             if _G.FLUX_KB_HUD_GUI then
                 pcall(function() _G.FLUX_KB_HUD_GUI:Destroy() end)
                 _G.FLUX_KB_HUD_GUI = nil
             end
 
-            -- Silent Aim Cleanup
             if _G.SILENT_CFG then _G.SILENT_CFG.Enabled = false end
             if silentFovCircle then pcall(function() silentFovCircle:Destroy() end) end
 
@@ -6370,7 +6298,6 @@ do
             pcall(function() NotifySG:Destroy() end)
             pcall(function() SG:Destroy() end)
 
-            -- Cleanup Mobile/Core components
             for _, v in pairs(CoreGui:GetChildren()) do
                 if v.Name == "FluxUI" or v.Name == "MobileToggle" or v.Name == "NotifySG" then
                     pcall(function() v:Destroy() end)
@@ -6383,11 +6310,9 @@ do
     end)()
 end
 
--- Server Content
 ; (function()
     local srvPage = stPages[2]
 
-    -- Card 1: Server Hop Options
     local hopCard = NewFrame(srvPage, UDim2.new(0.46, 0, 0, 180), UDim2.new(0, 1, 0, 3), PANEL)
     Corner(hopCard, 8)
     Stroke(hopCard, STROKE, 1)
@@ -6444,7 +6369,6 @@ end
         Hop(true)
     end)
 
-    -- Card 2: Server Information
     local infoCard = NewFrame(srvPage, UDim2.new(0.52, -4, 0, 180), UDim2.new(0.48, 1, 0, 3), PANEL)
     Corner(infoCard, 8)
     Stroke(infoCard, STROKE, 1)
@@ -6483,7 +6407,6 @@ end
     local pingVal = InfoRow("Ping", "0ms")
     local uptimeVal = InfoRow("Time in Server", "0s")
 
-    -- Copy JobId Button
     local copyBtn = NewBtn(infoContent, UDim2.new(1, 0, 0, 28), nil, Color3.fromRGB(40, 40, 52))
     Corner(copyBtn, 6)
     Stroke(copyBtn, STROKE2, 1)
@@ -6496,7 +6419,6 @@ end
         end
     end)
 
-    -- Real-time Updates
     task.spawn(function()
         while task.wait(1) and infoCard.Parent do
             if getgenv().FLUX_SESSION ~= MySession then break end
@@ -6512,7 +6434,6 @@ end
         end
     end)
 
-    -- Card 3: Server Browser (New Premium Feature)
     local function CreateServerBrowser()
         local srvListCard = NewFrame(srvPage, UDim2.new(0.46, 0, 0, 140), UDim2.new(0, 1, 0, 193), PANEL)
         Corner(srvListCard, 8)
@@ -6523,7 +6444,6 @@ end
         srvListTitle.Size = UDim2.new(1, 0, 0, 30)
         srvListTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-        -- Dropdown Frame
         local srvDropdown = NewFrame(srvListCard, UDim2.new(1, -24, 0, 32), UDim2.new(0, 12, 0, 38),
             Color3.fromRGB(32, 32, 44))
         Corner(srvDropdown, 6)
@@ -6544,7 +6464,6 @@ end
 
         local srvDropdownBtn = NewBtn(srvDropdown, UDim2.new(1, 0, 1, 0), nil, BG, 1)
 
-        -- Popup List container (parented to srvDropdown)
         local srvPopup = NewFrame(srvDropdown, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 4), Color3.fromRGB(28, 28, 38))
         srvPopup.ZIndex = 500
         srvPopup.Visible = false
@@ -6564,18 +6483,26 @@ end
         local function srvClose()
             srvOpen = false
             Tw(srvPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
-            task.delay(0.16, function() srvPopup.Visible = false end)
+            task.delay(0.16, function()
+                if not srvOpen then
+                    srvPopup.Visible = false
+                    srvListCard.ZIndex = 1
+                    srvDropdown.ZIndex = 1
+                    srvPopup.ZIndex = 1
+                    srvScroll.ZIndex = 1
+                end
+            end)
             Tw(srvArrow, 0.15, "Quad", "Out", { Rotation = 0 })
         end
 
         local function PopulateServers(listTable)
-            for _, c in ipairs(srvPopup:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+            for _, c in ipairs(srvScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
             if #listTable == 0 then
                 srvSelLbl.Text = "No servers found."
                 return
             end
             for i, sv in ipairs(listTable) do
-                local ob = NewBtn(srvPopup, UDim2.new(1, 0, 0, srvOptH), nil, Color3.fromRGB(45, 45, 60), 1)
+                local ob = NewBtn(srvScroll, UDim2.new(1, 0, 0, srvOptH), nil, Color3.fromRGB(45, 45, 60), 1)
                 ob.LayoutOrder = i
                 ob.ZIndex = 501
                 local t = string.format("%d/%d Players | Ping: %d", sv.playing, sv.maxPlayers, sv.ping)
@@ -6596,13 +6523,18 @@ end
                     end)
                 end)
             end
+            srvScroll.CanvasSize = UDim2.new(0, 0, 0, #listTable * srvOptH)
             if srvOpen then
                 local targetH = math.min(#listTable * srvOptH, srvPopH)
                 Tw(srvPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, targetH) })
             end
         end
 
-        local function fetchServers(sortOrder)
+        local function RebuildSrvPopup()
+            PopulateServers(fetchedServers)
+        end
+
+        local function FetchServers(sortOrder)
             local Http = game:GetService("HttpService")
             local url = "https://games.roblox.com/v1/games/" ..
                 game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
@@ -6619,34 +6551,10 @@ end
                         })
                     end
                 end
+                fetchedServers = list
+                return true
             end
-
-            for i, srv in ipairs(fetchedServers) do
-                local ob = NewBtn(srvScroll, UDim2.new(1, 0, 0, srvOptH), nil, Color3.fromRGB(45, 45, 60), 1)
-                ob.LayoutOrder = i
-                ob.ZIndex = 501
-
-                local srvText = string.format("Server #%d (%d/%d) - %dms", i, srv.players, srv.max, srv.ping)
-                local ol = NewLabel(ob, srvText, 11, TEXT)
-                ol.Position = UDim2.new(0, 10, 0, 0)
-                ol.Size = UDim2.new(1, -10, 1, 0)
-                ol.ZIndex = 502
-
-                ob.MouseButton1Click:Connect(function()
-                    srvSelLbl.Text = string.format("Server #%d (%d/%d)", i, srv.players, srv.max)
-                    srvClose()
-                    NOTIFY("Server Teleport", "Teleporting to Server #" .. i .. "...", 3)
-                    task.wait(0.5)
-                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, srv.id, LP)
-                end)
-
-                ob.MouseEnter:Connect(function()
-                    Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 })
-                end)
-                ob.MouseLeave:Connect(function()
-                    Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 1 })
-                end)
-            end
+            return false
         end
 
         local function HandleFilter(sortOrder)
@@ -6724,6 +6632,10 @@ end
             srvOpen = not srvOpen
             if srvOpen then
                 srvPopup.Visible = true
+                srvListCard.ZIndex = 100
+                srvDropdown.ZIndex = 101
+                srvPopup.ZIndex = 102
+                srvScroll.ZIndex = 103
 
                 local targetH = math.min(#fetchedServers * srvOptH, srvPopH)
                 if #fetchedServers == 0 then targetH = srvOptH end
@@ -6751,11 +6663,9 @@ end
     CreateServerBrowser()
 end)()
 
--- Entrance Animation
 Root.Size = UDim2.new(0, curW, 0, 0)
 Tw(Root, 0.28, "Back", "Out", { Size = UDim2.new(0, curW, 0, curH) })
 
--- Visibility Toggle
 UIS.InputBegan:Connect(function(inp, gp)
     if gp then return end
     if inp.KeyCode == toggleKey then
@@ -6775,9 +6685,8 @@ UIS.InputBegan:Connect(function(inp, gp)
     end
 end)
 
--- Apply initial settings after UI is fully built
 if ApplyUIPreferences then ApplyUIPreferences() end
--- ══════════════════ AIMBOT ENGINE ══════════════════
+
 FOV_CIRCLE = Drawing.new("Circle")
 FOV_CIRCLE.Visible = false
 FOV_CIRCLE.Color = ACCENT
@@ -6789,63 +6698,67 @@ FOV_CIRCLE.Filled = false
 local ignoreSilentRay = false
 
 local function IsPositionVisible(origin, targetPos, targetChar, cam)
-    local direction = targetPos - origin
-    local distance = direction.Magnitude
-    local dirUnit = direction.Unit
+    if not (origin and targetPos and targetChar and cam) then return false end
+    local success, visible = pcall(function()
+        local direction = targetPos - origin
+        local distance = direction.Magnitude
+        local dirUnit = direction.Unit
 
-    local rayParams = RaycastParams.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    local ignoreList = { LP.Character, targetChar, cam }
-    rayParams.FilterDescendantsInstances = ignoreList
+        local rayParams = RaycastParams.new()
+        rayParams.FilterType = Enum.RaycastFilterType.Exclude
+        local ignoreList = { LP.Character or targetChar, targetChar, cam }
+        rayParams.FilterDescendantsInstances = ignoreList
 
-    local isBronx = IsBronxDuels()
-    local currentOrigin = origin
-    local remainingDist = distance
-    local isVis = false
-    local maxSteps = isBronx and 5 or 1
-
-    for step = 1, maxSteps do
-        ignoreSilentRay = true
-        local res = workspace:Raycast(currentOrigin, dirUnit * remainingDist, rayParams)
-        ignoreSilentRay = false
-
-        if not res then
-            isVis = true
-            break
+        local isBronx = false
+        if type(IsBronxDuels) == "function" then
+            isBronx = IsBronxDuels()
         end
+        local currentOrigin = origin
+        local remainingDist = distance
+        local isVis = false
+        local maxSteps = isBronx and 5 or 1
 
-        local hit = res.Instance
-        if hit:IsDescendantOf(targetChar) then
-            isVis = true
-            break
-        end
+        for step = 1, maxSteps do
+            ignoreSilentRay = true
+            local res = workspace:Raycast(currentOrigin, dirUnit * remainingDist, rayParams)
+            ignoreSilentRay = false
 
-        -- Bypass non-collidable, transparent, or accessory/tracer/tool parts (only for Bronx Duels)
-        if isBronx and (hit.CanCollide == false or hit.Transparency > 0.9 or hit.Name == "Bullet" or hit.Name == "Handle" or hit:IsA("Accessory") or hit:IsA("Tool")) then
-            local currentFilter = rayParams.FilterDescendantsInstances
-            table.insert(currentFilter, hit)
-            rayParams.FilterDescendantsInstances = currentFilter
-
-            currentOrigin = res.Position + dirUnit * 0.01
-            remainingDist = (targetPos - currentOrigin).Magnitude
-            if remainingDist < 0.05 then
+            if not res then
                 isVis = true
                 break
             end
-        else
-            break
+
+            local hit = res.Instance
+            if hit:IsDescendantOf(targetChar) then
+                isVis = true
+                break
+            end
+
+            if isBronx and (hit.CanCollide == false or hit.Transparency > 0.9 or hit.Name == "Bullet" or hit.Name == "Handle" or hit:IsA("Accessory") or hit:IsA("Tool")) then
+                local currentFilter = rayParams.FilterDescendantsInstances
+                table.insert(currentFilter, hit)
+                rayParams.FilterDescendantsInstances = currentFilter
+
+                currentOrigin = res.Position + dirUnit * 0.01
+                remainingDist = (targetPos - currentOrigin).Magnitude
+                if remainingDist < 0.05 then
+                    isVis = true
+                    break
+                end
+            else
+                break
+            end
         end
-    end
-    return isVis
+        return isVis
+    end)
+    return success and visible
 end
 
--- [ AIMBOT ENGINE ]
 local function GetTarget()
     local cam = workspace.CurrentCamera
     local mousePos = UIS:GetMouseLocation()
     local screenCenter = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
 
-    -- Use center for Camera Aim, Mouse for Mouse Aim
     local refPos = (_G.AIMBOT_CFG.AimMode == "Camera Aim") and screenCenter or mousePos
 
     local target = nil
@@ -6931,18 +6844,15 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
                 local aimPos = targetPart.Position
                 local dist = (cam.CFrame.Position - aimPos).Magnitude
 
-                -- Advanced Dynamic Prediction
                 if _G.AIMBOT_CFG.Prediction then
                     local targetVel = targetPart.Velocity
                     local selfVel = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")) and
                         LP.Character.HumanoidRootPart.Velocity or Vector3.new(0, 0, 0)
                     local relativeVel = targetVel - selfVel
 
-                    -- Scale lead time by distance
                     local distFactor = dist / 100
                     local predictOffset = relativeVel * (_G.AIMBOT_CFG.PredictionAmount * distFactor)
 
-                    -- Gravity/Drop Compensation
                     local dropComp = Vector3.new(0, (distFactor * distFactor) * 0.15, 0)
                     aimPos = aimPos + predictOffset + dropComp
                 end
@@ -6950,7 +6860,6 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
                 local tPos, _ = cam:WorldToViewportPoint(aimPos)
                 local tVector = Vector2.new(tPos.X, tPos.Y)
 
-                -- Convert HitChance (0-100) to Smoothing (20-1)
                 local s = 21 - (_G.AIMBOT_CFG.HitChance / 5)
                 s = math.max(1, s)
 
@@ -6962,7 +6871,6 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
                         mousemoverel(diff.X / (s * 1.5), diff.Y / (s * 1.5))
                     end
                 else
-                    -- CAMERA AIM FIX
                     local targetCF = CFrame.lookAt(cam.CFrame.Position, aimPos)
                     if _G.AIMBOT_CFG.RCS then
                         targetCF = targetCF * CFrame.Angles(math.rad(-_G.AIMBOT_CFG.RCSAmount), 0, 0)
@@ -6979,23 +6887,16 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
     end
 end)
 
--- [ SILENT AIM ENGINE ]
 if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
-    -- If we are on mobile and playing Duelist, skip the old engine entirely
-    if IS_MOBILE and IsDuelist() then
-        -- We will handle Mobile Duelist Silent Aim separately below
-    else
-        pcall(function()
-            silentFovCircle = Drawing.new("Circle")
-            silentFovCircle.Thickness = 1.5
-            silentFovCircle.NumSides = 60
-            silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-            silentFovCircle.Filled = false
-            silentFovCircle.Visible = false
-            silentFovCircle.ZIndex = 999
-            silentFovCircle.Transparency = 1
-            silentFovCircle.Color = Color3.fromRGB(255, 255, 255)
-        end)
+    silentFovCircle = Drawing.new("Circle")
+    silentFovCircle.Thickness = 1.5
+    silentFovCircle.NumSides = 60
+    silentFovCircle.Radius = _G.SILENT_CFG.FOV or 150
+    silentFovCircle.Filled = false
+    silentFovCircle.Visible = false
+    silentFovCircle.ZIndex = 999
+    silentFovCircle.Transparency = 1
+    silentFovCircle.Color = Color3.fromRGB(255, 255, 255)
 
     local silentFovConn
     silentFovConn = game:GetService("RunService").RenderStepped:Connect(function()
@@ -7019,7 +6920,6 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         local target = nil
         local dist = _G.SILENT_CFG.FOV
 
-        -- PRIORITY: TargetShoots
         local tsFolder = workspace:FindFirstChild("TargetShoots")
         if tsFolder then
             for _, child in pairs(tsFolder:GetChildren()) do
@@ -7043,7 +6943,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
         end
 
-        if target then return target end -- Prioritize TargetShoot if found
+        if target then return target end
 
         local function check(char)
             if not char or char == LP.Character then return end
@@ -7054,18 +6954,16 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                     return
                 end
                 if IsBronxDuels() or IsDuelist() then
-                    -- In Bronx Duels, opponents are in lp.Data.Match.Enemies
                     local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
                         LP.Data.Match:FindFirstChild("Enemies")
                     if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
                         if not enemiesFolder:FindFirstChild(p.Name) then
-                            return -- Not an enemy
+                            return
                         end
                     else
-                        -- Fallback to standard team checks or attribute checks
                         if _G.ESP_CFG and _G.ESP_CFG.IgnoreTeam then
                             if p.Team and LP.Team and p.Team == LP.Team then
-                                return -- Same team
+                                return
                             end
                             local myTeam = LP:GetAttribute("DuelsTeam")
                             local theirTeam = p:GetAttribute("DuelsTeam")
@@ -7074,7 +6972,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
                             if myMatch and theirMatch and myMatch == theirMatch then
                                 if myTeam and theirTeam and myTeam == theirTeam then
-                                    return -- Same team
+                                    return
                                 end
                             end
                         end
@@ -7134,16 +7032,11 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return target
     end
 
-    -- ═══════════════════════════════════════════════════════
-    -- NAMECALL INTERCEPTION SYSTEM (Undetectable Wallbang)
-    -- ═══════════════════════════════════════════════════════
-
     local mt = getrawmetatable(game)
     local oldNamecall = mt.__namecall
     local oldIndex = mt.__index
     setreadonly(mt, false)
 
-    -- Cache for target to avoid recalculating every frame
     local cachedTarget = nil
     local cacheExpire = 0
     local isGettingTarget = false
@@ -7157,7 +7050,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             isGettingTarget = false
             if ok then
                 cachedTarget = res
-                cacheExpire = now + 0.05 -- 50ms cache
+                cacheExpire = now + 0.05
             else
                 warn("Error in GetSilentTarget: " .. tostring(res))
                 return nil
@@ -7173,12 +7066,10 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         if not checkcaller() and hookActive then
             if typeof(self) == "Instance" and self:IsA("Camera") then
                 if k == "CFrame" or k == "cf" then
-                    -- Prevent Aimlock for games that use Raycast (bypasses obfuscation issues with getcallingscript)
                     if IsHitmark() or IsBronxDuels() or IsDuelist() then
                         return oldIndex(self, k)
                     end
 
-                    -- Prevent Aimlock: Do not spoof CFrame if a camera script is asking for it
                     local caller = getcallingscript()
                     if caller then
                         local cName = caller.Name
@@ -7218,16 +7109,13 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         local method = getnamecallmethod()
         local hookActive = (_G.SILENT_CFG and _G.SILENT_CFG.Enabled) or (_G.KILLAURA_ACTIVE_TARGET ~= nil)
 
-        -- Bypass Bronx Duels Anti-Cheat (AD event)
         if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
             return
         end
 
-        -- Intercept Raycast for Silent Aim & Wallbang
         if hookActive and method == "Raycast" and typeof(self) == "Instance" and self == workspace and not checkcaller() and not ignoreSilentRay then
             local args = table.pack(...)
 
-            -- Usually bullets have a very long direction vector
             if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
                 local chance = math.random(1, 100)
                 if chance <= (_G.SILENT_CFG.HitChance or 100) then
@@ -7249,10 +7137,8 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                         end
 
                         if hitPos then
-                            -- Redirect the ray direction towards the target
                             args[2] = (hitPos - args[1]).Unit * 10000
 
-                            -- Handle Wallbang
                             local doWallbang = (_G.KILLAURA_ACTIVE_TARGET ~= nil) and
                                 (_G.KILLAURA_CFG and _G.KILLAURA_CFG.Wallbang) or
                                 (_G.SILENT_CFG and _G.SILENT_CFG.Wallbang)
@@ -7380,115 +7266,10 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 end
             end)
         end
+
         return _G.FLUX_OLD_FIRESERVER(self, ...)
     end)
-    end -- end for if IS_MOBILE and IsDuelist() else block
-    
-    -- [ MOBILE EXCLUSIVE SILENT AIM FOR DUELIST ]
-    if IS_MOBILE and IsDuelist() then
-        local cam = workspace.CurrentCamera
-        
-        -- Drawing for mobile FOV (if supported)
-        local mobileFovCircle = nil
-        pcall(function()
-            mobileFovCircle = Drawing.new("Circle")
-            mobileFovCircle.Thickness = 1.5
-            mobileFovCircle.NumSides = 60
-            mobileFovCircle.Filled = false
-            mobileFovCircle.ZIndex = 999
-            mobileFovCircle.Transparency = 1
-            mobileFovCircle.Color = Color3.fromRGB(255, 255, 255)
-        end)
-        
-        local function GetMobileTarget()
-            if not cam then return nil end
-            local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-            local dist = _G.SILENT_CFG.FOV or 150
-            local target = nil
-            
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= LP and p.Character then
-                    -- Team check
-                    local myTeam = LP:GetAttribute("DuelsTeam")
-                    local theirTeam = p:GetAttribute("DuelsTeam")
-                    if not (myTeam and theirTeam and myTeam == theirTeam) then
-                        local hrp = p.Character:FindFirstChild("Head") or p.Character:FindFirstChild("HumanoidRootPart")
-                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                        if hrp and hum and hum.Health > 0 and not p.Character:GetAttribute("Downed") then
-                            local pos, vis = cam:WorldToViewportPoint(hrp.Position)
-                            if pos.Z > 0 then
-                                local mag = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                                if mag < dist then
-                                    if _G.SILENT_CFG.Wallbang or IsPositionVisible(cam.CFrame.Position, hrp.Position, p.Character, cam) then
-                                        dist = mag
-                                        target = p.Character
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            return target
-        end
-        
-        -- FOV Render Loop
-        game:GetService("RunService").RenderStepped:Connect(function()
-            if getgenv().FLUX_SESSION ~= MySession then return end
-            if mobileFovCircle then
-                if _G.SILENT_CFG and _G.SILENT_CFG.Enabled and _G.SILENT_CFG.DrawFov and cam then
-                    mobileFovCircle.Visible = true
-                    mobileFovCircle.Radius = _G.SILENT_CFG.FOV or 150
-                    mobileFovCircle.Position = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-                else
-                    mobileFovCircle.Visible = false
-                end
-            end
-        end)
-        
-        -- FireServer Hook specifically for Mobile Duelist
-        local oldFire = nil
-        oldFire = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
-            if checkcaller() or typeof(self) ~= "Instance" then
-                return oldFire(self, ...)
-            end
-            
-            if self.Name == "Weapons" and _G.SILENT_CFG and _G.SILENT_CFG.Enabled then
-                local args = table.pack(...)
-                if args[1] == "Process" then
-                    local target = GetMobileTarget()
-                    if target then
-                        local partName = _G.SILENT_CFG.TargetPart or "Head"
-                        if partName == "Random" then
-                            local parts = {"Head", "UpperTorso", "HumanoidRootPart"}
-                            partName = parts[math.random(1, #parts)]
-                        end
-                        local hitPart = target:FindFirstChild(partName) or target:FindFirstChild("Head")
-                        local hum = target:FindFirstChildOfClass("Humanoid")
-                        if hitPart and hum then
-                            local tool = LP.Character and LP.Character:FindFirstChildOfClass("Tool")
-                            local isHead = hitPart.Name == "Head"
-                            local dmgAttr = isHead and "HeadDamage" or "Damage"
-                            local damage = (tool and tool:GetAttribute(dmgAttr)) or (isHead and 150 or 100)
-                            
-                            task.defer(function()
-                                pcall(function()
-                                    oldFire(self, "DamageRequest", hum, damage, isHead, hitPart, hitPart.Position)
-                                end)
-                            end)
-                        end
-                    end
-                end
-            end
-            
-            -- Call the original FLUX hook if it exists (for instakill/etc)
-            if _G.FLUX_OLD_FIRESERVER and type(_G.FLUX_OLD_FIRESERVER) == "function" then
-                return _G.FLUX_OLD_FIRESERVER(self, ...)
-            end
-            return oldFire(self, ...)
-        end)
-    end
-    
+
     _G.FLUX_GET_IK_ROOT = function(char)
         return char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
     end
@@ -7507,10 +7288,13 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             if player ~= LP and not IsIgnoredPlayer(player) and player:GetAttribute("Game") == myGame and player:GetAttribute("Team") ~= myTeam then
                 local enemyRoot = _G.FLUX_GET_IK_ROOT(player.Character)
                 if enemyRoot then
-                    local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                    if dist < closestDist then
-                        closestDist = dist
-                        closestEnemy = player
+                    local enemyHum = player.Character:FindFirstChildOfClass("Humanoid")
+                    if enemyHum and enemyHum.Health > 0 and not player.Character:GetAttribute("Downed") then
+                        local dist = (myRoot.Position - enemyRoot.Position).Magnitude
+                        if dist < closestDist then
+                            closestDist = dist
+                            closestEnemy = player
+                        end
                     end
                 end
             end
@@ -7567,10 +7351,14 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                     if enemyPlayer and not IsIgnoredPlayer(enemyPlayer) then
                         local enemyRoot = _G.FLUX_GET_IK_ROOT(enemyPlayer.Character)
                         if enemyRoot then
-                            local dist = (myRoot.Position - enemyRoot.Position).Magnitude
-                            if dist < closestDist then
-                                closestDist = dist
-                                closestEnemy = enemyPlayer
+                            local enemyHum = enemyPlayer.Character and
+                                enemyPlayer.Character:FindFirstChildOfClass("Humanoid")
+                            if enemyHum and enemyHum.Health > 0 and not enemyPlayer.Character:GetAttribute("Downed") then
+                                local dist = (myRoot.Position - enemyRoot.Position).Magnitude
+                                if dist < closestDist then
+                                    closestDist = dist
+                                    closestEnemy = enemyPlayer
+                                end
                             end
                         end
                     end
@@ -7592,10 +7380,13 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         local theirTeam = enemyPlayer:GetAttribute("Team")
         local myHum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
 
-        return myGame and theirGame == myGame and theirTeam ~= myTeam and myHum and myHum.Health > 0
+        local theirChar = enemyPlayer.Character
+        local theirHum = theirChar and theirChar:FindFirstChildOfClass("Humanoid")
+        local isAlive = theirHum and theirHum.Health > 0 and not theirChar:GetAttribute("Downed")
+
+        return myGame and theirGame == myGame and theirTeam ~= myTeam and myHum and myHum.Health > 0 and isAlive
     end
 
-    -- [ INSTA KILL - Standalone G keybind, independent of shooting ]
     _G.FLUX_FIRE_INSTAKILL = function(silent)
         if not _G.IK_CFG or not _G.IK_CFG.Enabled then return end
 
@@ -7612,8 +7403,21 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
         local ok, result = pcall(function()
             local rs = game:GetService("ReplicatedStorage")
-            local remotesModule = rs:FindFirstChild("Shared") and rs.Shared:FindFirstChild("Remotes")
-            local knife = remotesModule and require(remotesModule).KnifeKill
+
+            local knife
+            local netModule = rs:FindFirstChild("Packages") and rs.Packages:FindFirstChild("Net")
+            if netModule then
+                local success, netLib = pcall(require, netModule)
+                if success and netLib and type(netLib) == "table" and netLib.RemoteEvent then
+                    pcall(function()
+                        knife = netLib:RemoteEvent("KnifeKill")
+                    end)
+                end
+            end
+
+            if not knife and netModule then
+                knife = netModule:FindFirstChild("RE/90a36310509693bb2666729f57fed59e2e5e6a8ebc0835a3e35c43e1d47eb32e")
+            end
 
             if not knife then
                 if not silent then
@@ -7629,7 +7433,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                 return
             end
 
-            knife:FireServer(closestEnemy)
+            knife:FireServer("bb15e94b-1af0-48fe-be2b-b2f9e007565a", closestEnemy)
             if not silent then
                 NOTIFY("InstaKill", "Fired on " .. closestEnemy.Name, 2)
             end
@@ -7650,7 +7454,6 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         end
     end))
 
-    -- Auto Kill loop
     task.spawn(function()
         while true do
             task.wait(0.1)
@@ -7662,9 +7465,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     end)
 end
 
--- [ SPEED BOOST & FLY UTILITIES ]
 ; (function()
-    -- Speed Boost connections
     table.insert(_G.FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
         local hum = char:WaitForChild("Humanoid", 5)
         if hum and _G.LOCAL_PLAYER_CFG.SpeedEnabled and (IsMurderVsSheriff() or IsDuelist()) then
@@ -7705,7 +7506,6 @@ end
         end
     end)
 
-    -- Player Fly exact logic from UICompleta
     local flyConnection
     local flyPos
     local flyGyro
@@ -7739,7 +7539,6 @@ end
             if not root or not humanoid then return end
 
             if IsHitmark() then
-                -- PHYSICAL/VISIBLE BODYVELOCITY FLY FOR HITMARK
                 flyGyro = Instance.new("BodyGyro")
                 flyGyro.P = 9e4
                 flyGyro.D = 1e3
@@ -7780,7 +7579,6 @@ end
                     local cam = workspace.CurrentCamera
                     local speed = _G.LOCAL_PLAYER_CFG.FlySpeed or 50
 
-                    -- Keyboard inputs
                     local fwd = (UIS:IsKeyDown(Enum.KeyCode.W) and 1 or 0) - (UIS:IsKeyDown(Enum.KeyCode.S) and 1 or 0)
                     local side = (UIS:IsKeyDown(Enum.KeyCode.D) and 1 or 0) - (UIS:IsKeyDown(Enum.KeyCode.A) and 1 or 0)
                     local up = (UIS:IsKeyDown(Enum.KeyCode.Space) and 1 or 0) -
@@ -7789,10 +7587,8 @@ end
                     local camCF = cam.CFrame
                     local orientation = CFrame.fromEulerAnglesXYZ(camCF:ToEulerAnglesXYZ())
 
-                    -- Move forward/backward/sideways relative to camera rotation
                     local moveDir = orientation:VectorToWorldSpace(Vector3.new(side, 0, -fwd))
 
-                    -- Move up/down absolutely in world coordinates
                     local finalVelocity = moveDir * speed
                     if up ~= 0 then
                         finalVelocity = finalVelocity + Vector3.new(0, up * speed, 0)
@@ -7802,7 +7598,6 @@ end
                     flyVelo.Velocity = finalVelocity
                 end)
             else
-                -- ORIGINAL CFRAME FLY FOR MURDER VS SHERIFF
                 flyPos = root.Position
                 humanoid.PlatformStand = true
 
@@ -7855,7 +7650,6 @@ end
         end
     end
 
-    -- Hook up Fly state change listeners
     table.insert(_G.FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         if _G.LOCAL_PLAYER_CFG.FlyEnabled then
@@ -7863,7 +7657,6 @@ end
         end
     end))
 
-    -- Detect when configuration values are loaded or changed
     local oldFlyEnabled = _G.LOCAL_PLAYER_CFG.FlyEnabled
     task.spawn(function()
         while true do
@@ -7876,7 +7669,6 @@ end
         end
     end)
 
-    -- Invisibility runner logic
     local function setCharacterTransparency(character, transparency)
         for _, descendant in character:GetDescendants() do
             if descendant:IsA("BasePart") or descendant:IsA("Decal") then
@@ -7929,7 +7721,6 @@ end
         end
     end
 
-    -- Character added reset for Invisibility
     table.insert(_G.FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
         _G.LOCAL_PLAYER_CFG.InvisEnabled = false
         local invisChair = workspace:FindFirstChild("invischair")
@@ -7941,7 +7732,6 @@ end
         end
     end))
 
-    -- Configuration loader/change detector for Invisibility
     local oldInvisEnabled = _G.LOCAL_PLAYER_CFG.InvisEnabled
     task.spawn(function()
         while true do
@@ -7954,11 +7744,9 @@ end
         end
     end)
 
-    -- Keybind toggling listener
     table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
         if gpe then return end
 
-        -- Trigger Bot keybind check
         if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Keybind then
             local currentBind = _G.TRIGGERBOT_CFG.Keybind
             local match = false
@@ -7978,7 +7766,6 @@ end
             end
         end
 
-        -- Silent Aim keybind check
         if _G.SILENT_CFG and _G.SILENT_CFG.Keybind then
             local currentBind = _G.SILENT_CFG.Keybind
             local match = false
@@ -7998,7 +7785,6 @@ end
             end
         end
 
-        -- Kill Aura keybind check
         if _G.KILLAURA_CFG and _G.KILLAURA_CFG.Keybind then
             local currentBind = _G.KILLAURA_CFG.Keybind
             local match = false
@@ -8021,7 +7807,6 @@ end
         if inp.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = inp.KeyCode.Name
 
-            -- Speed Boost keybind
             if _G.LOCAL_PLAYER_CFG.SpeedKey ~= "None" and keyName == _G.LOCAL_PLAYER_CFG.SpeedKey then
                 if IsMurderVsSheriff() or IsDuelist() then
                     _G.LOCAL_PLAYER_CFG.SpeedEnabled = not _G.LOCAL_PLAYER_CFG.SpeedEnabled
@@ -8043,7 +7828,6 @@ end
                 end
             end
 
-            -- Player Fly keybind
             if _G.LOCAL_PLAYER_CFG.FlyKey ~= "None" and keyName == _G.LOCAL_PLAYER_CFG.FlyKey then
                 _G.LOCAL_PLAYER_CFG.FlyEnabled = not _G.LOCAL_PLAYER_CFG.FlyEnabled
                 UpdateFlyState()
@@ -8053,7 +7837,6 @@ end
                 end
             end
 
-            -- Invisibility keybind
             if _G.LOCAL_PLAYER_CFG.InvisKey ~= "None" and keyName == _G.LOCAL_PLAYER_CFG.InvisKey then
                 _G.LOCAL_PLAYER_CFG.InvisEnabled = not _G.LOCAL_PLAYER_CFG.InvisEnabled
                 NOTIFY("Invisibility", _G.LOCAL_PLAYER_CFG.InvisEnabled and "Enabled" or "Disabled", 2)
@@ -8065,7 +7848,6 @@ end
         end
     end))
 
-    -- Fun Options: Infinite Jump
     table.insert(_G.FLUX_CONNS, UIS.JumpRequest:Connect(function()
         if _G.FUN_CFG and _G.FUN_CFG.InfJump and IsHitmark() then
             local char = LP.Character
@@ -8076,7 +7858,6 @@ end
         end
     end))
 
-    -- Duelist Exclusive Infinite Jump
     table.insert(_G.FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gpe)
         if inp.KeyCode == Enum.KeyCode.Space then
             if _G.FUN_CFG and _G.FUN_CFG.InfJump and IsDuelist() then
@@ -8092,7 +7873,6 @@ end
         end
     end))
 
-    -- Fun Options: Gravity Changer
     task.spawn(function()
         while true do
             task.wait(0.1)
@@ -8110,7 +7890,6 @@ end
         end
     end)
 
-    -- Fun Options: Spinbot
     task.spawn(function()
         local spinVelo
         while true do
@@ -8144,13 +7923,9 @@ end
         end
     end)
 
-    -- ═══════════════════════════════════════════════════════
-    -- GUN MODS ENGINE (HITMARK)
-    -- ═══════════════════════════════════════════════════════
     task.spawn(function()
         local u3, u6, u11
 
-        -- 1. Slow scanning loop (1s) to find tables from getgc
         task.spawn(function()
             while true do
                 task.wait(1)
@@ -8175,14 +7950,12 @@ end
             end
         end)
 
-        -- 2. Fast override loop (every frame) for active overrides
         while true do
             task.wait()
             if getgenv().FLUX_SESSION ~= MySession then break end
 
             if IsHitmark() and u3 and u6 and u11 then
                 pcall(function()
-                    -- Hook visual camera shake (run once)
                     if not rawget(u6, "_oldShake") then
                         u6._oldShake = u6.Shake
                         u6.Shake = function(self, ...)
@@ -8193,7 +7966,6 @@ end
                         end
                     end
 
-                    -- Hook MouseDelta to remove physical recoil kick (run once)
                     local mt = getmetatable(u3)
                     if not mt then
                         mt = {}
@@ -8213,27 +7985,24 @@ end
                         end
                     end
 
-                    -- Real-time Active Weapon overrides
                     local current = u11.CurrentWeapon
                     local data = u11.WeaponData
 
                     if current and type(current) == "table" then
-                        -- Handle Infinite Ammo
                         if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.InfiniteAmmo then
                             rawset(current, "ammo", current.clipsize or 16)
                         end
-                        -- Handle Force Automatic
+
                         if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.Automatic then
                             rawset(current, "firemode", "Auto")
                         end
-                        -- Handle Rapid Fire
+
                         if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.RapidFire then
                             rawset(current, "firedelay", 0.05)
                         end
                     end
 
                     if data and type(data) == "table" then
-                        -- Handle No Spread (100% Accuracy)
                         if _G.GUN_MODS_CFG and _G.GUN_MODS_CFG.NoSpread then
                             if not rawget(data, "_oldAccuracyMin") then
                                 rawset(data, "_oldAccuracyMin", data.AccuracyMin or Vector3.new(0, 0, 0))
@@ -8249,7 +8018,6 @@ end
                         end
                     end
 
-                    -- Visual Material Changer
                     if _G.CURRENT_VISUAL_MAT and _G.CURRENT_VISUAL_MAT ~= "Default" then
                         local lp = game:GetService("Players").LocalPlayer
                         if lp.Character then
@@ -8320,13 +8088,12 @@ end
     end)
 end)()
 
--- [ KILL AURA ENGINE ]
 local lastKaTime = 0
 
 table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(function()
     if getgenv().FLUX_SESSION ~= MySession then return end
     if not _G.KILLAURA_CFG or not _G.KILLAURA_CFG.Enabled then return end
-    if not (IsHitmark() or IsDuelist()) then return end
+    if not (IsHitmark() or IsDuelist() or IsMurderVsSheriff()) then return end
 
     local closestDist = _G.KILLAURA_CFG.MaxDist or 300
     local kaTarget = nil
@@ -8363,20 +8130,40 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
         end
     end
 
+    local function isSameTeam(otherPlayer)
+        if _G.MY_TEAM_CACHE then
+            if type(_G.MY_TEAM_CACHE) == "table" and _G.MY_TEAM_CACHE.FindFirstChild then
+                if _G.MY_TEAM_CACHE:FindFirstChild(otherPlayer.Name) then
+                    return true
+                end
+            elseif typeof(_G.MY_TEAM_CACHE) == "Instance" then
+                if _G.MY_TEAM_CACHE:FindFirstChild(otherPlayer.Name) then
+                    return true
+                end
+            end
+        end
+        local myTeam = LP:GetAttribute("Team")
+        local theirTeam = otherPlayer:GetAttribute("Team")
+        if myTeam and theirTeam and myTeam ~= "nothing" and theirTeam ~= "nothing" then
+            return myTeam == theirTeam
+        end
+        if LP.Team and otherPlayer.Team then
+            return LP.Team == otherPlayer.Team
+        end
+        return false
+    end
+
     for _, p in ipairs(game.Players:GetPlayers()) do
         if p ~= game.Players.LocalPlayer and not IsIgnoredPlayer(p) and p.Character then
             local char = p.Character
-            if char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 and not char:GetAttribute("Downed") then
-                local validEnemy = true
-                if _G.MY_TEAM_CACHE and _G.MY_TEAM_CACHE:FindFirstChild(p.Name) then
-                    validEnemy = false
-                end
-
-                if validEnemy then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 and not char:GetAttribute("Downed") then
+                if not isSameTeam(p) then
                     local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head")
                     if hrp then
                         local mag = (hrp.Position - lpChar.HumanoidRootPart.Position).Magnitude
                         local inView = true
+
                         if _G.KILLAURA_CFG.AuraType == "Legit" then
                             local _, onScreen = cam:WorldToViewportPoint(hrp.Position)
                             if not onScreen then
@@ -8429,13 +8216,13 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
         if tick() - lastKaTime > delayTime then
             lastKaTime = tick()
             task.spawn(function()
-                pcall(function()
-                    local targetPart = IsDuelist() and "Head" or _G.SILENT_CFG.TargetPart
-                    local hitPart = kaTarget:FindFirstChild(targetPart) or kaTarget:FindFirstChild("Head") or
-                        kaTarget:FindFirstChild("HumanoidRootPart")
-                    if not hitPart then return end
+                local targetPart = IsDuelist() and "Head" or _G.SILENT_CFG.TargetPart
+                local hitPart = kaTarget:FindFirstChild(targetPart) or kaTarget:FindFirstChild("Head") or
+                    kaTarget:FindFirstChild("HumanoidRootPart")
+                if not hitPart then return end
 
-                    if IsHitmark() then
+                if IsHitmark() then
+                    pcall(function()
                         local BridgeNet2 = require(game:GetService("ReplicatedStorage").Shared.BridgeNet2)
                         local Gun2 = BridgeNet2.ClientBridge("Gun2")
                         Gun2:Fire({
@@ -8448,7 +8235,9 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                             ["timestamp"] = time(),
                             ["hitId"] = tick()
                         })
-                    elseif IsDuelist() then
+                    end)
+                elseif IsDuelist() then
+                    pcall(function()
                         local tool = lpChar:FindFirstChildOfClass("Tool")
                         local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
                             game:GetService("ReplicatedStorage").Events:FindFirstChild("Weapons")
@@ -8463,14 +8252,44 @@ table.insert(_G.FLUX_CONNS, game:GetService("RunService").RenderStepped:Connect(
                                 end
                             end
                         end
-                    end
-                end)
+                    end)
+                elseif IsMurderVsSheriff() then
+                    pcall(function()
+                        local rs = game:GetService("ReplicatedStorage")
+                        local gun = _G.FLUX_MVS_GUNKILL_EVENT
+                        if not gun then
+                            local netModule = rs:FindFirstChild("Packages") and rs.Packages:FindFirstChild("Net")
+                            if netModule then
+                                local success, netLib = pcall(require, netModule)
+                                if success and netLib and type(netLib) == "table" and netLib.RemoteEvent then
+                                    pcall(function()
+                                        gun = netLib:RemoteEvent("GunKill")
+                                    end)
+                                end
+                            end
+                            if not gun and netModule then
+                                gun = netModule:FindFirstChild(
+                                    "RE/b6356408cae7d8c822652d12353e8c05c64871ef5c130430fc0d1d10ecff2d94")
+                            end
+                            if gun then
+                                _G.FLUX_MVS_GUNKILL_EVENT = gun
+                            end
+                        end
+
+                        local enemyPlayer = game.Players:GetPlayerFromCharacter(kaTarget)
+                        local myHrp = lpChar:FindFirstChild("HumanoidRootPart")
+                        local targetHrp = kaTarget:FindFirstChild("HumanoidRootPart")
+                        if gun and enemyPlayer and myHrp and targetHrp then
+                            local lookVector = (targetHrp.Position - myHrp.Position).Unit
+                            gun:FireServer("9576996e-66e6-4d56-b791-f3b062eb597c", enemyPlayer, lookVector)
+                        end
+                    end)
+                end
             end)
         end
     end
 end))
 
--- [ BRONX DUELS / DUELIST SAFE GUN MODS: NO RECOIL HOOK ]
 task.spawn(function()
     while task.wait(2) do
         if getgenv().FLUX_SESSION ~= MySession then break end
@@ -8502,7 +8321,6 @@ task.spawn(function()
     end
 end)
 
--- [ DUELIST GUN MODS: FAST ATTRIBUTE OVERRIDE ]
 task.spawn(function()
     while task.wait() do
         if getgenv().FLUX_SESSION ~= MySession then break end
@@ -8512,21 +8330,16 @@ task.spawn(function()
                 if char then
                     local tool = char:FindFirstChildOfClass("Tool")
                     if tool then
-                        -- Infinite Ammo
                         if _G.GUN_MODS_CFG.InfiniteAmmo and tool:GetAttribute("MaxAmmo") then
                             tool:SetAttribute("Ammo", tool:GetAttribute("MaxAmmo") or 999)
                         end
 
-                        -- Rapid Fire is disabled for Duelist as it breaks the gun script
-
-                        -- Force Automatic
                         if _G.GUN_MODS_CFG.Automatic then
                             if tool:GetAttribute("Auto") ~= nil then tool:SetAttribute("Auto", true) end
                             if tool:GetAttribute("Automatic") ~= nil then tool:SetAttribute("Automatic", true) end
                             if tool:GetAttribute("FireMode") then tool:SetAttribute("FireMode", "Auto") end
                         end
 
-                        -- No Spread
                         if _G.GUN_MODS_CFG.NoSpread then
                             if tool:GetAttribute("Spread") then tool:SetAttribute("Spread", 0) end
                             if tool:GetAttribute("MinSpread") then tool:SetAttribute("MinSpread", 0) end
@@ -8571,14 +8384,12 @@ table.insert(_G.FLUX_CONNS, game:GetService("SoundService").ChildAdded:Connect(f
     end
 end))
 
--- [ HITBOX EXPANDER ENGINE ]
 task.spawn(function()
-    local originalProps = {} -- Almacenará { [Part] = { Size = Vector3, Transparency = number, CanCollide = boolean, Massless = boolean, TargetPartName = string } }
+    local originalProps = {}
 
     while true do
         task.wait(0.1)
         if getgenv().FLUX_SESSION ~= MySession then
-            -- Restaurar todos los tamaños originales al cerrar
             for part, data in pairs(originalProps) do
                 pcall(function()
                     part.Size = data.Size
@@ -8590,7 +8401,6 @@ task.spawn(function()
             break
         end
 
-        -- Limpiar partes destruidas o inválidas de la tabla para evitar fugas de memoria
         for part, _ in pairs(originalProps) do
             if not part or not part.Parent then
                 originalProps[part] = nil
@@ -8602,7 +8412,6 @@ task.spawn(function()
             local targetPartName = (_G.HITBOX_CFG.Part == "UpperTorso" and "UpperTorso" or "Head")
             local sizeVec = Vector3.new(size, size, size)
 
-            -- Tabla temporal para saber qué partes están activas en este ciclo
             local activeParts = {}
 
             for _, p in ipairs(game.Players:GetPlayers()) do
@@ -8654,7 +8463,6 @@ task.spawn(function()
                 end
             end
 
-            -- Restaurar partes que ya no están activas (por cambio de selección, respawn, etc.)
             for part, data in pairs(originalProps) do
                 if not activeParts[part] then
                     pcall(function()
@@ -8667,7 +8475,6 @@ task.spawn(function()
                 end
             end
         else
-            -- Expander desactivado: restaurar todo
             for part, data in pairs(originalProps) do
                 pcall(function()
                     part.Size = data.Size
@@ -8681,7 +8488,6 @@ task.spawn(function()
     end
 end)
 
--- [ TRIGGER BOT ENGINE ]
 local function GetTriggerBotTarget()
     local cam = workspace.CurrentCamera
     if not cam then return nil end
@@ -8692,12 +8498,11 @@ local function GetTriggerBotTarget()
     local mode = _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Mode or "Legit"
     local fovRadius = (_G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Fov)
     if not fovRadius then
-        fovRadius = (mode == "Blatant") and 120 or 12 -- Large FOV for Blatant silent-trigger, small for Legit
+        fovRadius = (mode == "Blatant") and 120 or 12
     end
     local bestTarget = nil
     local bestDist = fovRadius
 
-    -- Exclude local character from visibility check
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = { LP.Character }
@@ -8711,13 +8516,11 @@ local function GetTriggerBotTarget()
         local hitPart = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
         if not hitPart then return end
 
-        -- Get screen position of the hitPart
         local screenPos, onScreen = cam:WorldToViewportPoint(hitPart.Position)
         if not onScreen then return end
 
         local dist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
         if dist < bestDist then
-            -- Visibility Check using advanced IsPositionVisible function (handles accessories, bullet trails, etc.)
             if IsPositionVisible(cam.CFrame.Position, hitPart.Position, char, cam) then
                 bestTarget = char
                 bestDist = dist
@@ -8725,10 +8528,8 @@ local function GetTriggerBotTarget()
         end
     end
 
-    -- Loop through players
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LP then
-            -- Teammate check
             local isTeammate = false
             if IsBronxDuels() or IsDuelist() then
                 local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
@@ -8764,7 +8565,6 @@ local function GetTriggerBotTarget()
         end
     end
 
-    -- Loop through bots
     local bots = _G.BOT_LIST or {}
     for i = 1, #bots do
         checkChar(bots[i])
@@ -8833,7 +8633,6 @@ task.spawn(function()
             break
         end
         if _G.TRIGGERBOT_CFG and _G.TRIGGERBOT_CFG.Enabled then
-            -- Dynamic weapon override for 100% long range accuracy (no spread, infinite range, no recoil)
             local activeTool = nil
             pcall(function()
                 local char = LP.Character
@@ -8856,7 +8655,6 @@ task.spawn(function()
                 local mode = _G.TRIGGERBOT_CFG.Mode or "Legit"
 
                 if mode == "Legit" then
-                    -- Check if active weapon is automatic
                     local isAuto = false
                     if activeTool then
                         isAuto = activeTool:GetAttribute("Automatic") == true
@@ -8868,8 +8666,7 @@ task.spawn(function()
                     if isAuto then
                         PressTrigger()
                     else
-                        -- Semi-automatic: tap weapon
-                        ReleaseTrigger() -- Make sure we release before tapping again
+                        ReleaseTrigger()
                         local delay = _G.TRIGGERBOT_CFG.Delay or 0.05
                         if tick() - lastTriggerClick > delay then
                             lastTriggerClick = tick()
@@ -8878,7 +8675,7 @@ task.spawn(function()
                     end
                 elseif mode == "Blatant" then
                     ReleaseTrigger()
-                    -- Blatant mode: instantly hit via remote/process if Duelist or Hitmark, otherwise click fast
+
                     if IsDuelist() then
                         local tool = activeTool
                         local Weapons = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
@@ -8893,7 +8690,6 @@ task.spawn(function()
                                     local dmgAttr = isHead and "HeadDamage" or "Damage"
                                     local damage = tool:GetAttribute(dmgAttr) or (isHead and 150 or 100)
 
-                                    -- Instant Kill (multiple remote shots paired with Process)
                                     for i = 1, 3 do
                                         Weapons:FireServer("Process")
                                         Weapons:FireServer("DamageRequest", targetChar.Humanoid, damage, isHead, hitPart,
@@ -8911,7 +8707,6 @@ task.spawn(function()
                             local Gun2 = BridgeNet2.ClientBridge("Gun2")
                             local cam = workspace.CurrentCamera
 
-                            -- Instant Kill (multiple remote shots with unique timestamps/hitIds)
                             for i = 1, 3 do
                                 Gun2:Fire({
                                     ["hitType"] = "Hit",
@@ -8926,7 +8721,6 @@ task.spawn(function()
                             end
                         end
                     else
-                        -- Fallback to fast click if not Duelist or Hitmark
                         local isAuto = false
                         if activeTool then
                             isAuto = activeTool:GetAttribute("Automatic") == true
@@ -8947,11 +8741,9 @@ task.spawn(function()
                     end
                 end
             else
-                -- No target: release trigger immediately
                 ReleaseTrigger()
             end
         else
-            -- Triggerbot disabled: release trigger immediately
             ReleaseTrigger()
         end
     end
