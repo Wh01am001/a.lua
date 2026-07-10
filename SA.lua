@@ -1,4 +1,3 @@
-
 if not getgenv then
     local _sharedEnv = {}
     getgenv = function() return _sharedEnv end
@@ -136,11 +135,11 @@ local GAME_IDS = {
         [97351810896225] = true
     },
     BronxDuels = {
-        [139943061361383] = true, 
-        [99362936871032] = true,  
-        [85788627530413] = true,  
-        [9091734830] = true,      
-        [121567535120062] = false 
+        [139943061361383] = true,
+        [99362936871032] = true,
+        [85788627530413] = true,
+        [9091734830] = true,
+        [121567535120062] = false
     },
     Duelist = {
         [122310270867133] = true
@@ -149,7 +148,14 @@ local GAME_IDS = {
 
 local function IsMurderVsSheriff()
     local pid = game.PlaceId
-    return GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid]
+    if GAME_IDS.MurderVsSheriff.Lobbies[pid] or GAME_IDS.MurderVsSheriff.Arenas[pid] then
+        return true
+    end
+    local rs = game:GetService("ReplicatedStorage")
+    if rs:FindFirstChild("Packages") and rs.Packages:FindFirstChild("Networking") and rs.Packages.Networking:FindFirstChild("RE/Combat/Beam") then
+        return true
+    end
+    return false
 end
 
 local function IsHitmark()
@@ -570,7 +576,7 @@ local function MakeDraggable(area, target)
 
     area.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            task.wait() 
+            task.wait()
             if getgenv()._CEN_SLD_ACTIVE or getgenv()._CEN_PKR_ACTIVE then return end
 
             dragging = true
@@ -756,7 +762,7 @@ Root                 = NewFrame(SG,
 )
 Root.BorderSizePixel = 0
 Corner(Root, 10)
-MakeDraggable(Root) 
+MakeDraggable(Root)
 
 local SnowHolder                  = Instance.new("Frame")
 SnowHolder.Name                   = "SnowHolder"
@@ -837,7 +843,7 @@ if IS_MOBILE then
             PICKER_OPEN = false
         end
     end)
-    MakeDraggable(Toggle) 
+    MakeDraggable(Toggle)
 end
 
 local NotifySG = Instance.new("ScreenGui")
@@ -944,3057 +950,1715 @@ rightGrad.Color = ColorSequence.new(Color3.fromRGB(20, 20, 26), Color3.fromRGB(2
 rightGrad.Enabled = false
 rightGrad.Parent = RightBox
 
-local Shadow = Instance.new("ImageLabel")
-Shadow.BackgroundTransparency = 1
-Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-Shadow.Position = UDim2.new(0.5, 0, 0.5, 3)
-Shadow.Size = UDim2.new(1, 60, 1, 60)
-Shadow.ZIndex = 0
-Shadow.Image = "rbxassetid://6014261993"
-Shadow.ImageColor3 = Color3.new(0, 0, 0)
-Shadow.ImageTransparency = 0.35
-Shadow.ScaleType = Enum.ScaleType.Slice
-Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
-Shadow.Parent = Root
+; (function()
+    local Shadow = Instance.new("ImageLabel")
+    Shadow.BackgroundTransparency = 1
+    Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    Shadow.Position = UDim2.new(0.5, 0, 0.5, 3)
+    Shadow.Size = UDim2.new(1, 60, 1, 60)
+    Shadow.ZIndex = 0
+    Shadow.Image = "rbxassetid://6014261993"
+    Shadow.ImageColor3 = Color3.new(0, 0, 0)
+    Shadow.ImageTransparency = 0.35
+    Shadow.ScaleType = Enum.ScaleType.Slice
+    Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
+    Shadow.Parent = Root
 
-local LogoLbl = Instance.new("ImageLabel")
-LogoLbl.Name = "Logo"
-LogoLbl.BackgroundTransparency = 1
-LogoLbl.Size = UDim2.new(0.2, 42, 0, 42)
-LogoLbl.Position = UDim2.new(0.5, -45, 0.01, 10)
-LogoLbl.Image = "rbxassetid://115851224962601"
-LogoLbl.Parent = Sidebar
+    local LogoLbl = Instance.new("ImageLabel")
+    LogoLbl.Name = "Logo"
+    LogoLbl.BackgroundTransparency = 1
+    LogoLbl.Size = UDim2.new(0.2, 42, 0, 42)
+    LogoLbl.Position = UDim2.new(0.5, -45, 0.01, 10)
+    LogoLbl.Image = "rbxassetid://115851224962601"
+    LogoLbl.Parent = Sidebar
 
-local LogoSep = NewFrame(Sidebar, UDim2.new(1, -24, 0, 1), UDim2.new(0, 12, 0, 66), STROKE)
+    local LogoSep = NewFrame(Sidebar, UDim2.new(1, -24, 0, 1), UDim2.new(0, 12, 0, 66), STROKE)
 
-local NavHolder = NewFrame(Sidebar,
-    UDim2.new(1, 0, 1, -110),
-    UDim2.new(0, 0, 0, 76),
-    SIDEBAR, 1
-)
-
-local NavPad = Instance.new("UIPadding")
-NavPad.PaddingLeft = UDim.new(0, 8)
-NavPad.PaddingRight = UDim.new(0, 8)
-NavPad.PaddingTop = UDim.new(0, 6)
-NavPad.Parent = NavHolder
-
-local NavList = Instance.new("UIListLayout")
-NavList.SortOrder = Enum.SortOrder.LayoutOrder
-NavList.Padding = UDim.new(0, 3)
-NavList.Parent = NavHolder
-
-local NAV_DATA = {
-    { name = "Main",     icon = "135031929601625", active = true },
-    { name = "Combat",   icon = "124577101938161", active = false },
-    { name = "Visuals",  icon = "94346865873525",  active = false },
-    { name = "Config",   icon = "138953556540282", active = false },
-    { name = "Settings", icon = "133365821659023", active = false },
-}
-
-local currentNav = nil
-local navPages = {}
-local accentFills = {} 
-
-local function MakeNav(data, idx)
-    local btn = NewBtn(NavHolder,
-        UDim2.new(1, 0, 0, 38),
-        UDim2.new(0, 0, 0, 0),
-        Color3.fromRGB(30, 30, 38), 
-        data.active and 0 or 1
+    local NavHolder = NewFrame(Sidebar,
+        UDim2.new(1, 0, 1, -110),
+        UDim2.new(0, 0, 0, 76),
+        SIDEBAR, 1
     )
-    btn.LayoutOrder = idx
-    Corner(btn, 19) 
 
-    local dot = NewFrame(btn, UDim2.new(0, 8, 0, 8), UDim2.new(1, -20, 0.5, -4),
-        data.active and ACCENT or Color3.new(1, 1, 1))
-    dot.Visible = data.active
-    Corner(dot, 4)
+    local NavPad = Instance.new("UIPadding")
+    NavPad.PaddingLeft = UDim.new(0, 8)
+    NavPad.PaddingRight = UDim.new(0, 8)
+    NavPad.PaddingTop = UDim.new(0, 6)
+    NavPad.Parent = NavHolder
 
-    local sym = Instance.new("ImageLabel")
-    sym.BackgroundTransparency = 1
-    sym.Size = UDim2.new(0, 20, 0, 20)
-    sym.Position = UDim2.new(0, 16, 0.5, -10)
-    sym.Image = "rbxassetid://" .. data.icon
-    sym.ImageColor3 = data.active and Color3.new(1, 1, 1) or DIM
-    sym.Parent = btn
+    local NavList = Instance.new("UIListLayout")
+    NavList.SortOrder = Enum.SortOrder.LayoutOrder
+    NavList.Padding = UDim.new(0, 3)
+    NavList.Parent = NavHolder
 
-    local lbl = NewLabel(btn, data.name, 13, data.active and Color3.new(1, 1, 1) or DIM, data.active)
-    lbl.Size = UDim2.new(1, -65, 1, 0)
-    lbl.Position = UDim2.new(0, 48, 0, 0)
+    local NAV_DATA = {
+        { name = "Main",     icon = "135031929601625", active = true },
+        { name = "Combat",   icon = "124577101938161", active = false },
+        { name = "Visuals",  icon = "94346865873525",  active = false },
+        { name = "Config",   icon = "138953556540282", active = false },
+        { name = "Settings", icon = "133365821659023", active = false },
+    }
 
-    local catPage = NewFrame(RightBox, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-    catPage.Visible = data.active
-    navPages[data.name] = catPage
+    local currentNav = nil
+    local navPages = {}
+    local accentFills = {}
 
-    local ref = { btn = btn, sym = sym, lbl = lbl, dot = dot, name = data.name, page = catPage }
-    if data.active then currentNav = ref end
+    local function MakeNav(data, idx)
+        local btn = NewBtn(NavHolder,
+            UDim2.new(1, 0, 0, 38),
+            UDim2.new(0, 0, 0, 0),
+            Color3.fromRGB(30, 30, 38),
+            data.active and 0 or 1
+        )
+        btn.LayoutOrder = idx
+        Corner(btn, 19)
 
-    btn.MouseButton1Click:Connect(function()
-        if currentNav == ref then return end
-        if currentNav then
-            Tw(currentNav.btn, 0.13, "Quad", "Out", { BackgroundTransparency = 1 })
-            Tw(currentNav.sym, 0.13, "Quad", "Out", { ImageColor3 = DIM })
-            Tw(currentNav.lbl, 0.13, "Quad", "Out", { TextColor3 = DIM })
-            currentNav.lbl.Font = Enum.Font.Gotham
-            currentNav.dot.Visible = false
-            currentNav.page.Visible = false
-        end
-        Tw(btn, 0.13, "Quad", "Out", { BackgroundTransparency = 0 })
-        Tw(sym, 0.13, "Quad", "Out", { ImageColor3 = ACCENT })
-        Tw(lbl, 0.13, "Quad", "Out", { TextColor3 = ACCENT })
-        lbl.Font = Enum.Font.GothamBold
-        dot.BackgroundColor3 = ACCENT
-        dot.Visible = true
-        catPage.Visible = true
-        currentNav = ref
-    end)
+        local dot = NewFrame(btn, UDim2.new(0, 8, 0, 8), UDim2.new(1, -20, 0.5, -4),
+            data.active and ACCENT or Color3.new(1, 1, 1))
+        dot.Visible = data.active
+        Corner(dot, 4)
 
-    btn.MouseEnter:Connect(function()
-        if not (currentNav and currentNav.btn == btn) then
-            Tw(btn, 0.09, "Quad", "Out", { BackgroundTransparency = 0.8, BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-        end
-    end)
-    btn.MouseLeave:Connect(function()
-        if not (currentNav and currentNav.btn == btn) then
-            Tw(btn, 0.09, "Quad", "Out", { BackgroundTransparency = 1, BackgroundColor3 = Color3.fromRGB(30, 30, 38) })
-        end
-    end)
-end
+        local sym = Instance.new("ImageLabel")
+        sym.BackgroundTransparency = 1
+        sym.Size = UDim2.new(0, 20, 0, 20)
+        sym.Position = UDim2.new(0, 16, 0.5, -10)
+        sym.Image = "rbxassetid://" .. data.icon
+        sym.ImageColor3 = data.active and Color3.new(1, 1, 1) or DIM
+        sym.Parent = btn
 
-for i, v in ipairs(NAV_DATA) do MakeNav(v, i) end
+        local lbl = NewLabel(btn, data.name, 13, data.active and Color3.new(1, 1, 1) or DIM, data.active)
+        lbl.Size = UDim2.new(1, -65, 1, 0)
+        lbl.Position = UDim2.new(0, 48, 0, 0)
 
-local FootSep = NewFrame(Sidebar, UDim2.new(1, -24, 0, 1), UDim2.new(0, 12, 1, -58), STROKE)
+        local catPage = NewFrame(RightBox, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+        catPage.Visible = data.active
+        navPages[data.name] = catPage
 
-local UserCard = NewBtn(Sidebar, UDim2.new(1, -16, 0, 44), UDim2.new(0, 8, 1, -52), BG, 1)
-Corner(UserCard, 8)
+        local ref = { btn = btn, sym = sym, lbl = lbl, dot = dot, name = data.name, page = catPage }
+        if data.active then currentNav = ref end
 
-local pfp = Instance.new("ImageLabel")
-pfp.Size = UDim2.new(0, 32, 0, 32)
-pfp.Position = UDim2.new(0, 8, 0.5, -16)
-pfp.BackgroundTransparency = 1
-pfp.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LP.UserId .. "&w=150&h=150"
-Corner(pfp, 16)
-pfp.Parent = UserCard
+        btn.MouseButton1Click:Connect(function()
+            if currentNav == ref then return end
+            if currentNav then
+                Tw(currentNav.btn, 0.13, "Quad", "Out", { BackgroundTransparency = 1 })
+                Tw(currentNav.sym, 0.13, "Quad", "Out", { ImageColor3 = DIM })
+                Tw(currentNav.lbl, 0.13, "Quad", "Out", { TextColor3 = DIM })
+                currentNav.lbl.Font = Enum.Font.Gotham
+                currentNav.dot.Visible = false
+                currentNav.page.Visible = false
+            end
+            Tw(btn, 0.13, "Quad", "Out", { BackgroundTransparency = 0 })
+            Tw(sym, 0.13, "Quad", "Out", { ImageColor3 = ACCENT })
+            Tw(lbl, 0.13, "Quad", "Out", { TextColor3 = ACCENT })
+            lbl.Font = Enum.Font.GothamBold
+            dot.BackgroundColor3 = ACCENT
+            dot.Visible = true
+            catPage.Visible = true
+            currentNav = ref
+        end)
 
-local uLbl = NewLabel(UserCard, "••••••••••", 13, TEXT, true)
-uLbl.Size = UDim2.new(1, -52, 1, 0)
-uLbl.Position = UDim2.new(0, 48, 0, 0)
-
-local censored = true
-UserCard.MouseButton1Click:Connect(function()
-    censored = not censored
-    uLbl.Text = censored and "••••••••••" or LP.Name:lower()
-end)
-
-local function AddCardKeybind(parent, label, default, callback)
-    local row = NewBtn(parent, UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 0), BG, 1)
-    local lbl = NewLabel(row, label, 10, TEXT)
-    lbl.Position = UDim2.new(0, 8, 0, 0)
-    lbl.Size = UDim2.new(1, -74, 1, 0)
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.TextScaled = true
-    local fit = Instance.new("UITextSizeConstraint")
-    fit.MaxTextSize = 11
-    fit.MinTextSize = 8
-    fit.Parent = lbl
-
-    local box = NewFrame(row, UDim2.new(0, 60, 0, 20), UDim2.new(1, -68, 0.5, -10), Color3.fromRGB(45, 45, 55))
-    Corner(box, 4)
-    Stroke(box, STROKE2, 1)
-
-    local bindLbl = NewLabel(box, typeof(default) == "EnumItem" and default.Name or tostring(default), 10, TEXT, false,
-        Enum.TextXAlignment.Center)
-    bindLbl.Size = UDim2.new(1, 0, 1, 0)
-
-    local waiting = false
-    row.MouseButton1Click:Connect(function()
-        if waiting then return end
-        waiting = true
-        bindLbl.Text = "..."
-        Tw(box, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
-        bindLbl.TextColor3 = Color3.new(1, 1, 1)
-
-        local connection
-        connection = UIS.InputBegan:Connect(function(inp)
-            if inp.UserInputType == Enum.UserInputType.Keyboard then
-                waiting = false
-                bindLbl.Text = inp.KeyCode.Name
-                Tw(box, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-                bindLbl.TextColor3 = TEXT
-                callback(inp.KeyCode)
-                connection:Disconnect()
+        btn.MouseEnter:Connect(function()
+            if not (currentNav and currentNav.btn == btn) then
+                Tw(btn, 0.09, "Quad", "Out",
+                    { BackgroundTransparency = 0.8, BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
             end
         end)
-    end)
-    return row
-end
-
-local function AddCardSetting(parent, label, default, callback, keybindDefault, keybindCallback)
-    local row = NewBtn(parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-    Corner(row, 5)
-
-    local checked = default
-    local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-    Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-
-    local check = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-    check.Size = UDim2.new(1, 0, 1, 0); check.Visible = checked
-
-    local rightOffset = (keybindDefault and not IS_MOBILE) and -96 or -38
-    local lbl = NewLabel(row, label, 13, TEXT)
-    lbl.Position = UDim2.new(0, 32, 0, 0); lbl.Size = UDim2.new(1, rightOffset, 1, 0)
-    lbl.TextScaled = true
-    local fit = Instance.new("UITextSizeConstraint")
-    fit.MaxTextSize = 13
-    fit.MinTextSize = 8
-    fit.Parent = lbl
-
-    if keybindDefault and not IS_MOBILE then
-        local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55), 1)
-        kbBox.Name = "KeybindBox"
-        Corner(kbBox, 4)
-        Stroke(kbBox, STROKE2, 1)
-
-        local defName = "None"
-        if keybindDefault then
-            if typeof(keybindDefault) == "EnumItem" then
-                if keybindDefault == Enum.KeyCode.None then
-                    defName = "None"
-                else
-                    defName = keybindDefault.Name
-                end
-            else
-                defName = tostring(keybindDefault)
+        btn.MouseLeave:Connect(function()
+            if not (currentNav and currentNav.btn == btn) then
+                Tw(btn, 0.09, "Quad", "Out",
+                    { BackgroundTransparency = 1, BackgroundColor3 = Color3.fromRGB(30, 30, 38) })
             end
-        end
-        local bindLbl = NewLabel(kbBox, defName, 10, TEXT, false, Enum.TextXAlignment.Center)
-        bindLbl.Name = "BindLabel"
+        end)
+    end
+
+    for i, v in ipairs(NAV_DATA) do MakeNav(v, i) end
+
+    local FootSep = NewFrame(Sidebar, UDim2.new(1, -24, 0, 1), UDim2.new(0, 12, 1, -58), STROKE)
+
+    local UserCard = NewBtn(Sidebar, UDim2.new(1, -16, 0, 44), UDim2.new(0, 8, 1, -52), BG, 1)
+    Corner(UserCard, 8)
+
+    local pfp = Instance.new("ImageLabel")
+    pfp.Size = UDim2.new(0, 32, 0, 32)
+    pfp.Position = UDim2.new(0, 8, 0.5, -16)
+    pfp.BackgroundTransparency = 1
+    pfp.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LP.UserId .. "&w=150&h=150"
+    Corner(pfp, 16)
+    pfp.Parent = UserCard
+
+    local uLbl = NewLabel(UserCard, "••••••••••", 13, TEXT, true)
+    uLbl.Size = UDim2.new(1, -52, 1, 0)
+    uLbl.Position = UDim2.new(0, 48, 0, 0)
+
+    local censored = true
+    UserCard.MouseButton1Click:Connect(function()
+        censored = not censored
+        uLbl.Text = censored and "••••••••••" or LP.Name:lower()
+    end)
+
+    local function AddCardKeybind(parent, label, default, callback)
+        local row = NewBtn(parent, UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 0), BG, 1)
+        local lbl = NewLabel(row, label, 10, TEXT)
+        lbl.Position = UDim2.new(0, 8, 0, 0)
+        lbl.Size = UDim2.new(1, -74, 1, 0)
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.TextScaled = true
+        local fit = Instance.new("UITextSizeConstraint")
+        fit.MaxTextSize = 11
+        fit.MinTextSize = 8
+        fit.Parent = lbl
+
+        local box = NewFrame(row, UDim2.new(0, 60, 0, 20), UDim2.new(1, -68, 0.5, -10), Color3.fromRGB(45, 45, 55))
+        Corner(box, 4)
+        Stroke(box, STROKE2, 1)
+
+        local bindLbl = NewLabel(box, typeof(default) == "EnumItem" and default.Name or tostring(default), 10, TEXT,
+            false,
+            Enum.TextXAlignment.Center)
         bindLbl.Size = UDim2.new(1, 0, 1, 0)
 
         local waiting = false
-        kbBox.MouseButton1Click:Connect(function()
+        row.MouseButton1Click:Connect(function()
             if waiting then return end
             waiting = true
             bindLbl.Text = "..."
-            Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
+            Tw(box, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
             bindLbl.TextColor3 = Color3.new(1, 1, 1)
 
             local connection
             connection = UIS.InputBegan:Connect(function(inp)
                 if inp.UserInputType == Enum.UserInputType.Keyboard then
                     waiting = false
-                    local keyName = inp.KeyCode.Name
-                    bindLbl.Text = keyName
-                    Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                    bindLbl.Text = inp.KeyCode.Name
+                    Tw(box, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
                     bindLbl.TextColor3 = TEXT
-                    keybindCallback(inp.KeyCode)
+                    callback(inp.KeyCode)
                     connection:Disconnect()
                 end
             end)
         end)
+        return row
     end
 
-    local function updateUI()
-        check.Visible = checked
-        Tw(cbBg, 0.1, "Quad", "Out",
-            { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
-    end
+    local function AddCardSetting(parent, label, default, callback, keybindDefault, keybindCallback)
+        local row = NewBtn(parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+        Corner(row, 5)
 
-    row.MouseButton1Click:Connect(function()
-        checked = not checked; updateUI(); callback(checked)
-        NOTIFY(label, checked and "Enabled" or "Disabled", 2)
-    end)
-    row.MouseEnter:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 }) end)
-    row.MouseLeave:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 }) end)
-    updateUI()
-    return row
-end
+        local checked = default
+        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+        Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
 
-local function AddCardSlider(parent, label, min, max, default, callback)
-    local row = NewFrame(parent, UDim2.new(1, 0, 0, 44), UDim2.new(0, 0, 0, 0), PANEL, 1)
-    local top = NewFrame(row, UDim2.new(1, 0, 0, 16), UDim2.new(0, 0, 0, 0), PANEL, 1)
-    local l = NewLabel(top, label, 11, TEXT); l.Size = UDim2.new(0.6, 0, 1, 0)
-    local vLbl = NewLabel(top, tostring(default), 11, TEXT, false, Enum.TextXAlignment.Right)
-    vLbl.Size = UDim2.new(0.4, 0, 1, 0); vLbl.Position = UDim2.new(0.6, 0, 0, 0)
+        local check = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+        check.Size = UDim2.new(1, 0, 1, 0); check.Visible = checked
 
-    local trackH = IS_MOBILE and 30 or 20
-    local track = NewBtn(row, UDim2.new(1, 0, 0, trackH), UDim2.new(0, 0, 0, 22 - (trackH / 2 - 2)), SLBG, 1)
-    local trackBG = NewFrame(track, UDim2.new(1, 0, 0, 4), UDim2.new(0, 0, 0.5, -2), SLBG); Corner(trackBG, 2)
-    trackBG.Name = "TrackBG"
-    local fill = NewFrame(trackBG, UDim2.new((default - min) / (max - min), 0, 1, 0), UDim2.new(0, 0, 0, 0), SLFILL)
-    fill.Name = "Fill"
-    Corner(fill, 2); accentFills[#accentFills + 1] = fill
+        local rightOffset = (keybindDefault and not IS_MOBILE) and -96 or -38
+        local lbl = NewLabel(row, label, 13, TEXT)
+        lbl.Position = UDim2.new(0, 32, 0, 0); lbl.Size = UDim2.new(1, rightOffset, 1, 0)
+        lbl.TextScaled = true
+        local fit = Instance.new("UITextSizeConstraint")
+        fit.MaxTextSize = 13
+        fit.MinTextSize = 8
+        fit.Parent = lbl
 
-    local knobS = IS_MOBILE and 18 or 12
-    local knob = NewFrame(track, UDim2.new(0, knobS, 0, knobS),
-        UDim2.new((default - min) / (max - min), -knobS / 2, 0.5, -knobS / 2), Color3.new(1, 1, 1))
-    knob.Name = "Knob"
-    Corner(knob, knobS / 2)
+        if keybindDefault and not IS_MOBILE then
+            local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55), 1)
+            kbBox.Name = "KeybindBox"
+            Corner(kbBox, 4)
+            Stroke(kbBox, STROKE2, 1)
 
-    local dragging = false
-    local function Update(inputX)
-        local rel = math.clamp((inputX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-        local val = math.floor(min + rel * (max - min))
-        vLbl.Text = tostring(val)
-        Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
-        Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
-        callback(val)
-    end
+            local defName = "None"
+            if keybindDefault then
+                if typeof(keybindDefault) == "EnumItem" then
+                    if keybindDefault == Enum.KeyCode.None then
+                        defName = "None"
+                    else
+                        defName = keybindDefault.Name
+                    end
+                else
+                    defName = tostring(keybindDefault)
+                end
+            end
+            local bindLbl = NewLabel(kbBox, defName, 10, TEXT, false, Enum.TextXAlignment.Center)
+            bindLbl.Name = "BindLabel"
+            bindLbl.Size = UDim2.new(1, 0, 1, 0)
 
-    track.MouseButton1Down:Connect(function() dragging = true end)
-    UIS.InputChanged:Connect(function(inp)
-        if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-            Update(inp.Position.X)
+            local waiting = false
+            kbBox.MouseButton1Click:Connect(function()
+                if waiting then return end
+                waiting = true
+                bindLbl.Text = "..."
+                Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
+                bindLbl.TextColor3 = Color3.new(1, 1, 1)
+
+                local connection
+                connection = UIS.InputBegan:Connect(function(inp)
+                    if inp.UserInputType == Enum.UserInputType.Keyboard then
+                        waiting = false
+                        local keyName = inp.KeyCode.Name
+                        bindLbl.Text = keyName
+                        Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                        bindLbl.TextColor3 = TEXT
+                        keybindCallback(inp.KeyCode)
+                        connection:Disconnect()
+                    end
+                end)
+            end)
         end
-    end)
-    UIS.InputEnded:Connect(function(inp)
-        if dragging and (inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch) then
-            dragging = false; NOTIFY(label, "Set to " .. vLbl.Text, 1.5)
+
+        local function updateUI()
+            check.Visible = checked
+            Tw(cbBg, 0.1, "Quad", "Out",
+                { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
         end
-    end)
-    return row
-end
 
-do
-    local MainPage = navPages["Main"]
-    local M_TAB_H = 44
-    local M_TabBar = NewFrame(MainPage, UDim2.new(1, 0, 0, M_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-    local M_TabSep = NewFrame(MainPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, M_TAB_H), STROKE)
-    local M_Content = NewFrame(MainPage, UDim2.new(1, -20, 1, -(M_TAB_H + 20)), UDim2.new(0, 10, 0, M_TAB_H + 10), BG, 1)
+        row.MouseButton1Click:Connect(function()
+            checked = not checked; updateUI(); callback(checked)
+            NOTIFY(label, checked and "Enabled" or "Disabled", 2)
+        end)
+        row.MouseEnter:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 }) end)
+        row.MouseLeave:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+        updateUI()
+        return row
+    end
 
-    local M_TABS = { "Main" }
-    local mPages = {}
-    local activeMIdx = 1
+    local function AddCardSlider(parent, label, min, max, default, callback)
+        local row = NewFrame(parent, UDim2.new(1, 0, 0, 44), UDim2.new(0, 0, 0, 0), PANEL, 1)
+        local top = NewFrame(row, UDim2.new(1, 0, 0, 16), UDim2.new(0, 0, 0, 0), PANEL, 1)
+        local l = NewLabel(top, label, 11, TEXT); l.Size = UDim2.new(0.6, 0, 1, 0)
+        local vLbl = NewLabel(top, tostring(default), 11, TEXT, false, Enum.TextXAlignment.Right)
+        vLbl.Size = UDim2.new(0.4, 0, 1, 0); vLbl.Position = UDim2.new(0.6, 0, 0, 0)
 
-    for i, name in ipairs(M_TABS) do
-        local tw = 70
-        local tb = NewBtn(M_TabBar, UDim2.new(0, tw, 1, 0), UDim2.new(0, 18, 0, 0), BG, 1)
-        local tl = NewLabel(tb, name, 13, ACCENT, true)
-        tl.Name = "SectionTitle"
-        tl.Size = UDim2.new(1, 0, 1, 0); tl.TextXAlignment = Enum.TextXAlignment.Center
+        local trackH = IS_MOBILE and 30 or 20
+        local track = NewBtn(row, UDim2.new(1, 0, 0, trackH), UDim2.new(0, 0, 0, 22 - (trackH / 2 - 2)), SLBG, 1)
+        local trackBG = NewFrame(track, UDim2.new(1, 0, 0, 4), UDim2.new(0, 0, 0.5, -2), SLBG); Corner(trackBG, 2)
+        trackBG.Name = "TrackBG"
+        local fill = NewFrame(trackBG, UDim2.new((default - min) / (max - min), 0, 1, 0), UDim2.new(0, 0, 0, 0), SLFILL)
+        fill.Name = "Fill"
+        Corner(fill, 2); accentFills[#accentFills + 1] = fill
 
-        local ul = NewFrame(MainPage, UDim2.new(0, tw, 0, 2), UDim2.new(0, 18, 0, M_TAB_H - 2), ACCENT)
-        Corner(ul, 1)
-        table.insert(accentFills, ul)
+        local knobS = IS_MOBILE and 18 or 12
+        local knob = NewFrame(track, UDim2.new(0, knobS, 0, knobS),
+            UDim2.new((default - min) / (max - min), -knobS / 2, 0.5, -knobS / 2), Color3.new(1, 1, 1))
+        knob.Name = "Knob"
+        Corner(knob, knobS / 2)
 
-        local page = NewScroll(M_Content, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-        mPages[i] = page
+        local dragging = false
+        local function Update(inputX)
+            local rel = math.clamp((inputX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+            local val = math.floor(min + rel * (max - min))
+            vLbl.Text = tostring(val)
+            Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
+            Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
+            callback(val)
+        end
 
-        local function IsMatchActive()
+        track.MouseButton1Down:Connect(function() dragging = true end)
+        UIS.InputChanged:Connect(function(inp)
+            if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+                Update(inp.Position.X)
+            end
+        end)
+        UIS.InputEnded:Connect(function(inp)
+            if dragging and (inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch) then
+                dragging = false; NOTIFY(label, "Set to " .. vLbl.Text, 1.5)
+            end
+        end)
+        return row
+    end
 
-            if IsBronxDuels() then
-                local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
-                    LP.Data.Match:FindFirstChild("Enemies")
-                if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
+    do
+        local MainPage = navPages["Main"]
+        local M_TAB_H = 44
+        local M_TabBar = NewFrame(MainPage, UDim2.new(1, 0, 0, M_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
+        local M_TabSep = NewFrame(MainPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, M_TAB_H), STROKE)
+        local M_Content = NewFrame(MainPage, UDim2.new(1, -20, 1, -(M_TAB_H + 20)), UDim2.new(0, 10, 0, M_TAB_H + 10), BG,
+            1)
+
+        local M_TABS = { "Main" }
+        local mPages = {}
+        local activeMIdx = 1
+
+        for i, name in ipairs(M_TABS) do
+            local tw = 70
+            local tb = NewBtn(M_TabBar, UDim2.new(0, tw, 1, 0), UDim2.new(0, 18, 0, 0), BG, 1)
+            local tl = NewLabel(tb, name, 13, ACCENT, true)
+            tl.Name = "SectionTitle"
+            tl.Size = UDim2.new(1, 0, 1, 0); tl.TextXAlignment = Enum.TextXAlignment.Center
+
+            local ul = NewFrame(MainPage, UDim2.new(0, tw, 0, 2), UDim2.new(0, 18, 0, M_TAB_H - 2), ACCENT)
+            Corner(ul, 1)
+            table.insert(accentFills, ul)
+
+            local page = NewScroll(M_Content, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+            mPages[i] = page
+
+            local function IsMatchActive()
+                if IsBronxDuels() then
+                    local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
+                        LP.Data.Match:FindFirstChild("Enemies")
+                    if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
+                        return true
+                    end
+                end
+
+                local myGame = LP:GetAttribute("Game")
+                if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" then
                     return true
                 end
-            end
 
-            local myGame = LP:GetAttribute("Game")
-            if myGame and myGame ~= "nothing" and myGame ~= "" and myGame ~= "Lobby" then
-                return true
-            end
-
-            local runningGames = workspace:FindFirstChild("RunningGames")
-            if runningGames then
-                for _, gameFolder in pairs(runningGames:GetChildren()) do
-                    local alivePlayers = gameFolder:FindFirstChild("AlivePlayers")
-                    if alivePlayers then
-                        for _, teamFolder in pairs(alivePlayers:GetChildren()) do
-                            if teamFolder:FindFirstChild(LP.Name) then return true end
+                local runningGames = workspace:FindFirstChild("RunningGames")
+                if runningGames then
+                    for _, gameFolder in pairs(runningGames:GetChildren()) do
+                        local alivePlayers = gameFolder:FindFirstChild("AlivePlayers")
+                        if alivePlayers then
+                            for _, teamFolder in pairs(alivePlayers:GetChildren()) do
+                                if teamFolder:FindFirstChild(LP.Name) then return true end
+                            end
                         end
                     end
                 end
+                return false
             end
-            return false
-        end
 
-        local function BuildAutoMatchCard()
-            local AMCard = NewFrame(page, UDim2.new(0.46, 0, 0, 110), UDim2.new(0, 1, 0, 3), PANEL)
-            Corner(AMCard, 8); Stroke(AMCard, STROKE, 1)
+            local function BuildAutoMatchCard()
+                local AMCard = NewFrame(page, UDim2.new(0.46, 0, 0, 110), UDim2.new(0, 1, 0, 3), PANEL)
+                Corner(AMCard, 8); Stroke(AMCard, STROKE, 1)
 
-            local AMTitle = NewLabel(AMCard, "Auto Matchmaking", 13, TEXT, true)
-            AMTitle.Size = UDim2.new(1, 0, 0, 30); AMTitle.TextXAlignment = Enum.TextXAlignment.Center
+                local AMTitle = NewLabel(AMCard, "Auto Matchmaking", 13, TEXT, true)
+                AMTitle.Size = UDim2.new(1, 0, 0, 30); AMTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            local AMHolder = NewFrame(AMCard, UDim2.new(1, -16, 0, 70), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            Instance.new("UIListLayout", AMHolder).Padding = UDim.new(0, 4)
+                local AMHolder = NewFrame(AMCard, UDim2.new(1, -16, 0, 70), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                Instance.new("UIListLayout", AMHolder).Padding = UDim.new(0, 4)
 
-            getgenv().AM_IGNORING = false
-            local lastMatch = 0
-            getgenv().Flux_RequestMatch = function()
-                if tick() - lastMatch < 1 then return end
-                lastMatch = tick()
-
-                getgenv().AM_IGNORING = true
-                local Event = game:GetService("ReplicatedStorage").Packages.Networking["RE/Matchmaking/Matchmaking"]
-                if Event then
-                    Event:FireServer("cancel")
-                    task.wait(0.5)
-                    Event:FireServer("play", { mode = getgenv().AM_CFG.Mode })
-                end
-                task.wait(1)
                 getgenv().AM_IGNORING = false
-            end
+                local lastMatch = 0
+                getgenv().Flux_RequestMatch = function()
+                    if tick() - lastMatch < 1 then return end
+                    lastMatch = tick()
 
-            local ddRow = NewFrame(AMHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            local dd = AddDropdown(ddRow, { "1v1", "2v2", "3v3" }, getgenv().AM_CFG.Mode, function(v)
-                getgenv().AM_CFG.Mode = v
-                if getgenv().AM_CFG.Enabled then getgenv().Flux_RequestMatch() end
-            end)
-            dd.Size = UDim2.new(1, 0, 1, 0)
-
-            local row = NewBtn(AMHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(row, 5)
-            local checked = getgenv().AM_CFG.Enabled
-            local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-            local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
-            local rowLbl = NewLabel(row, "Enable Auto Match", 13, TEXT)
-            rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
-
-            local function ToggleState(state, silent)
-                if state ~= nil then checked = state else checked = not checked end
-                getgenv().AM_CFG.Enabled = checked; cbCheck.Visible = checked
-                Tw(cbBg, 0.1, "Quad", "Out",
-                    { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
-                if not silent and checked then getgenv().Flux_RequestMatch() end
-            end
-
-            row.MouseButton1Click:Connect(function()
-                if IsMatchActive() or IsMurderVsSheriffArena() then
-                    NOTIFY("Matchmaking", "Already in a match!", 3)
-                    return
+                    getgenv().AM_IGNORING = true
+                    local Event = game:GetService("ReplicatedStorage").Packages.Networking["RE/Matchmaking/Matchmaking"]
+                    if Event then
+                        Event:FireServer("cancel")
+                        task.wait(0.5)
+                        Event:FireServer("play", { mode = getgenv().AM_CFG.Mode })
+                    end
+                    task.wait(1)
+                    getgenv().AM_IGNORING = false
                 end
-                ToggleState()
-            end)
-            row.MouseEnter:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
-            end)
-            row.MouseLeave:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
-            end)
 
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                local ns = getgenv().AM_CFG.Enabled
-                if ns == nil then ns = checked end
-                ToggleState(ns, true)
-            end)
+                local ddRow = NewFrame(AMHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                local dd = AddDropdown(ddRow, { "1v1", "2v2", "3v3" }, getgenv().AM_CFG.Mode, function(v)
+                    getgenv().AM_CFG.Mode = v
+                    if getgenv().AM_CFG.Enabled then getgenv().Flux_RequestMatch() end
+                end)
+                dd.Size = UDim2.new(1, 0, 1, 0)
 
-            if not getgenv().AM_HOOKED then
-                getgenv().AM_HOOKED = true
-                local oldNS
-                oldNS = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
-                    local args = { ... }
-                    if not getgenv().AM_IGNORING and typeof(self) == "Instance" and self.Name == "Matchmaking" and args[1] == "cancel" then
-                        if getgenv().AM_CFG and getgenv().AM_CFG.Enabled then
-                            task.spawn(function()
-                                task.wait(1)
-                                if getgenv().AM_CFG.Enabled and getgenv().Flux_RequestMatch then
-                                    getgenv().Flux_RequestMatch()
-                                end
+                local row = NewBtn(AMHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                Corner(row, 5)
+                local checked = getgenv().AM_CFG.Enabled
+                local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+                Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
+                local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
+                local rowLbl = NewLabel(row, "Enable Auto Match", 13, TEXT)
+                rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
+
+                local function ToggleState(state, silent)
+                    if state ~= nil then checked = state else checked = not checked end
+                    getgenv().AM_CFG.Enabled = checked; cbCheck.Visible = checked
+                    Tw(cbBg, 0.1, "Quad", "Out",
+                        { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
+                    if not silent and checked then getgenv().Flux_RequestMatch() end
+                end
+
+                row.MouseButton1Click:Connect(function()
+                    if IsMatchActive() or IsMurderVsSheriffArena() then
+                        NOTIFY("Matchmaking", "Already in a match!", 3)
+                        return
+                    end
+                    ToggleState()
+                end)
+                row.MouseEnter:Connect(function()
+                    Tw(row, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+                end)
+                row.MouseLeave:Connect(function()
+                    Tw(row, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                end)
+
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    local ns = getgenv().AM_CFG.Enabled
+                    if ns == nil then ns = checked end
+                    ToggleState(ns, true)
+                end)
+
+                if not getgenv().AM_HOOKED then
+                    getgenv().AM_HOOKED = true
+                    local oldNS
+                    oldNS = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
+                        local args = { ... }
+                        if not getgenv().AM_IGNORING and typeof(self) == "Instance" and self.Name == "Matchmaking" and args[1] == "cancel" then
+                            if getgenv().AM_CFG and getgenv().AM_CFG.Enabled then
+                                task.spawn(function()
+                                    task.wait(1)
+                                    if getgenv().AM_CFG.Enabled and getgenv().Flux_RequestMatch then
+                                        getgenv().Flux_RequestMatch()
+                                    end
+                                end)
+                            end
+                        end
+                        return oldNS(self, ...)
+                    end)
+                end
+            end
+            local function BuildEquipEmoteCard()
+                local EmoteCard = NewFrame(page, UDim2.new(0.52, -4, 0, 160), UDim2.new(0.48, 1, 0, 3), PANEL)
+                Corner(EmoteCard, 8); Stroke(EmoteCard, STROKE, 1)
+
+                local EmoteTitle = NewLabel(EmoteCard, "Equip Emote", 13, TEXT, true)
+                EmoteTitle.Size = UDim2.new(1, 0, 0, 30); EmoteTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local EmoteHolder = NewFrame(EmoteCard, UDim2.new(1, -16, 0, 110), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local list = Instance.new("UIListLayout", EmoteHolder)
+                list.Padding = UDim.new(0, 6)
+                list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                list.SortOrder = Enum.SortOrder.LayoutOrder
+
+                local emotes = {
+                    "20 min", "are you glad", "bad habit", "bang", "bhop", "billy bounce", "boogie down",
+                    "brazilian funk", "bunny", "chinese dance", "competent", "confess", "doodle", "dougie",
+                    "druski", "empty out our pockets", "excuse me sir", "flawless", "griddy", "gucci flip flap",
+                    "hope", "jester", "jumpStyle", "just wanna rock", "legacy", "low cortisol", "lush life",
+                    "matrix", "meant", "metro man", "miss the rage", "money so big", "msg", "no hands",
+                    "no the moon", "rat dance", "rather lie", "riot", "sigma walk", "snoops walk", "so nervy",
+                    "stephanie", "take the l", "teeth", "tiki tiki", "unlock it", "we can go up", "wiggle", "yara aura"
+                }
+                local slots = { "Slot: 1", "Slot: 2", "Slot: 3", "Slot: 4", "Slot: 5", "Slot: 6", "Slot: 7", "Slot: 8" }
+
+                local selectedEmote = emotes[1]
+                local selectedSlot = "Slot: 1"
+
+                local emoteDd = AddDropdown(EmoteHolder, emotes, selectedEmote, function(v)
+                    selectedEmote = v
+                end)
+                emoteDd.LayoutOrder = 1
+
+                local slotDd = AddDropdown(EmoteHolder, slots, selectedSlot, function(v)
+                    selectedSlot = v
+                end)
+                slotDd.LayoutOrder = 2
+
+                local btnContainer = NewFrame(EmoteHolder, UDim2.new(1, 0, 0, 32), UDim2.new(0, 0, 0, 0),
+                    Color3.fromRGB(0, 0, 0), 1)
+                btnContainer.LayoutOrder = 3
+                btnContainer.BackgroundTransparency = 1
+
+                local equipBtn = NewBtn(btnContainer, UDim2.new(0.5, -4, 1, 0), UDim2.new(0, 0, 0, 0),
+                    Color3.fromRGB(36, 36, 48))
+                Corner(equipBtn, 6)
+                Stroke(equipBtn, STROKE2, 1)
+                local btnLbl = NewLabel(equipBtn, "Equip", 11, TEXT, false, Enum.TextXAlignment.Center)
+                btnLbl.Size = UDim2.new(1, 0, 1, 0)
+
+                local playBtn = NewBtn(btnContainer, UDim2.new(0.5, -4, 1, 0), UDim2.new(0.5, 4, 0, 0),
+                    Color3.fromRGB(36, 36, 48))
+                Corner(playBtn, 6)
+                Stroke(playBtn, STROKE2, 1)
+                local playLbl = NewLabel(playBtn, "Play", 11, TEXT, false, Enum.TextXAlignment.Center)
+                playLbl.Size = UDim2.new(1, 0, 1, 0)
+
+                equipBtn.MouseButton1Click:Connect(function()
+                    pcall(function()
+                        local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events")
+                        if Event and Event:FindFirstChild("Emotes") then
+                            local slotNum = selectedSlot:match("%d+")
+                            Event.Emotes:FireServer("EquipEmote", slotNum, selectedEmote)
+                            NOTIFY("Equip Emote", "Equipped " .. selectedEmote .. " to slot " .. slotNum, 2)
+                        end
+                    end)
+                end)
+
+                equipBtn.MouseEnter:Connect(function()
+                    Tw(equipBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                end)
+                equipBtn.MouseLeave:Connect(function()
+                    Tw(equipBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+                end)
+
+                playBtn.MouseButton1Click:Connect(function()
+                    pcall(function()
+                        local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events")
+                        if Event and Event:FindFirstChild("Emotes") then
+                            Event.Emotes:FireServer("playEmote", selectedEmote)
+                            NOTIFY("Play Emote", "Playing " .. selectedEmote, 2)
+                        end
+                    end)
+                end)
+
+                playBtn.MouseEnter:Connect(function()
+                    Tw(playBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                end)
+                playBtn.MouseLeave:Connect(function()
+                    Tw(playBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+                end)
+            end
+
+            local function BuildKillSoundCard()
+                local KSCard = NewFrame(page, UDim2.new(0.52, -4, 0, 220), UDim2.new(0.48, 1, 0, 170), PANEL)
+                Corner(KSCard, 8); Stroke(KSCard, STROKE, 1)
+
+                local KSTitle = NewLabel(KSCard, "Custom Kill Sound", 13, TEXT, true)
+                KSTitle.Size = UDim2.new(1, 0, 0, 30); KSTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local KSHolder = NewFrame(KSCard, UDim2.new(1, -16, 0, 180), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local list = Instance.new("UIListLayout", KSHolder)
+                list.Padding = UDim.new(0, 6)
+                list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                list.SortOrder = Enum.SortOrder.LayoutOrder
+
+                local toggleRow = AddCardSetting(KSHolder, "Enable Custom Sound", getgenv().WORLD_CFG.KillSoundEnabled,
+                    function(v)
+                        getgenv().WORLD_CFG.KillSoundEnabled = v
+                        SaveUI()
+                    end)
+                toggleRow.LayoutOrder = 1
+
+                local tbWrap = NewFrame(KSHolder, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
+                tbWrap.LayoutOrder = 2
+                Corner(tbWrap, 5)
+                Stroke(tbWrap, STROKE2, 1)
+
+                local idTextBox = Instance.new("TextBox")
+                idTextBox.Size = UDim2.new(1, -16, 1, 0)
+                idTextBox.Position = UDim2.new(0, 8, 0, 0)
+                idTextBox.BackgroundTransparency = 1
+                idTextBox.BorderSizePixel = 0
+                idTextBox.TextColor3 = TEXT
+                idTextBox.PlaceholderColor3 = DIM
+                idTextBox.PlaceholderText = "Roblox Sound ID..."
+                idTextBox.Text = tostring(getgenv().WORLD_CFG.KillSoundId)
+                idTextBox.TextSize = 11
+                idTextBox.Font = Enum.Font.Gotham
+                idTextBox.ClearTextOnFocus = false
+                idTextBox.Parent = tbWrap
+
+                idTextBox.FocusLost:Connect(function()
+                    local txt = idTextBox.Text:gsub("%D", "")
+                    getgenv().WORLD_CFG.KillSoundId = txt
+                    idTextBox.Text = txt
+                    SaveUI()
+                end)
+
+                local volSlider = AddCardSlider(KSHolder, "Sound Volume", 0, 200, getgenv().WORLD_CFG.KillSoundVolume,
+                    function(v)
+                        getgenv().WORLD_CFG.KillSoundVolume = v
+                        SaveUI()
+                    end)
+                volSlider.LayoutOrder = 3
+
+                local testBtn = NewBtn(KSHolder, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(36, 36, 48))
+                testBtn.LayoutOrder = 4
+                Corner(testBtn, 6)
+                Stroke(testBtn, STROKE2, 1)
+                local testLbl = NewLabel(testBtn, "Test Sound", 11, TEXT, false, Enum.TextXAlignment.Center)
+                testLbl.Size = UDim2.new(1, 0, 1, 0)
+
+                testBtn.MouseButton1Click:Connect(function()
+                    pcall(function()
+                        local rawId = idTextBox.Text:gsub("%D", "")
+                        if rawId ~= "" then
+                            local sound = Instance.new("Sound")
+                            sound.SoundId = "rbxassetid://" .. rawId
+                            sound.Volume = (getgenv().WORLD_CFG.KillSoundVolume or 100) / 100
+                            sound.Parent = game:GetService("SoundService")
+                            sound:Play()
+                            sound.Ended:Once(function()
+                                sound:Destroy()
+                            end)
+                            task.delay(10, function()
+                                if sound and sound.Parent then sound:Destroy() end
                             end)
                         end
-                    end
-                    return oldNS(self, ...)
-                end)
-            end
-        end
-        local function BuildEquipEmoteCard()
-            local EmoteCard = NewFrame(page, UDim2.new(0.52, -4, 0, 160), UDim2.new(0.48, 1, 0, 3), PANEL)
-            Corner(EmoteCard, 8); Stroke(EmoteCard, STROKE, 1)
-
-            local EmoteTitle = NewLabel(EmoteCard, "Equip Emote", 13, TEXT, true)
-            EmoteTitle.Size = UDim2.new(1, 0, 0, 30); EmoteTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local EmoteHolder = NewFrame(EmoteCard, UDim2.new(1, -16, 0, 110), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local list = Instance.new("UIListLayout", EmoteHolder)
-            list.Padding = UDim.new(0, 6)
-            list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-            list.SortOrder = Enum.SortOrder.LayoutOrder
-
-            local emotes = {
-                "20 min", "are you glad", "bad habit", "bang", "bhop", "billy bounce", "boogie down",
-                "brazilian funk", "bunny", "chinese dance", "competent", "confess", "doodle", "dougie",
-                "druski", "empty out our pockets", "excuse me sir", "flawless", "griddy", "gucci flip flap",
-                "hope", "jester", "jumpStyle", "just wanna rock", "legacy", "low cortisol", "lush life",
-                "matrix", "meant", "metro man", "miss the rage", "money so big", "msg", "no hands",
-                "no the moon", "rat dance", "rather lie", "riot", "sigma walk", "snoops walk", "so nervy",
-                "stephanie", "take the l", "tiki tiki", "unlock it", "we can go up", "wiggle", "yara aura","beretta","dont you wanna dance","life goes on",
-				"look at me","misery","out the way","peep","tylil dance","unhappy"
-            }
-            local slots = { "Slot: 1", "Slot: 2", "Slot: 3", "Slot: 4", "Slot: 5", "Slot: 6", "Slot: 7", "Slot: 8" }
-
-            local selectedEmote = emotes[1]
-            local selectedSlot = "Slot: 1"
-
-            local emoteDd = AddDropdown(EmoteHolder, emotes, selectedEmote, function(v)
-                selectedEmote = v
-            end)
-            emoteDd.LayoutOrder = 1
-
-            local slotDd = AddDropdown(EmoteHolder, slots, selectedSlot, function(v)
-                selectedSlot = v
-            end)
-            slotDd.LayoutOrder = 2
-
-            local btnContainer = NewFrame(EmoteHolder, UDim2.new(1, 0, 0, 32), UDim2.new(0, 0, 0, 0),
-                Color3.fromRGB(0, 0, 0), 1)
-            btnContainer.LayoutOrder = 3
-            btnContainer.BackgroundTransparency = 1
-
-            local equipBtn = NewBtn(btnContainer, UDim2.new(0.5, -4, 1, 0), UDim2.new(0, 0, 0, 0),
-                Color3.fromRGB(36, 36, 48))
-            Corner(equipBtn, 6)
-            Stroke(equipBtn, STROKE2, 1)
-            local btnLbl = NewLabel(equipBtn, "Equip", 11, TEXT, false, Enum.TextXAlignment.Center)
-            btnLbl.Size = UDim2.new(1, 0, 1, 0)
-
-            local playBtn = NewBtn(btnContainer, UDim2.new(0.5, -4, 1, 0), UDim2.new(0.5, 4, 0, 0),
-                Color3.fromRGB(36, 36, 48))
-            Corner(playBtn, 6)
-            Stroke(playBtn, STROKE2, 1)
-            local playLbl = NewLabel(playBtn, "Play", 11, TEXT, false, Enum.TextXAlignment.Center)
-            playLbl.Size = UDim2.new(1, 0, 1, 0)
-
-            equipBtn.MouseButton1Click:Connect(function()
-                pcall(function()
-                    local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events")
-                    if Event and Event:FindFirstChild("Emotes") then
-                        local slotNum = selectedSlot:match("%d+")
-                        Event.Emotes:FireServer("EquipEmote", slotNum, selectedEmote)
-                        NOTIFY("Equip Emote", "Equipped " .. selectedEmote .. " to slot " .. slotNum, 2)
-                    end
-                end)
-            end)
-
-            equipBtn.MouseEnter:Connect(function()
-                Tw(equipBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-            end)
-            equipBtn.MouseLeave:Connect(function()
-                Tw(equipBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-            end)
-
-            playBtn.MouseButton1Click:Connect(function()
-                pcall(function()
-                    local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events")
-                    if Event and Event:FindFirstChild("Emotes") then
-                        Event.Emotes:FireServer("playEmote", selectedEmote)
-                        NOTIFY("Play Emote", "Playing " .. selectedEmote, 2)
-                    end
-                end)
-            end)
-
-            playBtn.MouseEnter:Connect(function()
-                Tw(playBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-            end)
-            playBtn.MouseLeave:Connect(function()
-                Tw(playBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-            end)
-        end
-
-        local function BuildKillSoundCard()
-            local KSCard = NewFrame(page, UDim2.new(0.52, -4, 0, 220), UDim2.new(0.48, 1, 0, 170), PANEL)
-            Corner(KSCard, 8); Stroke(KSCard, STROKE, 1)
-
-            local KSTitle = NewLabel(KSCard, "Custom Kill Sound", 13, TEXT, true)
-            KSTitle.Size = UDim2.new(1, 0, 0, 30); KSTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local KSHolder = NewFrame(KSCard, UDim2.new(1, -16, 0, 180), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local list = Instance.new("UIListLayout", KSHolder)
-            list.Padding = UDim.new(0, 6)
-            list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-            list.SortOrder = Enum.SortOrder.LayoutOrder
-
-            local toggleRow = AddCardSetting(KSHolder, "Enable Custom Sound", getgenv().WORLD_CFG.KillSoundEnabled, function(v)
-                getgenv().WORLD_CFG.KillSoundEnabled = v
-                SaveUI()
-            end)
-            toggleRow.LayoutOrder = 1
-
-            local tbWrap = NewFrame(KSHolder, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
-            tbWrap.LayoutOrder = 2
-            Corner(tbWrap, 5)
-            Stroke(tbWrap, STROKE2, 1)
-
-            local idTextBox = Instance.new("TextBox")
-            idTextBox.Size = UDim2.new(1, -16, 1, 0)
-            idTextBox.Position = UDim2.new(0, 8, 0, 0)
-            idTextBox.BackgroundTransparency = 1
-            idTextBox.BorderSizePixel = 0
-            idTextBox.TextColor3 = TEXT
-            idTextBox.PlaceholderColor3 = DIM
-            idTextBox.PlaceholderText = "Roblox Sound ID..."
-            idTextBox.Text = tostring(getgenv().WORLD_CFG.KillSoundId)
-            idTextBox.TextSize = 11
-            idTextBox.Font = Enum.Font.Gotham
-            idTextBox.ClearTextOnFocus = false
-            idTextBox.Parent = tbWrap
-
-            idTextBox.FocusLost:Connect(function()
-                local txt = idTextBox.Text:gsub("%D", "")
-                getgenv().WORLD_CFG.KillSoundId = txt
-                idTextBox.Text = txt
-                SaveUI()
-            end)
-
-            local volSlider = AddCardSlider(KSHolder, "Sound Volume", 0, 200, getgenv().WORLD_CFG.KillSoundVolume, function(v)
-                getgenv().WORLD_CFG.KillSoundVolume = v
-                SaveUI()
-            end)
-            volSlider.LayoutOrder = 3
-
-            local testBtn = NewBtn(KSHolder, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(36, 36, 48))
-            testBtn.LayoutOrder = 4
-            Corner(testBtn, 6)
-            Stroke(testBtn, STROKE2, 1)
-            local testLbl = NewLabel(testBtn, "Test Sound", 11, TEXT, false, Enum.TextXAlignment.Center)
-            testLbl.Size = UDim2.new(1, 0, 1, 0)
-
-            testBtn.MouseButton1Click:Connect(function()
-                pcall(function()
-                    local rawId = idTextBox.Text:gsub("%D", "")
-                    if rawId ~= "" then
-                        local sound = Instance.new("Sound")
-                        sound.SoundId = "rbxassetid://" .. rawId
-                        sound.Volume = (getgenv().WORLD_CFG.KillSoundVolume or 100) / 100
-                        sound.Parent = game:GetService("SoundService")
-                        sound:Play()
-                        sound.Ended:Once(function()
-                            sound:Destroy()
-                        end)
-                        task.delay(10, function()
-                            if sound and sound.Parent then sound:Destroy() end
-                        end)
-                    end
-                end)
-            end)
-
-            testBtn.MouseEnter:Connect(function()
-                Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-            end)
-            testBtn.MouseLeave:Connect(function()
-                Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-            end)
-
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                if not KSCard or not KSCard.Parent then return end
-                local active = getgenv().WORLD_CFG.KillSoundEnabled
-                local cbBg = toggleRow:FindFirstChildOfClass("Frame")
-                local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                if cbCheck then cbCheck.Visible = active end
-                if cbBg then
-                    cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                end
-                idTextBox.Text = tostring(getgenv().WORLD_CFG.KillSoundId)
-
-                local volVal = getgenv().WORLD_CFG.KillSoundVolume or 100
-                local topFrame = volSlider:FindFirstChildOfClass("Frame")
-                if topFrame then
-                    for _, child in ipairs(topFrame:GetChildren()) do
-                        if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
-                            child.Text = tostring(volVal)
-                        end
-                    end
-                end
-                local trackBtn = volSlider:FindFirstChildOfClass("TextButton")
-                local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
-                local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
-                local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
-                if fillFrame and knobFrame then
-                    local rel = math.clamp(volVal / 200, 0, 1)
-                    fillFrame.Size = UDim2.new(rel, 0, 1, 0)
-                    local knobS = IS_MOBILE and 18 or 12
-                    knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
-                end
-            end)
-        end
-
-        local function BuildAutoCollectHatsCard()
-            local ACCard = NewFrame(page, UDim2.new(0.52, -4, 0, 110), UDim2.new(0.48, 1, 0, 3), PANEL)
-            Corner(ACCard, 8); Stroke(ACCard, STROKE, 1)
-
-            local ACTitle = NewLabel(ACCard, "Auto Collect Coconut", 13, TEXT, true)
-            ACTitle.Size = UDim2.new(1, 0, 0, 30); ACTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local ACHolder = NewFrame(ACCard, UDim2.new(1, -16, 0, 34), UDim2.new(0, 8, 0, 32), PANEL, 1)
-
-            local row = NewBtn(ACHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(row, 5)
-
-            local active = false
-            local usedThisMatch = false
-
-            local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-            local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = false
-
-            local rowLbl = NewLabel(row, "Collect Now", 13, TEXT)
-            rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
-
-            row.MouseButton1Click:Connect(function()
-                if not IsMatchActive() and IsMurderVsSheriffLobby() then
-                    NOTIFY("Auto Collect", "Only available in a match!", 3)
-                    return
-                end
-
-                if usedThisMatch then
-                    NOTIFY("Auto Collect", "Already used this match!", 3)
-                    return
-                end
-
-                active = true; usedThisMatch = true
-                cbCheck.Visible = true; rowLbl.Text = "Collecting..."
-
-                task.spawn(function()
-                    local Event = game:GetService("ReplicatedStorage").Packages.Networking
-                        ["RE/Events/CollectEventSpawnable"]
-                    local gui = LP:FindFirstChild("PlayerGui") and LP.PlayerGui:FindFirstChild("Main")
-                    local currency = gui and gui:FindFirstChild("MainButtonsGui") and
-                        gui.MainButtonsGui:FindFirstChild("EventCurrency")
-
-                    local lastVal = currency and currency.Text or ""
-                    local noChangeCount = 0
-
-                    for i = 1, 100 do
-                        if not active then break end
-                        Event:FireServer()
-                        task.wait(0.03)
-
-                        local currentVal = currency and currency.Text or ""
-                        if currentVal ~= lastVal then
-                            lastVal = currentVal; noChangeCount = 0
-                        else
-                            noChangeCount = noChangeCount + 1
-                        end
-
-                        if i > 20 and noChangeCount > 15 then break end
-                    end
-
-                    active = false; cbCheck.Visible = false
-                    rowLbl.Text = "Collect (Locked)"; rowLbl.TextColor3 = DIM
-                    row.AutoButtonColor = false
-                    NOTIFY("Auto Collect", "Finished collecting!", 3)
-                end)
-            end)
-            row.MouseEnter:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
-            end)
-            row.MouseLeave:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
-            end)
-
-            task.spawn(function()
-                local wasInMatch = false
-                while task.wait(2) do
-                    if getgenv().FLUX_SESSION ~= MySession then break end
-                    local nowInMatch = IsMatchActive()
-                    if nowInMatch and not wasInMatch then
-                        usedThisMatch = false
-                        rowLbl.Text = "Collect Now"
-                        rowLbl.TextColor3 = TEXT
-                        row.AutoButtonColor = true
-                    end
-                    wasInMatch = nowInMatch
-                end
-            end)
-        end
-        local function BuildAutoCollectCoconutsCard()
-            local ACCard = NewFrame(page, UDim2.new(0.52, -4, 0, 80), UDim2.new(0.48, 1, 0, 3), PANEL)
-            Corner(ACCard, 8); Stroke(ACCard, STROKE, 1)
-
-            local ACTitle = NewLabel(ACCard, "Auto Collect Eggs", 13, TEXT, true)
-            ACTitle.Size = UDim2.new(1, 0, 0, 30); ACTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local ACHolder = NewFrame(ACCard, UDim2.new(1, -16, 0, 34), UDim2.new(0, 8, 0, 32), PANEL, 1)
-
-            local row = NewBtn(ACHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(row, 5)
-
-            local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-            local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = false
-
-            local rowLbl = NewLabel(row, "Enable Auto Collect", 13, TEXT)
-            rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
-
-            local autoCollectEnabled = false
-            local addedConn = nil
-            local spawnConn = nil
-
-            row.MouseButton1Click:Connect(function()
-                autoCollectEnabled = not autoCollectEnabled
-                cbCheck.Visible = autoCollectEnabled
-                Tw(cbBg, 0.1, "Quad", "Out",
-                    { BackgroundColor3 = autoCollectEnabled and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
-
-                if autoCollectEnabled then
-                    task.spawn(function()
-                        local droppables = workspace:WaitForChild("IgnoreThese"):WaitForChild("Pickups"):WaitForChild(
-                            "Droppables")
-
-                        local function touchEgg(part)
-                            if not autoCollectEnabled then return end
-                            local lp = game:GetService("Players").LocalPlayer
-                            local char = lp.Character or lp.CharacterAdded:Wait()
-                            local hrp = char:WaitForChild("HumanoidRootPart")
-                            if not hrp then return end
-                            pcall(firetouchinterest, hrp, part, 0)
-                            task.wait(0.1)
-                            pcall(firetouchinterest, hrp, part, 1)
-                        end
-
-                        local function collectAll()
-                            if not autoCollectEnabled then return end
-                            for _, child in ipairs(droppables:GetChildren()) do
-                                if child.Name:match("^Egg") then
-                                    task.spawn(touchEgg, child)
-                                end
-                            end
-                        end
-
-                        addedConn = droppables.ChildAdded:Connect(function(child)
-                            if child.Name:match("^Egg") then
-                                task.spawn(touchEgg, child)
-                            end
-                        end)
-
-                        local lp = game:GetService("Players").LocalPlayer
-                        spawnConn = lp.CharacterAdded:Connect(function()
-                            task.wait(1)
-                            collectAll()
-                        end)
-
-                        collectAll()
                     end)
-                else
-                    if addedConn then
-                        addedConn:Disconnect(); addedConn = nil
-                    end
-                    if spawnConn then
-                        spawnConn:Disconnect(); spawnConn = nil
-                    end
-                end
-            end)
-
-            row.MouseEnter:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
-            end)
-            row.MouseLeave:Connect(function()
-                Tw(row, 0.1, "Quad", "Out",
-                    { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
-            end)
-        end
-
-        local function BuildRollbackDupeCard()
-            local RDCard = NewFrame(page, UDim2.new(0.46, 0, 0, 80), UDim2.new(0, 1, 0, 353), PANEL)
-            Corner(RDCard, 8); Stroke(RDCard, STROKE, 1)
-
-            local RDTitle = NewLabel(RDCard, "Rollback Dupe", 13, TEXT, true)
-            RDTitle.Size = UDim2.new(1, 0, 0, 30); RDTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local RDHolder = NewFrame(RDCard, UDim2.new(1, -16, 0, 40), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local executeBtn = NewBtn(RDHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(36, 36, 48))
-            Corner(executeBtn, 6); Stroke(executeBtn, STROKE2, 1)
-
-            local executeLbl = NewLabel(executeBtn, "Execute Rollback", 11, TEXT, true, Enum.TextXAlignment.Center)
-            executeLbl.Size = UDim2.new(1, 0, 1, 0)
-
-            executeBtn.MouseButton1Click:Connect(function()
-                pcall(function()
-                    local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
-                        game:GetService("ReplicatedStorage").Events:FindFirstChild("HUD") and
-                        game:GetService("ReplicatedStorage").Events.HUD:FindFirstChild("Settings")
-                    if Event then
-                        Event:FireServer("CrosshairID", "\xED\xBE\x8C", "Crosshair")
-                        NOTIFY("Rollback Dupe", "Rollback event fired!", 3)
-                    else
-                        NOTIFY("Rollback Dupe", "Settings event not found!", 3)
-                    end
                 end)
-            end)
 
-            executeBtn.MouseEnter:Connect(function()
-                Tw(executeBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-            end)
-            executeBtn.MouseLeave:Connect(function()
-                Tw(executeBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-            end)
-        end
-
-        local function BuildLocalPlayerCard()
-            local yPos = 3
-            local LPCardHeight = 160
-            local LPHolderHeight = 120
-
-            if IsMurderVsSheriff() then
-                yPos = 123
-                LPCardHeight = 240
-                LPHolderHeight = 200
-            elseif IsHitmark() then
-                yPos = 3
-                LPCardHeight = 380
-                LPHolderHeight = 340
-            elseif IsDuelist() then
-                yPos = 3
-                LPCardHeight = 340
-                LPHolderHeight = 300
-            end
-
-            local LPCard = NewFrame(page, UDim2.new(0.46, 0, 0, LPCardHeight), UDim2.new(0, 1, 0, yPos), PANEL)
-            Corner(LPCard, 8); Stroke(LPCard, STROKE, 1)
-
-            local LPTitle = NewLabel(LPCard, "Local Player", 13, TEXT, true)
-            LPTitle.Size = UDim2.new(1, 0, 0, 30); LPTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local LPHolder = NewFrame(LPCard, UDim2.new(1, -16, 0, LPHolderHeight), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local list = Instance.new("UIListLayout", LPHolder)
-            list.Padding = UDim.new(0, 4)
-            list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-            list.SortOrder = Enum.SortOrder.LayoutOrder
-
-            local speedCheck, speedSlider
-            if IsMurderVsSheriff() or IsDuelist() then
-                speedCheck = AddCardSetting(LPHolder, "Speed Boost", getgenv().LOCAL_PLAYER_CFG.SpeedEnabled, function(v)
-                    getgenv().LOCAL_PLAYER_CFG.SpeedEnabled = v
-                    local char = LP.Character
-                    local hum = char and char:FindFirstChildOfClass("Humanoid")
-                    if hum and not v then
-                        if IsDuelist() then
-                            hum:SetAttribute("ForceSpeed", nil)
-                        else
-                            hum.WalkSpeed = 16
-                        end
-                    end
-                end, getgenv().LOCAL_PLAYER_CFG.SpeedKey, function(k)
-                    getgenv().LOCAL_PLAYER_CFG.SpeedKey = k.Name
+                testBtn.MouseEnter:Connect(function()
+                    Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
                 end)
-                speedCheck.LayoutOrder = 1
-
-                speedSlider = AddCardSlider(LPHolder, "Walk Speed", 16, 40, getgenv().LOCAL_PLAYER_CFG.Speed, function(v)
-                    getgenv().LOCAL_PLAYER_CFG.Speed = v
+                testBtn.MouseLeave:Connect(function()
+                    Tw(testBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
                 end)
-                speedSlider.LayoutOrder = 2
-            end
 
-            local flyCheck = AddCardSetting(LPHolder, "Player Fly", getgenv().LOCAL_PLAYER_CFG.FlyEnabled, function(v)
-                getgenv().LOCAL_PLAYER_CFG.FlyEnabled = v
-            end, getgenv().LOCAL_PLAYER_CFG.FlyKey, function(k)
-                getgenv().LOCAL_PLAYER_CFG.FlyKey = k.Name
-            end)
-            flyCheck.LayoutOrder = 3
-
-            local flySlider = AddCardSlider(LPHolder, "Fly Speed", 0, 1000, getgenv().LOCAL_PLAYER_CFG.FlySpeed, function(v)
-                getgenv().LOCAL_PLAYER_CFG.FlySpeed = v
-            end)
-            flySlider.LayoutOrder = 4
-
-            local invisCheck
-            if not IsBronxDuels() and not IsDuelist() then
-                invisCheck = AddCardSetting(LPHolder, "Invisibility", getgenv().LOCAL_PLAYER_CFG.InvisEnabled, function(v)
-                    getgenv().LOCAL_PLAYER_CFG.InvisEnabled = v
-                end, getgenv().LOCAL_PLAYER_CFG.InvisKey, function(k)
-                    getgenv().LOCAL_PLAYER_CFG.InvisKey = k.Name
-                    if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
-                end)
-                invisCheck.LayoutOrder = 5
-            end
-
-            local infCheck, spinCheck, spinSlider, gravCheck, gravSlider
-            if IsHitmark() or IsDuelist() then
-                infCheck = AddCardSetting(LPHolder, "Infinite Jump", getgenv().FUN_CFG.InfJump, function(v)
-                    getgenv().FUN_CFG.InfJump = v
-                end)
-                infCheck.LayoutOrder = 10
-
-                spinCheck = AddCardSetting(LPHolder, "Spinbot", getgenv().FUN_CFG.Spinbot, function(v)
-                    getgenv().FUN_CFG.Spinbot = v
-                end)
-                spinCheck.LayoutOrder = 11
-
-                spinSlider = AddCardSlider(LPHolder, "Spin Speed", 10, 100, getgenv().FUN_CFG.SpinSpeed, function(v)
-                    getgenv().FUN_CFG.SpinSpeed = v
-                end)
-                spinSlider.LayoutOrder = 12
-            end
-
-            if IsHitmark() then
-                gravCheck = AddCardSetting(LPHolder, "Custom Gravity", getgenv().FUN_CFG.GravityEnabled, function(v)
-                    getgenv().FUN_CFG.GravityEnabled = v
-                end)
-                gravCheck.LayoutOrder = 13
-
-                gravSlider = AddCardSlider(LPHolder, "Gravity Value", 0, 500, getgenv().FUN_CFG.GravityValue, function(v)
-                    getgenv().FUN_CFG.GravityValue = v
-                end)
-                gravSlider.LayoutOrder = 14
-            end
-
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                if (IsMurderVsSheriff() or IsDuelist()) and speedCheck and speedSlider then
-                    local active = getgenv().LOCAL_PLAYER_CFG.SpeedEnabled
-                    local cbBg = speedCheck:FindFirstChildOfClass("Frame")
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    if not KSCard or not KSCard.Parent then return end
+                    local active = getgenv().WORLD_CFG.KillSoundEnabled
+                    local cbBg = toggleRow:FindFirstChildOfClass("Frame")
                     local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
                     if cbCheck then cbCheck.Visible = active end
                     if cbBg then
                         cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
                     end
+                    idTextBox.Text = tostring(getgenv().WORLD_CFG.KillSoundId)
 
-                    local kbBox = speedCheck:FindFirstChild("KeybindBox")
-                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
-                    if bindLbl then
-                        bindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.SpeedKey)
-                    end
-
-                    local speedVal = getgenv().LOCAL_PLAYER_CFG.Speed
-                    local topFrame = speedSlider:FindFirstChildOfClass("Frame")
+                    local volVal = getgenv().WORLD_CFG.KillSoundVolume or 100
+                    local topFrame = volSlider:FindFirstChildOfClass("Frame")
                     if topFrame then
                         for _, child in ipairs(topFrame:GetChildren()) do
                             if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
-                                child.Text = tostring(speedVal)
+                                child.Text = tostring(volVal)
                             end
                         end
                     end
-                    local trackBtn = speedSlider:FindFirstChildOfClass("TextButton")
+                    local trackBtn = volSlider:FindFirstChildOfClass("TextButton")
                     local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
                     local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
                     local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
                     if fillFrame and knobFrame then
-                        local rel = math.clamp((speedVal - 16) / (250 - 16), 0, 1)
+                        local rel = math.clamp(volVal / 200, 0, 1)
                         fillFrame.Size = UDim2.new(rel, 0, 1, 0)
                         local knobS = IS_MOBILE and 18 or 12
                         knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
                     end
-                end
-
-                local fActive = getgenv().LOCAL_PLAYER_CFG.FlyEnabled
-                local fCbBg = flyCheck:FindFirstChildOfClass("Frame")
-                local fCbCheck = fCbBg and fCbBg:FindFirstChildOfClass("TextLabel")
-                if fCbCheck then fCbCheck.Visible = fActive end
-                if fCbBg then
-                    fCbBg.BackgroundColor3 = fActive and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                end
-
-                local fKbBox = flyCheck:FindFirstChild("KeybindBox")
-                local fBindLbl = fKbBox and fKbBox:FindFirstChild("BindLabel")
-                if fBindLbl then
-                    fBindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.FlyKey)
-                end
-
-                local flyVal = getgenv().LOCAL_PLAYER_CFG.FlySpeed
-                local fTopFrame = flySlider:FindFirstChildOfClass("Frame")
-                if fTopFrame then
-                    for _, child in ipairs(fTopFrame:GetChildren()) do
-                        if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
-                            child.Text = tostring(flyVal)
-                        end
-                    end
-                end
-                local fTrackBtn = flySlider:FindFirstChildOfClass("TextButton")
-                local fTrackBG = fTrackBtn and fTrackBtn:FindFirstChild("TrackBG")
-                local fFillFrame = fTrackBG and fTrackBG:FindFirstChild("Fill")
-                local fKnobFrame = fTrackBtn and fTrackBtn:FindFirstChild("Knob")
-                if fFillFrame and fKnobFrame then
-                    local rel = math.clamp(flyVal / 1000, 0, 1)
-                    fFillFrame.Size = UDim2.new(rel, 0, 1, 0)
-                    local knobS = IS_MOBILE and 18 or 12
-                    fKnobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
-                end
-
-                if invisCheck then
-                    local iActive = getgenv().LOCAL_PLAYER_CFG.InvisEnabled
-                    local iCbBg = invisCheck:FindFirstChildOfClass("Frame")
-                    local iCbCheck = iCbBg and iCbBg:FindFirstChildOfClass("TextLabel")
-                    if iCbCheck then iCbCheck.Visible = iActive end
-                    if iCbBg then
-                        iCbBg.BackgroundColor3 = iActive and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                    end
-
-                    local iKbBox = invisCheck:FindFirstChild("KeybindBox")
-                    local iBindLbl = iKbBox and iKbBox:FindFirstChild("BindLabel")
-                    if iBindLbl then
-                        iBindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.InvisKey)
-                    end
-                end
-
-                if IsHitmark() or IsDuelist() then
-                    if infCheck then
-                        local active = getgenv().FUN_CFG.InfJump
-                        local cbBg = infCheck:FindFirstChildOfClass("Frame")
-                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                        if cbCheck then cbCheck.Visible = active end
-                        if cbBg then
-                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                        end
-                    end
-                    if spinCheck then
-                        local active = getgenv().FUN_CFG.Spinbot
-                        local cbBg = spinCheck:FindFirstChildOfClass("Frame")
-                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                        if cbCheck then cbCheck.Visible = active end
-                        if cbBg then
-                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                        end
-                    end
-                    if spinSlider then
-                        local val = getgenv().FUN_CFG.SpinSpeed
-                        local topFrame = spinSlider:FindFirstChildOfClass("Frame")
-                        if topFrame then
-                            for _, child in ipairs(topFrame:GetChildren()) do
-                                if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
-                                    child.Text = tostring(val)
-                                end
-                            end
-                        end
-                        local trackBtn = spinSlider:FindFirstChildOfClass("TextButton")
-                        local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
-                        local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
-                        local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
-                        if fillFrame and knobFrame then
-                            local rel = math.clamp((val - 10) / 90, 0, 1)
-                            fillFrame.Size = UDim2.new(rel, 0, 1, 0)
-                            local knobS = IS_MOBILE and 18 or 12
-                            knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
-                        end
-                    end
-                    if gravCheck then
-                        local active = getgenv().FUN_CFG.GravityEnabled
-                        local cbBg = gravCheck:FindFirstChildOfClass("Frame")
-                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                        if cbCheck then cbCheck.Visible = active end
-                        if cbBg then
-                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                        end
-                    end
-                    if gravSlider then
-                        local val = getgenv().FUN_CFG.GravityValue
-                        local topFrame = gravSlider:FindFirstChildOfClass("Frame")
-                        if topFrame then
-                            for _, child in ipairs(topFrame:GetChildren()) do
-                                if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
-                                    child.Text = tostring(val)
-                                end
-                            end
-                        end
-                        local trackBtn = gravSlider:FindFirstChildOfClass("TextButton")
-                        local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
-                        local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
-                        local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
-                        if fillFrame and knobFrame then
-                            local rel = math.clamp(val / 500, 0, 1)
-                            fillFrame.Size = UDim2.new(rel, 0, 1, 0)
-                            local knobS = IS_MOBILE and 18 or 12
-                            knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
-                        end
-                    end
-                end
-            end)
-        end
-
-        if IsMurderVsSheriff() then
-            BuildAutoMatchCard()
-            BuildAutoCollectHatsCard()
-        elseif IsHitmark() then
-            BuildAutoCollectCoconutsCard()
-        elseif IsDuelist() then
-            BuildEquipEmoteCard()
-            BuildKillSoundCard()
-            BuildRollbackDupeCard()
-        end
-        BuildLocalPlayerCard()
-    end
-end
-
-local CombatPage = navPages["Combat"]
-local TAB_H = 44
-local TabBar = NewFrame(CombatPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-
-local TabSep = NewFrame(CombatPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
-
-local ContentRow = NewFrame(CombatPage,
-    UDim2.new(1, -20, 1, -(TAB_H + 3 + 20)),
-    UDim2.new(0, 10, 0, TAB_H + 3 + 10),
-    BG, 1
-)
-
-local TABS = { "Aimbot", "Silent Aim", "Kill Aura" }
-local tabPages = {}
-local activeTabIdx = 1
-local tabBtns = {}
-local tabLines = {}
-
-local tx = 18
-for i, name in ipairs(TABS) do
-    local tw2 = 82
-    local tb = NewBtn(TabBar, UDim2.new(0, tw2, 1, 0), UDim2.new(0, tx, 0, 0), BG, 1)
-    local tl = NewLabel(tb, name, 13, i == 1 and ACCENT or DIM, i == 1)
-    tl.Size = UDim2.new(1, 0, 1, 0)
-    tl.TextXAlignment = Enum.TextXAlignment.Center
-
-    local ul = NewFrame(CombatPage, UDim2.new(0, tw2, 0, 2), UDim2.new(0, tx, 0, TAB_H - 2), ACCENT)
-    ul.Visible = i == 1
-    Corner(ul, 1)
-
-    local page = NewFrame(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-    page.Visible = (i == 1)
-
-    local pageLayout = Instance.new("UIListLayout")
-    pageLayout.FillDirection = Enum.FillDirection.Horizontal
-    pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    pageLayout.Padding = UDim.new(0, 10)
-    pageLayout.Parent = page
-
-    tabPages[i] = page
-    tabBtns[i] = { btn = tb, lbl = tl }
-    tabLines[i] = ul
-    tx = tx + tw2 + 14
-
-    tb.MouseButton1Click:Connect(function()
-        if activeTabIdx == i then return end
-
-        tabBtns[activeTabIdx].lbl.TextColor3 = DIM
-        tabBtns[activeTabIdx].lbl.Font = Enum.Font.Gotham
-        tabLines[activeTabIdx].Visible = false
-        tabPages[activeTabIdx].Visible = false
-
-        activeTabIdx = i
-        tl.TextColor3 = ACCENT
-        tl.Font = Enum.Font.GothamBold
-        ul.Visible = true
-        page.Visible = true
-    end)
-end
-
-local AimbotPage = tabPages[1]
-
-local LeftPanel = NewFrame(AimbotPage, UDim2.new(0.54, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
-LeftPanel.LayoutOrder = 1
-Corner(LeftPanel, 8)
-Stroke(LeftPanel, STROKE, 1)
-
-local LPTitle = NewLabel(LeftPanel, "Aimbot", 13, TEXT, true)
-LPTitle.Name = "SectionTitle"
-LPTitle.Size = UDim2.new(1, 0, 0, 30)
-LPTitle.Position = UDim2.new(0, 0, 0, 0)
-LPTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-local CheckHolder = NewFrame(LeftPanel, UDim2.new(1, -16, 0, 210), UDim2.new(0, 8, 0, 36), PANEL, 1)
-local CheckList = Instance.new("UIListLayout")
-CheckList.SortOrder = Enum.SortOrder.LayoutOrder
-CheckList.Padding = UDim.new(0, 2)
-CheckList.Parent = CheckHolder
-
-local CHECKS = {
-    { label = "Aimbot",              badge = "None" },
-    { label = "Draw Fov",            badge = nil },
-    { label = "Visible Check",       badge = nil },
-    { label = "Ignore Dead Players", badge = nil },
-    { label = "Humanize Aimbot",     badge = nil },
-}
-
-for i, data in ipairs(CHECKS) do
-    local row = NewBtn(CheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-    row.LayoutOrder = i
-    Corner(row, 5)
-
-    local bLbl = nil
-
-    local checked = false
-    if data.label == "Ignore Dead Players" then checked = true end
-    local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-    Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-    local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-    cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
-
-    local rowLbl = NewLabel(row, data.label, 13, TEXT)
-    rowLbl.Position = UDim2.new(0, 32, 0, 0)
-    local rightOffset = (data.badge and not IS_MOBILE) and -96 or -38
-    rowLbl.Size = UDim2.new(1, rightOffset, 1, 0)
-    rowLbl.TextScaled = true
-    local fit = Instance.new("UITextSizeConstraint")
-    fit.MaxTextSize = 13
-    fit.MinTextSize = 8
-    fit.Parent = rowLbl
-
-    local function ToggleState(state, silent)
-        if state ~= nil then checked = state else checked = not checked end
-        cbCheck.Visible = checked
-        Tw(cbBg, 0.1, "Quad", "Out", {
-            BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-        })
-
-        if data.label == "Aimbot" then
-            getgenv().AIMBOT_CFG.Enabled = checked
-        elseif data.label == "Draw Fov" then
-            getgenv().AIMBOT_CFG.DrawFov = checked
-        elseif data.label == "Visible Check" then
-            getgenv().AIMBOT_CFG.VisibleCheck = checked
-        elseif data.label == "Humanize Aimbot" then
-            getgenv().AIMBOT_CFG.Humanize = checked
-        elseif data.label == "Ignore Dead Players" then
-            getgenv().AIMBOT_CFG.IgnoreDead = checked
-        end
-        if not silent then NOTIFY(data.label, checked and "Enabled" or "Disabled", 2) end
-    end
-
-    getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-    table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-        local ns = checked
-        if data.label == "Aimbot" then
-            ns = getgenv().AIMBOT_CFG.Enabled
-
-            if data.badge and getgenv().AIMBOT_CFG.Keybind and bLbl then
-                local k = getgenv().AIMBOT_CFG.Keybind
-                local name = (typeof(k) == "EnumItem" and k.Name or tostring(k):gsub("Enum.UserInputType.", ""))
-                if name ~= "None" and name ~= "" then
-                    bLbl.Text = name:sub(1, 6)
-                else
-                    bLbl.Text = "None"
-                end
-            end
-        elseif data.label == "Draw Fov" then
-            ns = getgenv().AIMBOT_CFG.DrawFov
-        elseif data.label == "Visible Check" then
-            ns = getgenv().AIMBOT_CFG.VisibleCheck
-        elseif data.label == "Humanize Aimbot" then
-            ns = getgenv().AIMBOT_CFG.Humanize
-        elseif data.label == "Ignore Dead Players" then
-            ns = getgenv().AIMBOT_CFG.IgnoreDead
-        end
-        if ns == nil then ns = checked end
-        ToggleState(ns, true)
-    end)
-
-    if data.badge and not IS_MOBILE then
-        local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55), 1)
-        kbBox.Name = "KeybindBox"
-        Corner(kbBox, 4)
-        Stroke(kbBox, STROKE2, 1)
-
-        bLbl = NewLabel(kbBox, data.badge, 10, TEXT, false, Enum.TextXAlignment.Center)
-        bLbl.Size = UDim2.new(1, 0, 1, 0)
-
-        local waiting = false
-        kbBox.MouseButton1Click:Connect(function()
-            if waiting then return end
-            waiting = true
-            bLbl.Text = "..."
-            bLbl.TextColor3 = Color3.new(1, 1, 1)
-            Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
-
-            local conn; conn = UIS.InputBegan:Connect(function(inp, gpe)
-                if gpe then return end
-                if inp.UserInputType == Enum.UserInputType.Keyboard or inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.MouseButton2 then
-                    waiting = false
-                    local boundKey = inp.KeyCode ~= Enum.KeyCode.Unknown and inp.KeyCode or inp.UserInputType
-                    local name = (typeof(boundKey) == "EnumItem" and boundKey.Name or tostring(boundKey):gsub("Enum.UserInputType.", ""))
-                    bLbl.Text = name:sub(1, 6)
-                    bLbl.TextColor3 = TEXT
-                    Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-                    if data.label == "Aimbot" then
-                        getgenv().AIMBOT_CFG.Keybind = boundKey
-                        if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
-                    end
-                    conn:Disconnect()
-                end
-            end)
-        end)
-
-        table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gp)
-            if gp or waiting then return end
-            local currentBind = (data.label == "Aimbot") and getgenv().AIMBOT_CFG.Keybind or nil
-            if not currentBind then return end
-
-            local match = false
-            if typeof(currentBind) == "EnumItem" then
-                if currentBind.EnumType == Enum.KeyCode then
-                    match = (inp.KeyCode == currentBind)
-                elseif currentBind.EnumType == Enum.UserInputType then
-                    match = (inp.UserInputType == currentBind)
-                end
-            end
-
-            if match then
-                ToggleState()
-                if getgenv().FLUX_UI_UPDATE_FUNCS then
-                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
-                end
-            end
-        end))
-    end
-
-    row.MouseButton1Click:Connect(function() ToggleState() end)
-    row.MouseEnter:Connect(function()
-        Tw(row, 0.1, "Quad", "Out", { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
-    end)
-    row.MouseLeave:Connect(function()
-        Tw(row, 0.1, "Quad", "Out", { BackgroundTransparency = 1, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
-    end)
-end
-
-local targetPartDd = AddDropdown(LeftPanel, { "Head", "UpperTorso", "HumanoidRootPart" }, "Head", function(v)
-    getgenv().AIMBOT_CFG.TargetPart = v
-end)
-targetPartDd.Position = UDim2.new(0, 8, 0, 260)
-targetPartDd.Size = UDim2.new(0.48, -12, 0, 32)
-
-local aimModeDd = AddDropdown(LeftPanel, { "Mouse Aim", "Camera Aim" }, "Mouse Aim", function(v)
-    getgenv().AIMBOT_CFG.AimMode = v
-end)
-aimModeDd.Position = UDim2.new(0.52, 4, 0, 260)
-aimModeDd.Size = UDim2.new(0.48, -12, 0, 32)
-
-local RightPanel = NewFrame(AimbotPage, UDim2.new(0.46, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
-RightPanel.LayoutOrder = 2
-Corner(RightPanel, 8)
-Stroke(RightPanel, STROKE, 1)
-
-local RPTitle = NewLabel(RightPanel, "Options", 13, TEXT, true)
-RPTitle.Name = "SectionTitle"
-RPTitle.Size = UDim2.new(1, 0, 0, 30)
-RPTitle.Position = UDim2.new(0, 0, 0, 0)
-RPTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-local SliderHolder = NewFrame(RightPanel, UDim2.new(1, -20, 0, 260), UDim2.new(0, 10, 0, 36), PANEL, 1)
-local SliderListLayout = Instance.new("UIListLayout")
-SliderListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SliderListLayout.Padding = UDim.new(0, 6)
-SliderListLayout.Parent = SliderHolder
-
-local SLIDERS = {
-    { label = "FOV",           min = 0, max = 500,  val = 150.0, key = "FOV" },
-    { label = "Distance",      min = 0, max = 1000, val = 500.0, key = "MaxDist" },
-    { label = "Hit Chance",    min = 0, max = 100,  val = 80.0,  key = "HitChance" },
-    { label = "Prediction",    min = 0, max = 2,    val = 0.165, key = "PredictionAmount" },
-    { label = "RCS Intensity", min = 0, max = 5,    val = 1.0,   key = "RCSAmount" },
-}
-
-local activeSliders = {}
-
-for i, data in ipairs(SLIDERS) do
-    local row = NewFrame(SliderHolder, UDim2.new(1, 0, 0, 52), UDim2.new(0, 0, 0, 0), PANEL, 1)
-    row.LayoutOrder = i
-
-    local topRow = NewFrame(row, UDim2.new(1, 0, 0, 18), UDim2.new(0, 0, 0, 0), PANEL, 1)
-    local sLbl = NewLabel(topRow, data.label, 12, TEXT)
-    sLbl.Size = UDim2.new(0.6, 0, 1, 0)
-
-    local valLbl = NewLabel(topRow, string.format("%.1f", data.val), 12, TEXT, false, Enum.TextXAlignment.Right)
-    valLbl.Size = UDim2.new(0.4, 0, 1, 0)
-    valLbl.Position = UDim2.new(0.6, 0, 0, 0)
-
-    local trackH = IS_MOBILE and 30 or 5
-    local track = NewBtn(row, UDim2.new(1, 0, 0, trackH), UDim2.new(0, 0, 0, 26 - (trackH / 2 - 2)), PANEL, 1)
-
-    local trackBG = NewFrame(track, UDim2.new(1, 0, 0, 5), UDim2.new(0, 0, 0.5, -2), SLBG)
-    Corner(trackBG, 3)
-
-    local pct = (data.val - data.min) / (data.max - data.min)
-    local fill = NewFrame(trackBG, UDim2.new(pct, 0, 1, 0), UDim2.new(0, 0, 0, 0), SLFILL)
-    Corner(fill, 3)
-    accentFills[#accentFills + 1] = fill
-
-    local knobS = IS_MOBILE and 20 or 15
-    local knob = NewFrame(track, UDim2.new(0, knobS, 0, knobS), UDim2.new(pct, -knobS / 2, 0.5, -knobS / 2),
-        Color3.fromRGB(228, 230, 255))
-    Corner(knob, knobS / 2)
-    Stroke(knob, Color3.fromRGB(170, 174, 210), 1.5)
-
-    local dragging = false
-
-    local function DoUpdate(inputX)
-        local ap = track.AbsolutePosition.X
-        local as = track.AbsoluteSize.X
-        local rel = math.clamp((inputX - ap) / as, 0, 1)
-        local nv = math.floor((data.min + rel * (data.max - data.min)) * 10 + 0.5) / 10
-        valLbl.Text = string.format("%.1f", nv)
-        Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
-        Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
-
-        if data.key then getgenv().AIMBOT_CFG[data.key] = nv end
-    end
-
-    track.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            getgenv()._CEN_SLD_ACTIVE = true
-            DoUpdate(inp.Position.X)
-        end
-    end)
-
-    UIS.InputChanged:Connect(function(inp)
-        if not dragging then return end
-        if inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch then
-            DoUpdate(inp.Position.X)
-        end
-    end)
-
-    UIS.InputEnded:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            if dragging then
-                dragging = false
-                getgenv()._CEN_SLD_ACTIVE = false
-            end
-        end
-    end)
-end
-
-function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback, defaultColors)
-    local row = NewBtn(parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-    row.LayoutOrder = #parent:GetChildren()
-    Corner(row, 5)
-
-    local checked = default
-    local curBind = nil
-    local waiting = false
-    local colorBtns = {}
-
-    local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-    Corner(cbBg, 3)
-    Stroke(cbBg, STROKE2, 1)
-
-    local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-    cbCheck.Size = UDim2.new(1, 0, 1, 0)
-    cbCheck.Visible = checked
-
-    local rightOffset = -35
-    if hasKeybind and not IS_MOBILE then
-        rightOffset = -94
-    elseif colorCount and colorCount > 0 then
-        rightOffset = -(colorCount * 28 + 38)
-    end
-
-    local lbl = NewLabel(row, label, 13, TEXT)
-    lbl.Position = UDim2.new(0, 32, 0, 0)
-    lbl.Size = UDim2.new(1, rightOffset, 1, 0)
-    lbl.TextScaled = true
-    lbl.TextWrapped = true
-    local fit = Instance.new("UITextSizeConstraint")
-    fit.MaxTextSize = 13
-    fit.MinTextSize = 8
-    fit.Parent = lbl
-
-    local function updateUI()
-        cbCheck.Visible = checked
-        Tw(cbBg, 0.1, "Quad", "Out", {
-            BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-        })
-    end
-
-    local function ToggleState(state, silent)
-        if state ~= nil then checked = state else checked = not checked end
-        updateUI()
-        local clrs = {}
-        for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
-        if callback then callback(checked, clrs, curBind) end
-        if not silent then NOTIFY("Settings", label .. ": " .. (checked and "Enabled" or "Disabled"), 1.2) end
-    end
-
-    if colorCount and colorCount > 0 then
-        local offset = -30
-        for i = 1, colorCount do
-            local defClr = (defaultColors and defaultColors[i]) or Color3.new(1, 1, 1)
-            local cBtn = NewBtn(row, UDim2.new(0, 24, 0, 24), UDim2.new(1, offset, 0.5, -12), defClr)
-            Corner(cBtn, 4)
-            Stroke(cBtn, Color3.new(1, 1, 1), 1).Transparency = 0.5
-            table.insert(colorBtns, cBtn)
-
-            cBtn.MouseButton1Click:Connect(function()
-                if getgenv().OpenPicker then
-                    getgenv().OpenPicker(cBtn.BackgroundColor3, cBtn.AbsolutePosition, function(c)
-                        cBtn.BackgroundColor3 = c
-                        local clrs = {}
-                        for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
-                        if callback then callback(checked, clrs) end
-                    end)
-                end
-            end)
-            offset = offset - 28
-        end
-    end
-
-    if hasKeybind and not IS_MOBILE then
-        local badge = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55))
-        badge.Name = "KeybindBadge"
-        Corner(badge, 4)
-        Stroke(badge, STROKE2, 1)
-        local bLbl = NewLabel(badge, "None", 10, TEXT, false, Enum.TextXAlignment.Center)
-        bLbl.Size = UDim2.new(1, 0, 1, 0)
-
-        badge.MouseButton1Click:Connect(function()
-            if waiting then return end
-            waiting = true
-            bLbl.Text = "..."
-            bLbl.TextColor3 = Color3.new(1, 1, 1)
-            Tw(badge, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
-
-            local conn
-            conn = UIS.InputBegan:Connect(function(inp, gp)
-                if gp then return end
-                if inp.UserInputType == Enum.UserInputType.Keyboard then
-                    curBind = inp.KeyCode
-                    bLbl.Text = curBind.Name:sub(1, 4)
-                    bLbl.TextColor3 = TEXT
-                    Tw(badge, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-                    waiting = false
-
-                    local clrs = {}
-                    for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
-                    if callback then callback(checked, clrs, curBind) end
-                    if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
-
-                    conn:Disconnect()
-                end
-            end)
-        end)
-
-        UIS.InputBegan:Connect(function(inp, gp)
-            if gp or waiting or not curBind then return end
-            if inp.KeyCode == curBind then ToggleState() end
-        end)
-    end
-
-    getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-    table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-        local ns = checked
-        if label == "Enabled" then
-            ns = getgenv().ESP_CFG.Enabled
-            if hasKeybind and getgenv().ESP_CFG.Keybind then
-                curBind = getgenv().ESP_CFG.Keybind
-                local badge = row:FindFirstChild("KeybindBadge")
-                local bLbl = badge and badge:FindFirstChildOfClass("TextLabel")
-                if bLbl then
-                    bLbl.Text = (typeof(curBind) == "EnumItem" and curBind.Name or tostring(curBind)):sub(1, 4)
-                end
-            end
-        elseif label == "Enable Bots" then
-            ns = getgenv().ESP_CFG.Bots
-        elseif label == "Ignore Team" then
-            ns = getgenv().ESP_CFG.IgnoreTeam
-        elseif label == "Player Names" then
-            ns = getgenv().ESP_CFG.Names
-        elseif label == "Display Names" then
-            ns = getgenv().ESP_CFG.DisplayNames
-        elseif label == "Equipped Tool" then
-            ns = getgenv().ESP_CFG.Tools
-        elseif label == "Distance" then
-            ns = getgenv().ESP_CFG.Distance
-        elseif label == "Health Bars" then
-            ns = getgenv().ESP_CFG.HealthBar
-        elseif label == "Health Text" then
-            ns = getgenv().ESP_CFG.HealthText
-        elseif label == "Skeleton" then
-            ns = getgenv().ESP_CFG.Skeleton
-        elseif label == "Chams" then
-            ns = getgenv().ESP_CFG.Chams
-        elseif label == "Tool Chams" then
-            ns = getgenv().ESP_CFG.ToolChams
-        elseif label == "Snaplines" then
-            ns = getgenv().ESP_CFG.Snaplines
-        elseif label == "Off-Screen Lines" then
-            ns = getgenv().ESP_CFG.OffScreen
-        elseif label == "Boxes" then
-            ns = getgenv().ESP_CFG.Boxes
-        elseif label == "Fill Boxes" then
-            ns = getgenv().ESP_CFG.BoxFill
-        elseif label == "Full Bright" then
-            ns = getgenv().WORLD_CFG.FullBright
-        elseif label == "No Fog" then
-            ns = getgenv().WORLD_CFG.NoFog
-        elseif label == "Atmosphere Color" then
-            ns = getgenv().WORLD_CFG.AtmosColor ~= nil
-        elseif label == "FPS Booster" then
-            ns = getgenv().WORLD_CFG.FPSBooster
-        end
-        if ns == nil then ns = checked end
-        ToggleState(ns, true)
-    end)
-
-    updateUI()
-    row.MouseButton1Click:Connect(function() ToggleState() end)
-    row.MouseEnter:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 }) end)
-    row.MouseLeave:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 }) end)
-
-    return row
-end
-
-function AddVSSlider(parent, label, min, max, default, suffix, callback)
-    local row = NewFrame(parent, UDim2.new(1, 0, 0, 42), nil, BG, 1)
-    local top = NewFrame(row, UDim2.new(1, 0, 0, 16), nil, BG, 1)
-    NewLabel(top, label, 11, TEXT).Size = UDim2.new(0.6, 0, 1, 0)
-    local valL = NewLabel(top, string.format("%.1f", default) .. (suffix or ""), 11, ACCENT, false,
-        Enum.TextXAlignment.Right)
-    valL.Size = UDim2.new(0.4, 0, 1, 0)
-    valL.Position = UDim2.new(0.6, 0, 0, 0)
-
-    local trackH = IS_MOBILE and 32 or 24
-    local track = NewBtn(row, UDim2.new(1, 0, 0, trackH), UDim2.new(0, 0, 0, 20), BG, 1)
-
-    local trackBG = NewFrame(track, UDim2.new(1, 0, 0, 4), UDim2.new(0, 0, 0.5, -2), Color3.fromRGB(45, 45, 55))
-    Corner(trackBG, 2)
-
-    local fill = NewFrame(trackBG, UDim2.new((default - min) / (max - min), 0, 1, 0), nil, ACCENT)
-    Corner(fill, 2)
-    accentFills[#accentFills + 1] = fill
-
-    local knobS = IS_MOBILE and 18 or 12
-    local knob = NewFrame(track, UDim2.new(0, knobS, 0, knobS),
-        UDim2.new((default - min) / (max - min), -knobS / 2, 0.5, -knobS / 2),
-        Color3.new(1, 1, 1))
-    Corner(knob, knobS / 2)
-
-    local dragging = false
-    local function update(inputX)
-        local rel = math.clamp((inputX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-        local val = math.floor((min + rel * (max - min)) * 10 + 0.5) / 10
-        valL.Text = string.format("%.1f", val) .. (suffix or "")
-        Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
-        Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
-        callback(val)
-    end
-
-    track.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            getgenv()._CEN_SLD_ACTIVE = true
-            dragging = true; update(i.Position.X)
-        end
-    end)
-    UIS.InputChanged:Connect(function(i)
-        if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-            update(i.Position.X)
-        end
-    end)
-    UIS.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            if dragging then
-                dragging = false
-                getgenv()._CEN_SLD_ACTIVE = false
-                local val = math.floor((min + (knob.Position.X.Scale) * (max - min)) * 10 + 0.5) / 10
-                NOTIFY("Settings", label .. ": " .. tostring(val) .. (suffix or ""), 1.5)
-            end
-        end
-    end)
-end
-
-local function SETUP_COLOR_PICKER()
-    if PICKER_GUI then return end
-    PICKER_GUI = Instance.new("ScreenGui")
-    PICKER_GUI.Name = "DrkPicker"
-    PICKER_GUI.DisplayOrder = 2147483647
-    PICKER_GUI.IgnoreGuiInset = true
-    pcall(function() PICKER_GUI.Parent = game:GetService("CoreGui") end)
-    if not PICKER_GUI.Parent then PICKER_GUI.Parent = PG end
-
-    PICKER_MAIN = NewFrame(PICKER_GUI, UDim2.new(0, 200, 0, 220), nil, Color3.fromRGB(30, 30, 40))
-    PICKER_MAIN.Visible = false
-    PICKER_MAIN.Active = true
-    Corner(PICKER_MAIN, 10)
-    Stroke(PICKER_MAIN, STROKE, 1)
-
-    local sv = NewFrame(PICKER_MAIN, UDim2.new(1, -20, 0, 150), UDim2.new(0, 10, 0, 10), Color3.fromHSV(0, 1, 1))
-    sv.Active = true
-    Corner(sv, 6)
-
-    local white = NewFrame(sv, UDim2.new(1, 0, 1, 0), nil, Color3.new(1, 1, 1))
-    Corner(white, 6)
-    local wg = Instance.new("UIGradient", white)
-    wg.Transparency = NumberSequence.new(0, 1)
-
-    local black = NewFrame(sv, UDim2.new(1, 0, 1, 0), nil, Color3.new(0, 0, 0))
-    Corner(black, 6)
-    local bg = Instance.new("UIGradient", black)
-    bg.Rotation = 90
-    bg.Transparency = NumberSequence.new(1, 0)
-
-    local cursor = NewFrame(sv, UDim2.new(0, 10, 0, 10), UDim2.new(1, -5, 0, -5), Color3.new(1, 1, 1))
-    Corner(cursor, 10)
-    Stroke(cursor, Color3.new(0, 0, 0), 2)
-
-    local hue = NewFrame(PICKER_MAIN, UDim2.new(1, -20, 0, 12), UDim2.new(0, 10, 0, 170), Color3.new(1, 1, 1))
-    hue.Active = true
-    Corner(hue, 6)
-    local hg = Instance.new("UIGradient", hue)
-    hg.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromHSV(0, 1, 1)),
-        ColorSequenceKeypoint.new(0.16, Color3.fromHSV(0.16, 1, 1)),
-        ColorSequenceKeypoint.new(0.33, Color3.fromHSV(0.33, 1, 1)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromHSV(0.5, 1, 1)),
-        ColorSequenceKeypoint.new(0.66, Color3.fromHSV(0.66, 1, 1)),
-        ColorSequenceKeypoint.new(0.83, Color3.fromHSV(0.83, 1, 1)),
-        ColorSequenceKeypoint.new(1, Color3.fromHSV(1, 1, 1))
-    })
-
-    local hcursor = NewFrame(hue, UDim2.new(0, 4, 1, 4), UDim2.new(0, 0, 0.5, -2), Color3.new(1, 1, 1))
-    Corner(hcursor, 2)
-    Stroke(hcursor, Color3.new(0, 0, 0), 1)
-
-    local ch, cs, cv = 0, 1, 1
-    local function Update()
-        local c = Color3.fromHSV(ch, cs, cv)
-        sv.BackgroundColor3 = Color3.fromHSV(ch, 1, 1)
-        cursor.Position = UDim2.new(cs, -5, 1 - cv, -5)
-        hcursor.Position = UDim2.new(ch, -2, 0.5, -9)
-        if PICKER_CALLBACK then PICKER_CALLBACK(c) end
-    end
-
-    local function HandleInput(obj, cb)
-        local d = false
-        obj.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                d = true;
-                getgenv()._CEN_PKR_ACTIVE = true
-                cb(i)
-            end
-        end)
-        UIS.InputChanged:Connect(function(i)
-            if d and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-                cb(i)
-            end
-        end)
-        UIS.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                d = false;
-                getgenv()._CEN_PKR_ACTIVE = false
-            end
-        end)
-    end
-
-    HandleInput(sv, function(i)
-        local x = math.clamp((i.Position.X - sv.AbsolutePosition.X) / sv.AbsoluteSize.X, 0, 1)
-        local y = math.clamp((i.Position.Y - sv.AbsolutePosition.Y) / sv.AbsoluteSize.Y, 0, 1)
-        cs, cv = x, 1 - y
-        Update()
-    end)
-    HandleInput(hue, function(i)
-        ch = math.clamp((i.Position.X - hue.AbsolutePosition.X) / hue.AbsoluteSize.X, 0, 1)
-        Update()
-    end)
-
-    UIS.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 and PICKER_MAIN.Visible then
-            local mp = UIS:GetMouseLocation()
-            local p = PICKER_MAIN.AbsolutePosition
-            local s = PICKER_MAIN.AbsoluteSize
-            if mp.X < p.X or mp.X > p.X + s.X or mp.Y < p.Y + 36 or mp.Y > p.Y + s.Y + 36 then
-                PICKER_MAIN.Visible = false
-                PICKER_OPEN = false
-            end
-        end
-    end)
-
-    getgenv().OpenPicker = function(cur, pos, cb)
-        ch, cs, cv = cur:ToHSV()
-        PICKER_CALLBACK = cb
-        PICKER_MAIN.Position = UDim2.new(0, pos.X - 210, 0, pos.Y - 50)
-        PICKER_MAIN.Visible = true
-        PICKER_OPEN = true
-        Update()
-    end
-end
-SETUP_COLOR_PICKER()
-
-local ConfigPreferencesTabPage
-
-do
-    local ConfigPage = navPages["Config"]
-    if ConfigPage then
-        local HS = game:GetService("HttpService")
-        local CONFIG_FOLDER = "FluxConfigs"
-        local AUTOLOAD_FILE = "FluxAutoload.json"
-
-        local TAB_H = 44
-        local TabBar = NewFrame(ConfigPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-        local TabSep = NewFrame(ConfigPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
-
-        local ContentRow = NewFrame(ConfigPage,
-            UDim2.new(1, -20, 1, -(TAB_H + 3 + 20)),
-            UDim2.new(0, 10, 0, TAB_H + 3 + 10),
-            BG, 1
-        )
-
-        local configTabDefs = {
-            { name = "Configs",     width = 82 },
-            { name = "Preferences", width = 96 }
-        }
-        local configTabBtns = {}
-        local configTabLines = {}
-        local configPages = {}
-        local activeConfigTabIdx = 1
-        local configTx = 18
-
-        for i, tabData in ipairs(configTabDefs) do
-            local tb = NewBtn(TabBar, UDim2.new(0, tabData.width, 1, 0), UDim2.new(0, configTx, 0, 0), BG, 1)
-            local tl = NewLabel(tb, tabData.name, 13, i == 1 and ACCENT or DIM, i == 1)
-            tl.Size = UDim2.new(1, 0, 1, 0)
-            tl.TextXAlignment = Enum.TextXAlignment.Center
-
-            local ul = NewFrame(ConfigPage, UDim2.new(0, tabData.width, 0, 2), UDim2.new(0, configTx, 0, TAB_H - 2),
-                ACCENT)
-            ul.Visible = i == 1
-            Corner(ul, 1)
-            table.insert(accentFills, ul)
-
-            local subPage = NewScroll(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-            subPage.Visible = i == 1
-            subPage.ClipsDescendants = true
-
-            configTabBtns[i] = { btn = tb, lbl = tl }
-            configTabLines[i] = ul
-            configPages[i] = subPage
-            configTx = configTx + tabData.width + 14
-
-            tb.MouseButton1Click:Connect(function()
-                if activeConfigTabIdx == i then return end
-
-                configTabBtns[activeConfigTabIdx].lbl.TextColor3 = DIM
-                configTabBtns[activeConfigTabIdx].lbl.Font = Enum.Font.Gotham
-                configTabLines[activeConfigTabIdx].Visible = false
-                configPages[activeConfigTabIdx].Visible = false
-
-                activeConfigTabIdx = i
-                tl.TextColor3 = ACCENT
-                tl.Font = Enum.Font.GothamBold
-                ul.Visible = true
-                subPage.Visible = true
-            end)
-        end
-
-        getgenv().FLUX_CONFIG_TAB_THEME_SYNC = function()
-            for i, ref in ipairs(configTabBtns) do
-                if ref and ref.lbl then
-                    ref.lbl.TextColor3 = (i == activeConfigTabIdx) and ACCENT or DIM
-                end
-            end
-        end
-
-        local page = configPages[1]
-        ConfigPreferencesTabPage = configPages[2]
-
-        local function EnsureFolder()
-            if not isfolder(CONFIG_FOLDER) then makefolder(CONFIG_FOLDER) end
-        end
-
-        local function ListConfigs()
-            EnsureFolder()
-            local out = {}
-            local ok, files = pcall(listfiles, CONFIG_FOLDER)
-            if ok and files then
-                for _, path in ipairs(files) do
-                    local name = path:match("[/\\]([^/\\]+)%.json$")
-                    if name then table.insert(out, name) end
-                end
-            end
-            return out
-        end
-
-        local function GetAutoload()
-            if isfile and isfile(AUTOLOAD_FILE) then
-                local ok, d = pcall(function() return HS:JSONDecode(readfile(AUTOLOAD_FILE)) end)
-                if ok and d and d.name then return d.name end
-            end
-            return nil
-        end
-
-        local function CollectSettings()
-            local function copy(t)
-                local r = {}
-                for k, v in pairs(t) do r[k] = v end
-                return r
-            end
-            return {
-                placeId     = game.PlaceId,
-                created     = os.date("%x %X"),
-                AIMBOT      = copy(getgenv().AIMBOT_CFG),
-                SILENT      = copy(getgenv().SILENT_CFG),
-                AM          = copy(getgenv().AM_CFG),
-                WORLD       = copy(getgenv().WORLD_CFG),
-                LOCALPLAYER = copy(getgenv().LOCAL_PLAYER_CFG),
-                FUN         = copy(getgenv().FUN_CFG),
-                ESP         = getgenv().ESP_CFG and copy(getgenv().ESP_CFG) or nil,
-                UI          = {
-                    notifications = useNotifications,
-                    watermark     = useWatermark,
-                    kbhud         = useKbHud
-                }
-            }
-        end
-
-        local function ApplySettings(data)
-            if not data then return end
-            if GetGameGroup(data.placeId) ~= GetGameGroup(game.PlaceId) then
-                NOTIFY("Config", "This config is for a different game!", 3)
-                return
-            end
-            local function merge(dst, src)
-                if not src then return end
-                for k, v in pairs(src) do dst[k] = v end
-            end
-            merge(getgenv().AIMBOT_CFG, data.AIMBOT)
-            merge(getgenv().SILENT_CFG, data.SILENT)
-            merge(getgenv().AM_CFG, data.AM)
-            merge(getgenv().WORLD_CFG, data.WORLD)
-            if data.LOCALPLAYER then merge(getgenv().LOCAL_PLAYER_CFG, data.LOCALPLAYER) end
-            if data.FUN then merge(getgenv().FUN_CFG, data.FUN) end
-            if data.ESP and getgenv().ESP_CFG then merge(getgenv().ESP_CFG, data.ESP) end
-
-            if data.UI then
-                if data.UI.notifications ~= nil then useNotifications = data.UI.notifications end
-                if data.UI.watermark ~= nil then useWatermark = data.UI.watermark end
-                if data.UI.kbhud ~= nil then useKbHud = data.UI.kbhud end
-
-                if ApplyUIPreferences then ApplyUIPreferences() end
-            end
-
-            if getgenv().FLUX_UI_UPDATE_FUNCS then
-                for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do
-                    pcall(f)
-                end
-            end
-
-            NOTIFY("Config", "Config loaded ✓", 2.5)
-        end
-
-        task.defer(function()
-            local aName = GetAutoload()
-            if aName then
-                local path = CONFIG_FOLDER .. "/" .. aName .. ".json"
-                if isfile(path) then
-                    local ok, d = pcall(function() return HS:JSONDecode(readfile(path)) end)
-                    if ok and d then ApplySettings(d) end
-                end
-            end
-        end)
-
-        local LeftPanel = NewFrame(page, UDim2.new(0.46, 0, 0, 380), UDim2.new(0, 1, 0, 3), PANEL)
-        LeftPanel.LayoutOrder = 1
-        Corner(LeftPanel, 8); Stroke(LeftPanel, STROKE, 1)
-
-        local LPTitle = NewLabel(LeftPanel, "Config Management", 13, TEXT, true)
-        LPTitle.Name = "SectionTitle"
-        LPTitle.Size = UDim2.new(1, 0, 0, 30)
-        LPTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-        local scroll = NewFrame(LeftPanel, UDim2.new(1, -16, 1, -42), UDim2.new(0, 8, 0, 42), BG, 1)
-        Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 10)
-
-        local nameCard = NewFrame(scroll, UDim2.new(1, 0, 0, 70), nil, PANEL)
-        Corner(nameCard, 8)
-        NewLabel(nameCard, "Config name", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
-
-        local nameBoxWrap = NewFrame(nameCard, UDim2.new(1, -20, 0, 30), UDim2.new(0, 10, 0, 28),
-            Color3.fromRGB(15, 15, 20))
-        Corner(nameBoxWrap, 5); Stroke(nameBoxWrap, STROKE2, 1)
-
-        local nameBox = Instance.new("TextBox")
-        nameBox.Size = UDim2.new(1, 0, 1, 0)
-        nameBox.Position = UDim2.new(0, 0, 0, 0)
-        nameBox.BackgroundTransparency = 1; nameBox.BorderSizePixel = 0
-        nameBox.TextColor3 = TEXT; nameBox.PlaceholderColor3 = DIM
-        nameBox.PlaceholderText = "Enter name..."; nameBox.Text = ""
-        nameBox.TextSize = 11; nameBox.Font = Enum.Font.Gotham
-        nameBox.ClearTextOnFocus = false; nameBox.Parent = nameBoxWrap
-
-        local listCard = NewFrame(scroll, UDim2.new(1, 0, 0, 260), nil, PANEL)
-        Corner(listCard, 8)
-        NewLabel(listCard, "Config list", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
-
-        local selectedConfig = nil
-        local ddFrame = NewFrame(listCard, UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 26), Color3.fromRGB(32, 32, 44))
-        Corner(ddFrame, 6); Stroke(ddFrame, STROKE2, 1)
-
-        local ddLbl = NewLabel(ddFrame, "---", 11, TEXT)
-        ddLbl.Position = UDim2.new(0, 10, 0, 0); ddLbl.Size = UDim2.new(1, -30, 1, 0)
-
-        local ddArrow = Instance.new("ImageLabel")
-        ddArrow.BackgroundTransparency = 1; ddArrow.Size = UDim2.new(0, 12, 0, 12); ddArrow.Position = UDim2.new(1, -22,
-            0.5, -6)
-        ddArrow.Image = "rbxassetid://6034818372"; ddArrow.ImageColor3 = DIM; ddArrow.Parent = ddFrame
-
-        local ddOpen = false
-        local ddPopup = NewFrame(ddFrame, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 4), Color3.fromRGB(28, 28, 38))
-        ddPopup.ZIndex = 500; ddPopup.Visible = false; ddPopup.ClipsDescendants = true
-        Corner(ddPopup, 6); Stroke(ddPopup, STROKE2, 1)
-        Instance.new("UIListLayout", ddPopup).SortOrder = Enum.SortOrder.LayoutOrder
-
-        local totalLbl 
-        local function RefreshTotalCount()
-            if totalLbl then
-                local configs = ListConfigs()
-                totalLbl.Text = "Total Configs: " .. #configs
-            end
-        end
-
-        local configNames = {}
-        local function RefreshDD()
-            for _, c in ipairs(ddPopup:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-            configNames = ListConfigs()
-            if #configNames == 0 then
-                ddLbl.Text = "---"; selectedConfig = nil
-            end
-            for i, n in ipairs(configNames) do
-                local ob = NewBtn(ddPopup, UDim2.new(1, 0, 0, 26), nil, BG, 1)
-                ob.LayoutOrder = i; ob.ZIndex = 501
-                local ol = NewLabel(ob, n, 11, TEXT); ol.Position = UDim2.new(0, 10, 0, 0); ol.Size = UDim2.new(1, -10, 1,
-                    0); ol.ZIndex = 502
-                ob.MouseButton1Click:Connect(function()
-                    selectedConfig = n; ddLbl.Text = n; ddOpen = false
-                    Tw(ddPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
-                    task.delay(0.16, function() ddPopup.Visible = false end)
-                    Tw(ddArrow, 0.15, "Quad", "Out", { Rotation = 0 })
-                    if getgenv().UpdateConfigDetails then getgenv().UpdateConfigDetails(n) end
                 end)
             end
-            RefreshTotalCount()
-        end
 
-        local ddBtn = NewBtn(ddFrame, UDim2.new(1, 0, 1, 0), nil, BG, 1)
-        ddBtn.ZIndex = 10
-        ddBtn.MouseButton1Click:Connect(function()
-            ddOpen = not ddOpen
-            if ddOpen then
-                RefreshDD()
-                ddPopup.Visible = true
-                local popH = #configNames * 26
-                Tw(ddPopup, 0.18, "Quad", "Out", { Size = UDim2.new(1, 0, 0, math.min(popH, 150)) })
-                Tw(ddArrow, 0.18, "Quad", "Out", { Rotation = 180 })
-            else
-                ddOpen = false; Tw(ddPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
-                task.delay(0.16, function() ddPopup.Visible = false end)
-                Tw(ddArrow, 0.15, "Quad", "Out", { Rotation = 0 })
-            end
-        end)
+            local function BuildAutoCollectHatsCard()
+                local ACCard = NewFrame(page, UDim2.new(0.52, -4, 0, 110), UDim2.new(0.48, 1, 0, 3), PANEL)
+                Corner(ACCard, 8); Stroke(ACCard, STROKE, 1)
 
-        local gridY = 66
-        local btnDefs = {
-            { "Load",    "load" }, { "Overwrite", "overwrite" }, { "Delete", "delete" },
-            { "Refresh", "refresh" }, { "Autoload", "setauto" }, { "Clear Auto", "resetauto" },
-        }
-        local actionBtns = {}
-        for i, def in ipairs(btnDefs) do
-            local col = (i - 1) % 2; local row = math.floor((i - 1) / 2)
-            local ab = NewBtn(listCard, UDim2.new(0.5, -13, 0, 34),
-                UDim2.new(col * 0.5, col == 0 and 10 or 3, 0, gridY + row * 42), Color3.fromRGB(28, 28, 38))
-            Corner(ab, 6); Stroke(ab, STROKE, 1)
-            local aLbl = NewLabel(ab, def[1], 11, TEXT, false, Enum.TextXAlignment.Center); aLbl.Size = UDim2.new(1, 0, 1,
-                0)
-            ab.MouseEnter:Connect(function()
-                Tw(ab, 0.09, "Quad", "Out",
-                    { BackgroundColor3 = Color3.fromRGB(38, 38, 52) })
-            end)
-            ab.MouseLeave:Connect(function()
-                Tw(ab, 0.09, "Quad", "Out",
-                    { BackgroundColor3 = Color3.fromRGB(28, 28, 38) })
-            end)
-            actionBtns[def[2]] = { btn = ab, lbl = aLbl }
-        end
+                local ACTitle = NewLabel(ACCard, "Auto Collect Coconut", 13, TEXT, true)
+                ACTitle.Size = UDim2.new(1, 0, 0, 30); ACTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-        local createBtn = NewBtn(listCard, UDim2.new(1, -20, 0, 38), UDim2.new(0, 10, 0, gridY + 3 * 42),
-            Color3.fromRGB(32, 32, 44))
-        Corner(createBtn, 8)
-        Stroke(createBtn, STROKE2, 1)
-        local createLbl = NewLabel(createBtn, "Create config", 13, TEXT, false, Enum.TextXAlignment.Center)
-        createLbl.Size = UDim2.new(1, 0, 1, 0)
-        createBtn.MouseEnter:Connect(function()
-            Tw(createBtn, 0.1, "Quad", "Out",
-                { BackgroundColor3 = Color3.fromRGB(40, 40, 55) })
-        end)
-        createBtn.MouseLeave:Connect(function()
-            Tw(createBtn, 0.1, "Quad", "Out",
-                { BackgroundColor3 = Color3.fromRGB(32, 32, 44) })
-        end)
+                local ACHolder = NewFrame(ACCard, UDim2.new(1, -16, 0, 34), UDim2.new(0, 8, 0, 32), PANEL, 1)
 
-        listCard.Size = UDim2.new(1, 0, 0, gridY + 3 * 42 + 38 + 10)
+                local row = NewBtn(ACHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                Corner(row, 5)
 
-        local RightPanel = NewFrame(page, UDim2.new(0.52, -4, 0, 380), UDim2.new(0.48, 1, 0, 3), PANEL)
-        RightPanel.LayoutOrder = 2
-        Corner(RightPanel, 8); Stroke(RightPanel, STROKE, 1)
+                local active = false
+                local usedThisMatch = false
 
-        local RPTitle = NewLabel(RightPanel, "Settings Info", 13, TEXT, true)
-        RPTitle.Name = "SectionTitle"
-        RPTitle.Size = UDim2.new(1, 0, 0, 30); RPTitle.TextXAlignment = Enum.TextXAlignment.Center
+                local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+                Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
+                local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = false
 
-        local InfoScroll = NewFrame(RightPanel, UDim2.new(1, -16, 1, -42), UDim2.new(0, 8, 0, 42), BG, 1)
-        Instance.new("UIListLayout", InfoScroll).Padding = UDim.new(0, 10)
+                local rowLbl = NewLabel(row, "Collect Now", 13, TEXT)
+                rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
 
-        totalLbl = NewLabel(InfoScroll, "Total Configs: 0", 11, TEXT)
-        totalLbl.Size = UDim2.new(1, 0, 0, 20)
-
-        local autoLbl = NewLabel(InfoScroll, "Autoload: none", 11, ACCENT)
-        autoLbl.Size = UDim2.new(1, 0, 0, 20)
-
-        local function RefreshAutoLbl()
-            local n = GetAutoload(); autoLbl.Text = "Autoload: " .. (n or "none"); autoLbl.TextColor3 = n and ACCENT or
-                DIM
-        end
-        RefreshAutoLbl()
-
-        local detailTitle = NewLabel(InfoScroll, "Config Details:", 11, ACCENT)
-        detailTitle.Size = UDim2.new(1, 0, 0, 20)
-
-        local infoList = NewLabel(InfoScroll, "Select a config to see details", 11, DIM)
-        infoList.Size = UDim2.new(1, 0, 0, 160); infoList.TextWrapped = true; infoList.TextYAlignment = Enum
-            .TextYAlignment.Top
-
-        getgenv().UpdateConfigDetails = function(name)
-            if not name then
-                infoList.Text = "No config selected"; return
-            end
-            local path = CONFIG_FOLDER .. "/" .. name .. ".json"
-            if not isfile(path) then
-                infoList.Text = "File not found"; return
-            end
-            local ok, d = pcall(function() return HS:JSONDecode(readfile(path)) end)
-            if not (ok and d) then
-                infoList.Text = "Could not read config"; return
-            end
-
-            local txt = "• Created: " .. (d.created or "N/A") .. "\n"
-            txt = txt .. "• GameID: " .. tostring(d.placeId or "N/A") .. "\n\n"
-
-            local function listEnabled(tbl, labelMap)
-                if not tbl then return "" end
-                local out = ""
-                for key, label in pairs(labelMap) do
-                    if tbl[key] == true then
-                        out = out .. "  ✓ " .. label .. "\n"
+                row.MouseButton1Click:Connect(function()
+                    if not IsMatchActive() and IsMurderVsSheriffLobby() then
+                        NOTIFY("Auto Collect", "Only available in a match!", 3)
+                        return
                     end
-                end
-                return out
-            end
 
-            local aimbotMap = {
-                Enabled = "Aimbot",
-                DrawFov = "Draw FOV",
-                VisibleCheck = "Visible Check",
-                Humanize = "Humanize",
-                IgnoreDead = "Ignore Dead"
-            }
-            local aimbotLines = listEnabled(d.AIMBOT, aimbotMap)
-            if aimbotLines ~= "" then
-                txt = txt .. "Combat:\n" .. aimbotLines
-            end
+                    if usedThisMatch then
+                        NOTIFY("Auto Collect", "Already used this match!", 3)
+                        return
+                    end
 
-            local silentMap = {
-                Enabled = "Silent Aim",
-                AutoHead = "Auto Head",
-                AntiAim = "Anti-Aim",
-                NoRecoil = "No Recoil",
-                TargetLock = "Target Lock"
-            }
-            local silentLines = listEnabled(d.SILENT, silentMap)
-            if silentLines ~= "" then
-                txt = txt .. "Silent Aim:\n" .. silentLines
-            end
+                    active = true; usedThisMatch = true
+                    cbCheck.Visible = true; rowLbl.Text = "Collecting..."
 
-            local amMap = { Enabled = "Auto Match" }
-            local amLines = listEnabled(d.AM, amMap)
-            if amLines ~= "" then
-                txt = txt .. "Auto Match:\n" .. amLines
-            end
+                    task.spawn(function()
+                        local Event = game:GetService("ReplicatedStorage").Packages.Networking
+                            ["RE/Events/CollectEventSpawnable"]
+                        local gui = LP:FindFirstChild("PlayerGui") and LP.PlayerGui:FindFirstChild("Main")
+                        local currency = gui and gui:FindFirstChild("MainButtonsGui") and
+                            gui.MainButtonsGui:FindFirstChild("EventCurrency")
 
-            local espMap = {
-                Enabled = "ESP",
-                Names = "Player Names",
-                Boxes = "Boxes",
-                HealthBar = "Health Bars",
-                Skeleton = "Skeleton",
-                Snaplines = "Snaplines",
-                Chams = "Chams",
-                OffScreen = "Off-Screen Lines",
-                Bots = "Enable Bots"
-            }
-            local espLines = listEnabled(d.ESP, espMap)
-            if espLines ~= "" then
-                txt = txt .. "ESP:\n" .. espLines
-            end
+                        local lastVal = currency and currency.Text or ""
+                        local noChangeCount = 0
 
-            local worldMap = {
-                FullBright = "Full Bright", NoFog = "No Fog"
-            }
-            local worldLines = listEnabled(d.WORLD, worldMap)
-            if d.WORLD and d.WORLD.AtmosColor then
-                worldLines = worldLines .. "  ✓ Atmosphere Color\n"
-            end
-            if worldLines ~= "" then
-                txt = txt .. "World Visuals:\n" .. worldLines
-            end
+                        for i = 1, 100 do
+                            if not active then break end
+                            Event:FireServer()
+                            task.wait(0.03)
 
-            if txt:match("✓") == nil then
-                txt = txt .. "(No options enabled)"
-            end
+                            local currentVal = currency and currency.Text or ""
+                            if currentVal ~= lastVal then
+                                lastVal = currentVal; noChangeCount = 0
+                            else
+                                noChangeCount = noChangeCount + 1
+                            end
 
-            infoList.Text = txt
-        end
-
-        RefreshTotalCount()
-
-        createBtn.MouseButton1Click:Connect(function()
-            local n = nameBox.Text:match("^%s*(.-)%s*$")
-            if n == "" then
-                NOTIFY("Config", "Enter name!", 2); return
-            end
-            EnsureFolder(); local path = CONFIG_FOLDER .. "/" .. n .. ".json"
-            local data = CollectSettings()
-            local ok = pcall(function() writefile(path, HS:JSONEncode(data)) end)
-            if ok then
-                NOTIFY("Config", "Saved ✓", 2.5); nameBox.Text = ""; RefreshDD()
-            else
-                NOTIFY("Config", "Save failed", 3)
-            end
-        end)
-
-        actionBtns.load.btn.MouseButton1Click:Connect(function()
-            if not selectedConfig then
-                NOTIFY("Config", "Select one!", 2); return
-            end
-            local path = CONFIG_FOLDER .. "/" .. selectedConfig .. ".json"
-            if not isfile(path) then
-                NOTIFY("Config", "Not found!", 2); return
-            end
-            local ok, d = pcall(function() return HS:JSONDecode(readfile(path)) end)
-            if ok then ApplySettings(d) else NOTIFY("Config", "Load error!", 2) end
-        end)
-
-        actionBtns.overwrite.btn.MouseButton1Click:Connect(function()
-            if not selectedConfig then
-                NOTIFY("Config", "Select one!", 2); return
-            end
-            EnsureFolder(); local path = CONFIG_FOLDER .. "/" .. selectedConfig .. ".json"
-            local data = CollectSettings()
-            local ok = pcall(function() writefile(path, HS:JSONEncode(data)) end)
-            if ok then NOTIFY("Config", "Updated ✓", 2.5) else NOTIFY("Config", "Failed!", 2) end
-        end)
-
-        actionBtns.delete.btn.MouseButton1Click:Connect(function()
-            if not selectedConfig then
-                NOTIFY("Config", "Select one!", 2); return
-            end
-            local path = CONFIG_FOLDER .. "/" .. selectedConfig .. ".json"
-            local ok = pcall(delfile, path)
-            if ok then
-                NOTIFY("Config", "Deleted", 2); selectedConfig = nil; ddLbl.Text = "---"; RefreshDD(); RefreshAutoLbl()
-            else
-                NOTIFY("Config", "Failed!", 2)
-            end
-        end)
-
-        actionBtns.refresh.btn.MouseButton1Click:Connect(function()
-            RefreshDD(); NOTIFY("Config", "Refreshed", 1.5)
-        end)
-
-        actionBtns.setauto.btn.MouseButton1Click:Connect(function()
-            if not selectedConfig then
-                NOTIFY("Config", "Select one!", 2); return
-            end
-            local ok = pcall(function() writefile(AUTOLOAD_FILE, HS:JSONEncode({ name = selectedConfig })) end)
-            if ok then
-                NOTIFY("Config", "Autoload set!", 2.5); RefreshAutoLbl()
-            else
-                NOTIFY("Config", "Failed!", 2)
-            end
-        end)
-
-        actionBtns.resetauto.btn.MouseButton1Click:Connect(function()
-            local ok = pcall(delfile, AUTOLOAD_FILE)
-            if ok or not isfile(AUTOLOAD_FILE) then
-                NOTIFY("Config", "Cleared", 2); RefreshAutoLbl()
-            else
-                NOTIFY("Config", "Failed!", 2)
-            end
-        end)
-    end
-end
-
-do
-    local PreferencesPage = ConfigPreferencesTabPage or navPages["Preferences"]
-    if PreferencesPage then
-        local isEmbeddedInConfig = PreferencesPage == ConfigPreferencesTabPage
-        local prefScroll
-
-        if isEmbeddedInConfig then
-            prefScroll = NewScroll(PreferencesPage, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-        else
-            local PREF_TAB_H = 44
-            local PrefTabBar = NewFrame(PreferencesPage, UDim2.new(1, 0, 0, PREF_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-            local PrefTabSep = NewFrame(PreferencesPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, PREF_TAB_H), STROKE)
-
-            local PrefContentRow = NewFrame(PreferencesPage,
-                UDim2.new(1, -20, 1, -(PREF_TAB_H + 3 + 20)),
-                UDim2.new(0, 10, 0, PREF_TAB_H + 3 + 10),
-                BG, 1
-            )
-
-            local prefTabBtn = NewBtn(PrefTabBar, UDim2.new(0, 96, 1, 0), UDim2.new(0, 18, 0, 0), BG, 1)
-            local prefTabLbl = NewLabel(prefTabBtn, "Preferences", 13, ACCENT, true)
-            prefTabLbl.Name = "SectionTitle"
-            prefTabLbl.Size = UDim2.new(1, 0, 1, 0)
-            prefTabLbl.TextXAlignment = Enum.TextXAlignment.Center
-
-            local prefTabLine = NewFrame(PreferencesPage, UDim2.new(0, 96, 0, 2),
-                UDim2.new(0, 18, 0, PREF_TAB_H - 2), ACCENT)
-            Corner(prefTabLine, 1)
-            table.insert(accentFills, prefTabLine)
-
-            prefScroll = NewScroll(PrefContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-        end
-
-        prefScroll.ClipsDescendants = true
-
-        local ignoreCard = NewFrame(prefScroll, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
-        Corner(ignoreCard, 8)
-        Stroke(ignoreCard, STROKE, 1)
-
-        local ignoreTitle = NewLabel(ignoreCard, "Ignore Players", 13, TEXT, true)
-        ignoreTitle.Name = "SectionTitle"
-        ignoreTitle.Size = UDim2.new(1, 0, 0, 30)
-        ignoreTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-        local ignoreDesc = NewLabel(ignoreCard,
-            "Los jugadores ignorados se excluyen de ESP, aimbot, silent aim, insta kill, kill aura y hitbox expander.",
-            11, DIM)
-        ignoreDesc.Position = UDim2.new(0, 10, 0, 36)
-        ignoreDesc.Size = UDim2.new(1, -20, 0, 32)
-        ignoreDesc.TextWrapped = true
-        ignoreDesc.TextYAlignment = Enum.TextYAlignment.Top
-
-        local ignoredCountLbl = NewLabel(ignoreCard, "Ignored: 0", 11, ACCENT, true, Enum.TextXAlignment.Right)
-        ignoredCountLbl.Name = "SectionTitle"
-        ignoredCountLbl.Position = UDim2.new(0, 10, 0, 70)
-        ignoredCountLbl.Size = UDim2.new(1, -20, 0, 18)
-
-        local searchWrap = NewFrame(ignoreCard, UDim2.new(1, -16, 0, 30), UDim2.new(0, 8, 0, 96),
-            Color3.fromRGB(15, 15, 20))
-        Corner(searchWrap, 5)
-        Stroke(searchWrap, STROKE2, 1)
-
-        local searchBox = Instance.new("TextBox")
-        searchBox.Size = UDim2.new(1, -16, 1, 0)
-        searchBox.Position = UDim2.new(0, 8, 0, 0)
-        searchBox.BackgroundTransparency = 1
-        searchBox.BorderSizePixel = 0
-        searchBox.TextColor3 = TEXT
-        searchBox.PlaceholderColor3 = DIM
-        searchBox.PlaceholderText = "Buscar jugador por nombre o display..."
-        searchBox.Text = ""
-        searchBox.TextSize = 11
-        searchBox.TextScaled = true
-        local sFit = Instance.new("UITextSizeConstraint")
-        sFit.MaxTextSize = 11
-        sFit.MinTextSize = 8
-        sFit.Parent = searchBox
-        searchBox.Font = Enum.Font.Gotham
-        searchBox.ClearTextOnFocus = false
-        searchBox.Parent = searchWrap
-
-        local buttonRow = NewFrame(ignoreCard, UDim2.new(1, -16, 0, 32), UDim2.new(0, 8, 0, 132), BG, 1)
-
-        local refreshBtn = NewBtn(buttonRow, UDim2.new(0.5, -4, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
-        Corner(refreshBtn, 6)
-        Stroke(refreshBtn, STROKE2, 1)
-        local refreshLbl = NewLabel(refreshBtn, "Refresh List", 11, TEXT, false, Enum.TextXAlignment.Center)
-        refreshLbl.Size = UDim2.new(1, 0, 1, 0)
-
-        local clearBtn = NewBtn(buttonRow, UDim2.new(0.5, -4, 1, 0), UDim2.new(0.5, 4, 0, 0), Color3.fromRGB(36, 36, 48))
-        Corner(clearBtn, 6)
-        Stroke(clearBtn, STROKE2, 1)
-        local clearLbl = NewLabel(clearBtn, "Clear Ignored", 11, TEXT, false, Enum.TextXAlignment.Center)
-        clearLbl.Size = UDim2.new(1, 0, 1, 0)
-
-        local playersList = NewScroll(ignoreCard, UDim2.new(1, -16, 1, -180), UDim2.new(0, 8, 0, 172),
-            Color3.fromRGB(15, 15, 20))
-        playersList.ScrollBarThickness = 4
-        playersList.ScrollBarImageColor3 = ACCENT
-        Corner(playersList, 6)
-        Stroke(playersList, STROKE2, 1)
-
-        local playersLayout = Instance.new("UIListLayout", playersList)
-        playersLayout.Padding = UDim.new(0, 4)
-        playersLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-        local function RefreshIgnoredCount()
-            local total = 0
-            for _ in pairs(NormalizeIgnoredPlayers()) do
-                total = total + 1
-            end
-            ignoredCountLbl.Text = "Ignored: " .. total
-        end
-
-        local function RefreshIgnorePlayers()
-            if not playersList or not playersList.Parent then return end
-            playersList.ScrollBarImageColor3 = ACCENT
-
-            for _, child in ipairs(playersList:GetChildren()) do
-                if child:IsA("TextButton") or child.Name == "EmptyState" then
-                    child:Destroy()
-                end
-            end
-
-            local query = searchBox.Text:lower()
-            local serverPlayers = Players:GetPlayers()
-            table.sort(serverPlayers, function(a, b)
-                return a.Name:lower() < b.Name:lower()
-            end)
-
-            local shown = 0
-            for _, player in ipairs(serverPlayers) do
-                if player ~= LP then
-                    local haystack = (player.Name .. " " .. player.DisplayName):lower()
-                    if query == "" or string.find(haystack, query, 1, true) then
-                        shown = shown + 1
-
-                        local row = NewBtn(playersList, UDim2.new(1, -8, 0, 40), nil, Color3.fromRGB(32, 32, 42), 1)
-                        row.Name = "PlayerRow"
-                        Corner(row, 5)
-
-                        local ignored = IsIgnoredPlayer(player)
-                        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
-                            Color3.fromRGB(36, 36, 48))
-                        Corner(cbBg, 3)
-                        Stroke(cbBg, STROKE2, 1)
-
-                        local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-                        cbCheck.Size = UDim2.new(1, 0, 1, 0)
-
-                        local nameLbl = NewLabel(row, player.Name, 12, TEXT, true)
-                        nameLbl.Position = UDim2.new(0, 34, 0, 4)
-                        nameLbl.Size = UDim2.new(1, -95, 0, 16)
-                        nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-
-                        local displayLbl = NewLabel(row, "Display: " .. player.DisplayName, 10, DIM)
-                        displayLbl.Position = UDim2.new(0, 34, 0, 20)
-                        displayLbl.Size = UDim2.new(1, -95, 0, 14)
-                        displayLbl.TextTruncate = Enum.TextTruncate.AtEnd
-
-                        local statusLbl = NewLabel(row, "", 10, DIM, true, Enum.TextXAlignment.Right)
-                        statusLbl.Position = UDim2.new(1, -60, 0, 0)
-                        statusLbl.Size = UDim2.new(0, 50, 1, 0)
-
-                        local function ApplyRowState()
-                            cbCheck.Visible = ignored
-                            statusLbl.Text = ignored and "Ignored" or "Active"
-                            statusLbl.TextColor3 = ignored and ACCENT or DIM
-                            Tw(cbBg, 0.1, "Quad", "Out", {
-                                BackgroundColor3 = ignored and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                            })
+                            if i > 20 and noChangeCount > 15 then break end
                         end
 
-                        row.MouseButton1Click:Connect(function()
-                            ignored = not ignored
-                            SetIgnoredPlayer(player.Name, ignored)
-                            SaveUI()
-                            RefreshIgnoredCount()
-                            ApplyRowState()
-                        end)
+                        active = false; cbCheck.Visible = false
+                        rowLbl.Text = "Collect (Locked)"; rowLbl.TextColor3 = DIM
+                        row.AutoButtonColor = false
+                        NOTIFY("Auto Collect", "Finished collecting!", 3)
+                    end)
+                end)
+                row.MouseEnter:Connect(function()
+                    Tw(row, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+                end)
+                row.MouseLeave:Connect(function()
+                    Tw(row, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                end)
 
-                        row.MouseEnter:Connect(function()
-                            Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 })
-                        end)
-                        row.MouseLeave:Connect(function()
-                            Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 })
-                        end)
-
-                        ApplyRowState()
+                task.spawn(function()
+                    local wasInMatch = false
+                    while task.wait(2) do
+                        if getgenv().FLUX_SESSION ~= MySession then break end
+                        local nowInMatch = IsMatchActive()
+                        if nowInMatch and not wasInMatch then
+                            usedThisMatch = false
+                            rowLbl.Text = "Collect Now"
+                            rowLbl.TextColor3 = TEXT
+                            row.AutoButtonColor = true
+                        end
+                        wasInMatch = nowInMatch
                     end
+                end)
+            end
+            local function BuildAutoCollectCoconutsCard()
+                local ACCard = NewFrame(page, UDim2.new(0.52, -4, 0, 80), UDim2.new(0.48, 1, 0, 3), PANEL)
+                Corner(ACCard, 8); Stroke(ACCard, STROKE, 1)
+
+                local ACTitle = NewLabel(ACCard, "Auto Collect Eggs", 13, TEXT, true)
+                ACTitle.Size = UDim2.new(1, 0, 0, 30); ACTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local ACHolder = NewFrame(ACCard, UDim2.new(1, -16, 0, 34), UDim2.new(0, 8, 0, 32), PANEL, 1)
+
+                local row = NewBtn(ACHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                Corner(row, 5)
+
+                local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+                Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
+                local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = false
+
+                local rowLbl = NewLabel(row, "Enable Auto Collect", 13, TEXT)
+                rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
+
+                local autoCollectEnabled = false
+                local addedConn = nil
+                local spawnConn = nil
+
+                row.MouseButton1Click:Connect(function()
+                    autoCollectEnabled = not autoCollectEnabled
+                    cbCheck.Visible = autoCollectEnabled
+                    Tw(cbBg, 0.1, "Quad", "Out",
+                        {
+                            BackgroundColor3 = autoCollectEnabled and Color3.fromRGB(48, 50, 70) or
+                                Color3.fromRGB(36, 36, 48)
+                        })
+
+                    if autoCollectEnabled then
+                        task.spawn(function()
+                            local droppables = workspace:WaitForChild("IgnoreThese"):WaitForChild("Pickups")
+                                :WaitForChild(
+                                    "Droppables")
+
+                            local function touchEgg(part)
+                                if not autoCollectEnabled then return end
+                                local lp = game:GetService("Players").LocalPlayer
+                                local char = lp.Character or lp.CharacterAdded:Wait()
+                                local hrp = char:WaitForChild("HumanoidRootPart")
+                                if not hrp then return end
+                                pcall(firetouchinterest, hrp, part, 0)
+                                task.wait(0.1)
+                                pcall(firetouchinterest, hrp, part, 1)
+                            end
+
+                            local function collectAll()
+                                if not autoCollectEnabled then return end
+                                for _, child in ipairs(droppables:GetChildren()) do
+                                    if child.Name:match("^Egg") then
+                                        task.spawn(touchEgg, child)
+                                    end
+                                end
+                            end
+
+                            addedConn = droppables.ChildAdded:Connect(function(child)
+                                if child.Name:match("^Egg") then
+                                    task.spawn(touchEgg, child)
+                                end
+                            end)
+
+                            local lp = game:GetService("Players").LocalPlayer
+                            spawnConn = lp.CharacterAdded:Connect(function()
+                                task.wait(1)
+                                collectAll()
+                            end)
+
+                            collectAll()
+                        end)
+                    else
+                        if addedConn then
+                            addedConn:Disconnect(); addedConn = nil
+                        end
+                        if spawnConn then
+                            spawnConn:Disconnect(); spawnConn = nil
+                        end
+                    end
+                end)
+
+                row.MouseEnter:Connect(function()
+                    Tw(row, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+                end)
+                row.MouseLeave:Connect(function()
+                    Tw(row, 0.1, "Quad", "Out",
+                        { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                end)
+            end
+
+            local function BuildRollbackDupeCard()
+                local RDCard = NewFrame(page, UDim2.new(0.46, 0, 0, 80), UDim2.new(0, 1, 0, 353), PANEL)
+                Corner(RDCard, 8); Stroke(RDCard, STROKE, 1)
+
+                local RDTitle = NewLabel(RDCard, "Rollback Dupe", 13, TEXT, true)
+                RDTitle.Size = UDim2.new(1, 0, 0, 30); RDTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local RDHolder = NewFrame(RDCard, UDim2.new(1, -16, 0, 40), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local executeBtn = NewBtn(RDHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(36, 36, 48))
+                Corner(executeBtn, 6); Stroke(executeBtn, STROKE2, 1)
+
+                local executeLbl = NewLabel(executeBtn, "Execute Rollback", 11, TEXT, true, Enum.TextXAlignment.Center)
+                executeLbl.Size = UDim2.new(1, 0, 1, 0)
+
+                executeBtn.MouseButton1Click:Connect(function()
+                    pcall(function()
+                        local Event = game:GetService("ReplicatedStorage"):FindFirstChild("Events") and
+                            game:GetService("ReplicatedStorage").Events:FindFirstChild("HUD") and
+                            game:GetService("ReplicatedStorage").Events.HUD:FindFirstChild("Settings")
+                        if Event then
+                            Event:FireServer("CrosshairID", "\xED\xBE\x8C", "Crosshair")
+                            NOTIFY("Rollback Dupe", "Rollback event fired!", 3)
+                        else
+                            NOTIFY("Rollback Dupe", "Settings event not found!", 3)
+                        end
+                    end)
+                end)
+
+                executeBtn.MouseEnter:Connect(function()
+                    Tw(executeBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                end)
+                executeBtn.MouseLeave:Connect(function()
+                    Tw(executeBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+                end)
+            end
+
+            local function BuildLocalPlayerCard()
+                local yPos = 3
+                local LPCardHeight = 160
+                local LPHolderHeight = 120
+
+                if IsMurderVsSheriff() then
+                    yPos = 123
+                    LPCardHeight = 240
+                    LPHolderHeight = 200
+                elseif IsHitmark() then
+                    yPos = 3
+                    LPCardHeight = 380
+                    LPHolderHeight = 340
+                elseif IsDuelist() then
+                    yPos = 3
+                    LPCardHeight = 340
+                    LPHolderHeight = 300
                 end
+
+                local LPCard = NewFrame(page, UDim2.new(0.46, 0, 0, LPCardHeight), UDim2.new(0, 1, 0, yPos), PANEL)
+                Corner(LPCard, 8); Stroke(LPCard, STROKE, 1)
+
+                local LPTitle = NewLabel(LPCard, "Local Player", 13, TEXT, true)
+                LPTitle.Size = UDim2.new(1, 0, 0, 30); LPTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local LPHolder = NewFrame(LPCard, UDim2.new(1, -16, 0, LPHolderHeight), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local list = Instance.new("UIListLayout", LPHolder)
+                list.Padding = UDim.new(0, 4)
+                list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                list.SortOrder = Enum.SortOrder.LayoutOrder
+
+                local speedCheck, speedSlider
+                if IsMurderVsSheriff() or IsDuelist() then
+                    speedCheck = AddCardSetting(LPHolder, "Speed Boost", getgenv().LOCAL_PLAYER_CFG.SpeedEnabled,
+                        function(v)
+                            getgenv().LOCAL_PLAYER_CFG.SpeedEnabled = v
+                            local char = LP.Character
+                            local hum = char and char:FindFirstChildOfClass("Humanoid")
+                            if hum and not v then
+                                if IsDuelist() then
+                                    hum:SetAttribute("ForceSpeed", nil)
+                                else
+                                    hum.WalkSpeed = 16
+                                end
+                            end
+                        end, getgenv().LOCAL_PLAYER_CFG.SpeedKey, function(k)
+                            getgenv().LOCAL_PLAYER_CFG.SpeedKey = k.Name
+                        end)
+                    speedCheck.LayoutOrder = 1
+
+                    speedSlider = AddCardSlider(LPHolder, "Walk Speed", 16, 40, getgenv().LOCAL_PLAYER_CFG.Speed,
+                        function(v)
+                            getgenv().LOCAL_PLAYER_CFG.Speed = v
+                        end)
+                    speedSlider.LayoutOrder = 2
+                end
+
+                local flyCheck = AddCardSetting(LPHolder, "Player Fly", getgenv().LOCAL_PLAYER_CFG.FlyEnabled,
+                    function(v)
+                        getgenv().LOCAL_PLAYER_CFG.FlyEnabled = v
+                    end, getgenv().LOCAL_PLAYER_CFG.FlyKey, function(k)
+                        getgenv().LOCAL_PLAYER_CFG.FlyKey = k.Name
+                    end)
+                flyCheck.LayoutOrder = 3
+
+                local flySlider = AddCardSlider(LPHolder, "Fly Speed", 0, 1000, getgenv().LOCAL_PLAYER_CFG.FlySpeed,
+                    function(v)
+                        getgenv().LOCAL_PLAYER_CFG.FlySpeed = v
+                    end)
+                flySlider.LayoutOrder = 4
+
+                local invisCheck
+                if not IsBronxDuels() and not IsDuelist() then
+                    invisCheck = AddCardSetting(LPHolder, "Invisibility", getgenv().LOCAL_PLAYER_CFG.InvisEnabled,
+                        function(v)
+                            getgenv().LOCAL_PLAYER_CFG.InvisEnabled = v
+                        end, getgenv().LOCAL_PLAYER_CFG.InvisKey, function(k)
+                            getgenv().LOCAL_PLAYER_CFG.InvisKey = k.Name
+                            if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
+                        end)
+                    invisCheck.LayoutOrder = 5
+                end
+
+                local infCheck, spinCheck, spinSlider, gravCheck, gravSlider
+                if IsHitmark() or IsDuelist() then
+                    infCheck = AddCardSetting(LPHolder, "Infinite Jump", getgenv().FUN_CFG.InfJump, function(v)
+                        getgenv().FUN_CFG.InfJump = v
+                    end)
+                    infCheck.LayoutOrder = 10
+
+                    spinCheck = AddCardSetting(LPHolder, "Spinbot", getgenv().FUN_CFG.Spinbot, function(v)
+                        getgenv().FUN_CFG.Spinbot = v
+                    end)
+                    spinCheck.LayoutOrder = 11
+
+                    spinSlider = AddCardSlider(LPHolder, "Spin Speed", 10, 100, getgenv().FUN_CFG.SpinSpeed, function(v)
+                        getgenv().FUN_CFG.SpinSpeed = v
+                    end)
+                    spinSlider.LayoutOrder = 12
+                end
+
+                if IsHitmark() then
+                    gravCheck = AddCardSetting(LPHolder, "Custom Gravity", getgenv().FUN_CFG.GravityEnabled, function(v)
+                        getgenv().FUN_CFG.GravityEnabled = v
+                    end)
+                    gravCheck.LayoutOrder = 13
+
+                    gravSlider = AddCardSlider(LPHolder, "Gravity Value", 0, 500, getgenv().FUN_CFG.GravityValue,
+                        function(v)
+                            getgenv().FUN_CFG.GravityValue = v
+                        end)
+                    gravSlider.LayoutOrder = 14
+                end
+
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    if (IsMurderVsSheriff() or IsDuelist()) and speedCheck and speedSlider then
+                        local active = getgenv().LOCAL_PLAYER_CFG.SpeedEnabled
+                        local cbBg = speedCheck:FindFirstChildOfClass("Frame")
+                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                        if cbCheck then cbCheck.Visible = active end
+                        if cbBg then
+                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                        end
+
+                        local kbBox = speedCheck:FindFirstChild("KeybindBox")
+                        local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                        if bindLbl then
+                            bindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.SpeedKey)
+                        end
+
+                        local speedVal = getgenv().LOCAL_PLAYER_CFG.Speed
+                        local topFrame = speedSlider:FindFirstChildOfClass("Frame")
+                        if topFrame then
+                            for _, child in ipairs(topFrame:GetChildren()) do
+                                if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
+                                    child.Text = tostring(speedVal)
+                                end
+                            end
+                        end
+                        local trackBtn = speedSlider:FindFirstChildOfClass("TextButton")
+                        local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
+                        local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
+                        local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
+                        if fillFrame and knobFrame then
+                            local rel = math.clamp((speedVal - 16) / (250 - 16), 0, 1)
+                            fillFrame.Size = UDim2.new(rel, 0, 1, 0)
+                            local knobS = IS_MOBILE and 18 or 12
+                            knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
+                        end
+                    end
+
+                    local fActive = getgenv().LOCAL_PLAYER_CFG.FlyEnabled
+                    local fCbBg = flyCheck:FindFirstChildOfClass("Frame")
+                    local fCbCheck = fCbBg and fCbBg:FindFirstChildOfClass("TextLabel")
+                    if fCbCheck then fCbCheck.Visible = fActive end
+                    if fCbBg then
+                        fCbBg.BackgroundColor3 = fActive and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                    end
+
+                    local fKbBox = flyCheck:FindFirstChild("KeybindBox")
+                    local fBindLbl = fKbBox and fKbBox:FindFirstChild("BindLabel")
+                    if fBindLbl then
+                        fBindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.FlyKey)
+                    end
+
+                    local flyVal = getgenv().LOCAL_PLAYER_CFG.FlySpeed
+                    local fTopFrame = flySlider:FindFirstChildOfClass("Frame")
+                    if fTopFrame then
+                        for _, child in ipairs(fTopFrame:GetChildren()) do
+                            if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
+                                child.Text = tostring(flyVal)
+                            end
+                        end
+                    end
+                    local fTrackBtn = flySlider:FindFirstChildOfClass("TextButton")
+                    local fTrackBG = fTrackBtn and fTrackBtn:FindFirstChild("TrackBG")
+                    local fFillFrame = fTrackBG and fTrackBG:FindFirstChild("Fill")
+                    local fKnobFrame = fTrackBtn and fTrackBtn:FindFirstChild("Knob")
+                    if fFillFrame and fKnobFrame then
+                        local rel = math.clamp(flyVal / 1000, 0, 1)
+                        fFillFrame.Size = UDim2.new(rel, 0, 1, 0)
+                        local knobS = IS_MOBILE and 18 or 12
+                        fKnobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
+                    end
+
+                    if invisCheck then
+                        local iActive = getgenv().LOCAL_PLAYER_CFG.InvisEnabled
+                        local iCbBg = invisCheck:FindFirstChildOfClass("Frame")
+                        local iCbCheck = iCbBg and iCbBg:FindFirstChildOfClass("TextLabel")
+                        if iCbCheck then iCbCheck.Visible = iActive end
+                        if iCbBg then
+                            iCbBg.BackgroundColor3 = iActive and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                        end
+
+                        local iKbBox = invisCheck:FindFirstChild("KeybindBox")
+                        local iBindLbl = iKbBox and iKbBox:FindFirstChild("BindLabel")
+                        if iBindLbl then
+                            iBindLbl.Text = tostring(getgenv().LOCAL_PLAYER_CFG.InvisKey)
+                        end
+                    end
+
+                    if IsHitmark() or IsDuelist() then
+                        if infCheck then
+                            local active = getgenv().FUN_CFG.InfJump
+                            local cbBg = infCheck:FindFirstChildOfClass("Frame")
+                            local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                            if cbCheck then cbCheck.Visible = active end
+                            if cbBg then
+                                cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or
+                                    Color3.fromRGB(36, 36, 48)
+                            end
+                        end
+                        if spinCheck then
+                            local active = getgenv().FUN_CFG.Spinbot
+                            local cbBg = spinCheck:FindFirstChildOfClass("Frame")
+                            local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                            if cbCheck then cbCheck.Visible = active end
+                            if cbBg then
+                                cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or
+                                    Color3.fromRGB(36, 36, 48)
+                            end
+                        end
+                        if spinSlider then
+                            local val = getgenv().FUN_CFG.SpinSpeed
+                            local topFrame = spinSlider:FindFirstChildOfClass("Frame")
+                            if topFrame then
+                                for _, child in ipairs(topFrame:GetChildren()) do
+                                    if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
+                                        child.Text = tostring(val)
+                                    end
+                                end
+                            end
+                            local trackBtn = spinSlider:FindFirstChildOfClass("TextButton")
+                            local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
+                            local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
+                            local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
+                            if fillFrame and knobFrame then
+                                local rel = math.clamp((val - 10) / 90, 0, 1)
+                                fillFrame.Size = UDim2.new(rel, 0, 1, 0)
+                                local knobS = IS_MOBILE and 18 or 12
+                                knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
+                            end
+                        end
+                        if gravCheck then
+                            local active = getgenv().FUN_CFG.GravityEnabled
+                            local cbBg = gravCheck:FindFirstChildOfClass("Frame")
+                            local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                            if cbCheck then cbCheck.Visible = active end
+                            if cbBg then
+                                cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or
+                                    Color3.fromRGB(36, 36, 48)
+                            end
+                        end
+                        if gravSlider then
+                            local val = getgenv().FUN_CFG.GravityValue
+                            local topFrame = gravSlider:FindFirstChildOfClass("Frame")
+                            if topFrame then
+                                for _, child in ipairs(topFrame:GetChildren()) do
+                                    if child:IsA("TextLabel") and child.TextXAlignment == Enum.TextXAlignment.Right then
+                                        child.Text = tostring(val)
+                                    end
+                                end
+                            end
+                            local trackBtn = gravSlider:FindFirstChildOfClass("TextButton")
+                            local trackBG = trackBtn and trackBtn:FindFirstChild("TrackBG")
+                            local fillFrame = trackBG and trackBG:FindFirstChild("Fill")
+                            local knobFrame = trackBtn and trackBtn:FindFirstChild("Knob")
+                            if fillFrame and knobFrame then
+                                local rel = math.clamp(val / 500, 0, 1)
+                                fillFrame.Size = UDim2.new(rel, 0, 1, 0)
+                                local knobS = IS_MOBILE and 18 or 12
+                                knobFrame.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
+                            end
+                        end
+                    end
+                end)
             end
 
-            if shown == 0 then
-                local emptyLbl = NewLabel(playersList,
-                    query ~= "" and "No hay jugadores que coincidan." or "No hay otros jugadores en el servidor.",
-                    11, DIM, false, Enum.TextXAlignment.Center)
-                emptyLbl.Name = "EmptyState"
-                emptyLbl.Size = UDim2.new(1, -8, 0, 32)
+            if IsMurderVsSheriff() then
+                BuildAutoMatchCard()
+                BuildAutoCollectHatsCard()
+            elseif IsHitmark() then
+                BuildAutoCollectCoconutsCard()
+            elseif IsDuelist() then
+                BuildEquipEmoteCard()
+                BuildKillSoundCard()
+                BuildRollbackDupeCard()
             end
-
-            RefreshIgnoredCount()
+            BuildLocalPlayerCard()
         end
+    end
 
-        searchBox:GetPropertyChangedSignal("Text"):Connect(RefreshIgnorePlayers)
+    local CombatPage = navPages["Combat"]
+    local TAB_H = 44
+    local TabBar = NewFrame(CombatPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
 
-        refreshBtn.MouseButton1Click:Connect(RefreshIgnorePlayers)
-        refreshBtn.MouseEnter:Connect(function()
-            Tw(refreshBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+    local TabSep = NewFrame(CombatPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
+
+    local ContentRow = NewFrame(CombatPage,
+        UDim2.new(1, -20, 1, -(TAB_H + 3 + 20)),
+        UDim2.new(0, 10, 0, TAB_H + 3 + 10),
+        BG, 1
+    )
+
+    local TABS = { "Aimbot", "Silent Aim", "Kill Aura" }
+    local tabPages = {}
+    local activeTabIdx = 1
+    local tabBtns = {}
+    local tabLines = {}
+
+    local tx = 18
+    for i, name in ipairs(TABS) do
+        local tw2 = 82
+        local tb = NewBtn(TabBar, UDim2.new(0, tw2, 1, 0), UDim2.new(0, tx, 0, 0), BG, 1)
+        local tl = NewLabel(tb, name, 13, i == 1 and ACCENT or DIM, i == 1)
+        tl.Size = UDim2.new(1, 0, 1, 0)
+        tl.TextXAlignment = Enum.TextXAlignment.Center
+
+        local ul = NewFrame(CombatPage, UDim2.new(0, tw2, 0, 2), UDim2.new(0, tx, 0, TAB_H - 2), ACCENT)
+        ul.Visible = i == 1
+        Corner(ul, 1)
+
+        local page = NewFrame(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+        page.Visible = (i == 1)
+
+        local pageLayout = Instance.new("UIListLayout")
+        pageLayout.FillDirection = Enum.FillDirection.Horizontal
+        pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        pageLayout.Padding = UDim.new(0, 10)
+        pageLayout.Parent = page
+
+        tabPages[i] = page
+        tabBtns[i] = { btn = tb, lbl = tl }
+        tabLines[i] = ul
+        tx = tx + tw2 + 14
+
+        tb.MouseButton1Click:Connect(function()
+            if activeTabIdx == i then return end
+
+            tabBtns[activeTabIdx].lbl.TextColor3 = DIM
+            tabBtns[activeTabIdx].lbl.Font = Enum.Font.Gotham
+            tabLines[activeTabIdx].Visible = false
+            tabPages[activeTabIdx].Visible = false
+
+            activeTabIdx = i
+            tl.TextColor3 = ACCENT
+            tl.Font = Enum.Font.GothamBold
+            ul.Visible = true
+            page.Visible = true
         end)
-        refreshBtn.MouseLeave:Connect(function()
-            Tw(refreshBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-        end)
-
-        clearBtn.MouseButton1Click:Connect(function()
-            getgenv().PREFERENCES_CFG.IgnoredPlayers = {}
-            SaveUI()
-            RefreshIgnorePlayers()
-        end)
-        clearBtn.MouseEnter:Connect(function()
-            Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-        end)
-        clearBtn.MouseLeave:Connect(function()
-            Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-        end)
-
-        table.insert(getgenv().FLUX_CONNS, Players.PlayerAdded:Connect(RefreshIgnorePlayers))
-        table.insert(getgenv().FLUX_CONNS, Players.PlayerRemoving:Connect(function(player)
-            if IsIgnoredPlayer(player) then
-                RefreshIgnoredCount()
-            end
-            RefreshIgnorePlayers()
-        end))
-
-        getgenv().FLUX_PREFERENCES_REFRESH = RefreshIgnorePlayers
-        RefreshIgnorePlayers()
-    end
-end
-
-do
-    local Handle = NewBtn(Root, UDim2.new(0, 24, 0, 24), UDim2.new(1, 0, 1, 0), Color3.new(1, 1, 1), 1)
-    Handle.AnchorPoint = Vector2.new(0.5, 0.5)
-    Handle.ZIndex = 200
-
-    local hIcon = Instance.new("Frame")
-    hIcon.Size = UDim2.new(0, 12, 0, 12)
-    hIcon.Position = UDim2.new(0.5, -6, 0.5, -6)
-    hIcon.BackgroundTransparency = 1
-    hIcon.ZIndex = 201
-    hIcon.Parent = Handle
-
-    local clipper = Instance.new("Frame")
-    clipper.Name = "Clipper"
-    clipper.Size = UDim2.new(0, 14, 0, 14)
-    clipper.Position = UDim2.new(0.5, -7, 0.5, -7)
-    clipper.BackgroundTransparency = 1
-    clipper.ClipsDescendants = true
-    clipper.ZIndex = 201
-    clipper.Parent = Handle
-
-    local circle = Instance.new("Frame")
-    circle.Name = "Circle"
-    circle.Size = UDim2.new(0, 24, 0, 24)
-    circle.Position = UDim2.new(1, -24, 1, -24)
-    circle.BackgroundTransparency = 1
-    circle.ZIndex = 202
-    circle.Parent = clipper
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.new(1, 1, 1)
-    stroke.Thickness = 2
-    stroke.Transparency = 0.8
-    stroke.Parent = circle
-    Corner(circle, 12)
-
-    local resizing = false
-    local rStart = nil
-    local rW, rH = 0, 0
-
-    Handle.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            resizing = true
-            rStart = inp.Position
-            rW = Root.AbsoluteSize.X
-            rH = Root.AbsoluteSize.Y
-            inp.Changed:Connect(function()
-                if inp.UserInputState == Enum.UserInputState.End then resizing = false end
-            end)
-        end
-    end)
-
-    UIS.InputChanged:Connect(function(inp)
-        if resizing and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-            local d = inp.Position - rStart
-            curW = math.clamp(rW + d.X, 620, 1100)
-            curH = math.clamp(rH + d.Y, 380, 700)
-            Tw(Root, 0.04, "Linear", "Out", { Size = UDim2.new(0, curW, 0, curH) })
-        end
-    end)
-
-    Handle.MouseEnter:Connect(function() Tw(stroke, 0.09, "Quad", "Out", { Transparency = 0 }) end)
-    Handle.MouseLeave:Connect(function()
-        if not resizing then
-            Tw(stroke, 0.09, "Quad", "Out", { Transparency = 0.8 })
-        end
-    end)
-end
-
-local stLines = {}
-local stBtns = {}
-local activeStIdx = 1
-
-local vsLines = {}
-local vsBtns = {}
-local activeVsIdx = 1
-
-local UI_THEMES = {
-    ["Default"]     = { accent = Color3.fromRGB(238, 240, 255), side = Color3.fromRGB(15, 15, 20), bg = Color3.fromRGB(20, 20, 26), gradBot = nil },
-    ["Dark Blue"]   = { accent = Color3.fromRGB(100, 190, 255), side = Color3.fromRGB(12, 12, 20), bg = Color3.fromRGB(14, 16, 26), gradBot = Color3.fromRGB(50, 140, 255) },
-    ["Dark Purple"] = { accent = Color3.fromRGB(210, 130, 255), side = Color3.fromRGB(16, 10, 24), bg = Color3.fromRGB(18, 12, 30), gradBot = Color3.fromRGB(180, 50, 240) },
-    ["Dark White"]  = { accent = Color3.fromRGB(230, 235, 255), side = Color3.fromRGB(18, 18, 25), bg = Color3.fromRGB(22, 22, 30), gradBot = Color3.fromRGB(255, 255, 255) },
-}
-local currentUITheme = "Default"
-
-local function applyUITheme(name)
-    local t = UI_THEMES[name]
-    if not t then return end
-    currentUITheme = name
-    ACCENT = t.accent
-
-    local dur = 1.2
-    local ease = "Exponential"
-
-    Tw(Sidebar, dur, ease, "Out", { BackgroundColor3 = t.side })
-    Tw(RightBox, dur, ease, "Out", { BackgroundColor3 = t.bg })
-
-    if t.gradBot then
-        local sideSeq     = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, t.side),
-            ColorSequenceKeypoint.new(0.4, t.side:Lerp(t.gradBot, 0.35)),
-            ColorSequenceKeypoint.new(1, t.gradBot)
-        })
-        local rightSeq    = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, t.bg),
-            ColorSequenceKeypoint.new(0.4, t.bg:Lerp(t.gradBot, 0.35)),
-            ColorSequenceKeypoint.new(1, t.gradBot)
-        })
-        sideGrad.Color    = sideSeq
-        rightGrad.Color   = rightSeq
-        sideGrad.Enabled  = true
-        rightGrad.Enabled = true
-    else
-        sideGrad.Enabled  = false
-        rightGrad.Enabled = false
     end
 
-    if currentNav then
+    local AimbotPage = tabPages[1]
 
-        currentNav.sym.ImageColor3 = t.accent
-        currentNav.lbl.TextColor3 = t.accent
-        currentNav.dot.BackgroundColor3 = t.accent
-    end
+    local LeftPanel = NewFrame(AimbotPage, UDim2.new(0.54, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
+    LeftPanel.LayoutOrder = 1
+    Corner(LeftPanel, 8)
+    Stroke(LeftPanel, STROKE, 1)
 
-    for _, f in ipairs(accentFills) do
-        if f:IsA("UIGradient") then
-            f.Color = ColorSequence.new(t.side, t.bg)
-        else
-            Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
-        end
-    end
+    local LPTitle = NewLabel(LeftPanel, "Aimbot", 13, TEXT, true)
+    LPTitle.Name = "SectionTitle"
+    LPTitle.Size = UDim2.new(1, 0, 0, 30)
+    LPTitle.Position = UDim2.new(0, 0, 0, 0)
+    LPTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-    for _, v in ipairs(SG:GetDescendants()) do
-        if v:IsA("TextLabel") then
-            if v.Name == "SectionTitle" or v.TextColor3 == ACCENT then
-                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
-            end
-        elseif v:IsA("ScrollingFrame") then
-            Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
-        elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == ACCENT) then
-            Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
-        end
-    end
+    local CheckHolder = NewFrame(LeftPanel, UDim2.new(1, -16, 0, 210), UDim2.new(0, 8, 0, 36), PANEL, 1)
+    local CheckList = Instance.new("UIListLayout")
+    CheckList.SortOrder = Enum.SortOrder.LayoutOrder
+    CheckList.Padding = UDim.new(0, 2)
+    CheckList.Parent = CheckHolder
 
-    for _, ul in ipairs(tabLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
-    if tabBtns[activeTabIdx] then Tw(tabBtns[activeTabIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
-    for _, ul in ipairs(stLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
-    if stBtns[activeStIdx] then Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
-    for _, ul in ipairs(vsLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
-    if vsBtns[activeVsIdx] then Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
-    if getgenv().FLUX_CONFIG_TAB_THEME_SYNC then pcall(getgenv().FLUX_CONFIG_TAB_THEME_SYNC) end
-
-    for _, v in ipairs(SG:GetDescendants()) do
-        if v:IsA("TextLabel") and v.Text == "✓" then
-            Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
-        end
-    end
-
-    for _, dat in pairs(activeNotifs) do
-        Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
-        Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
-    end
-
-    Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
-
-    if getgenv().FLUX_KB_HUD_ACCENT_UPDATE then getgenv().FLUX_KB_HUD_ACCENT_UPDATE() end
-    if getgenv().FLUX_PREFERENCES_REFRESH then pcall(getgenv().FLUX_PREFERENCES_REFRESH) end
-end
-
-local VisualsPage = navPages["Visuals"]
-local VS_TAB_H = 44
-local VS_TabBar = NewFrame(VisualsPage, UDim2.new(1, 0, 0, VS_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-
-local VS_TabSep = NewFrame(VisualsPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, VS_TAB_H), STROKE)
-local VS_Content = NewFrame(VisualsPage, UDim2.new(1, -20, 1, -(VS_TAB_H + 20)), UDim2.new(0, 10, 0, VS_TAB_H + 10), BG,
-    1)
-
-local VS_TABS = { "Player Visuals", "World Visuals" }
-local vsPages = {}
-
-local vs_x = 18
-for i, name in ipairs(VS_TABS) do
-    local tw = (i == 1 and 110 or 110)
-    local tb = NewBtn(VS_TabBar, UDim2.new(0, tw, 1, 0), UDim2.new(0, vs_x, 0, 0), BG, 1)
-    local tl = NewLabel(tb, name, 13, i == 1 and ACCENT or DIM, i == 1)
-    tl.Size = UDim2.new(1, 0, 1, 0)
-    tl.TextXAlignment = Enum.TextXAlignment.Center
-
-    local ul = NewFrame(VisualsPage, UDim2.new(0, tw, 0, 2), UDim2.new(0, vs_x, 0, VS_TAB_H - 2), ACCENT)
-    ul.Visible = i == 1
-    Corner(ul, 1)
-
-    local page = NewScroll(VS_Content, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-    page.Visible = (i == 1)
-
-    vsPages[i] = page
-    vsBtns[i] = { btn = tb, lbl = tl }
-    vsLines[i] = ul
-    vs_x = vs_x + tw + 14
-
-    tb.MouseButton1Click:Connect(function()
-        if activeVsIdx == i then return end
-        vsBtns[activeVsIdx].lbl.TextColor3 = DIM
-        vsBtns[activeVsIdx].lbl.Font = Enum.Font.Gotham
-        vsLines[activeVsIdx].Visible = false
-        vsPages[activeVsIdx].Visible = false
-
-        activeVsIdx = i
-        tl.TextColor3 = ACCENT
-        tl.Font = Enum.Font.GothamBold
-        ul.Visible = true
-        page.Visible = true
-    end)
-end
-
-do
-    local espPage = vsPages[1]
-    local list = Instance.new("UIListLayout")
-    list.Padding = UDim.new(0, 4)
-    list.Parent = NewFrame(espPage, UDim2.new(1, -20, 1, -20), UDim2.new(0, 10, 0, 10), BG, 1)
-
-    local espCard = NewFrame(espPage, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
-    Corner(espCard, 8)
-    Stroke(espCard, STROKE, 1)
-
-    local espTitle = NewLabel(espCard, "ESP Options", 12, TEXT, true)
-    espTitle.Name = "SectionTitle"
-    espTitle.Size = UDim2.new(1, 0, 0, 30)
-    espTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    local espContent = NewFrame(espCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-    local espList = Instance.new("UIListLayout")
-    espList.Padding = UDim.new(0, 2)
-    espList.Parent = espContent
-
-    getgenv().ESP_CFG = {
-        Enabled = false,
-        Names = false,
-        DisplayNames = false,
-        Tools = false,
-        Distance = false,
-        HealthBar = false,
-        HealthText = false,
-        Skeleton = false,
-        Chams = false,
-        Snaplines = false,
-        OffScreen = false,
-        HealthColor1 = Color3.fromRGB(255, 0, 0),
-        HealthColor2 = Color3.fromRGB(0, 255, 0),
-        Boxes = false,
-        BoxFill = false,
-        BoxColor = Color3.new(1, 1, 1),
-        FillColor = Color3.new(1, 1, 1),
-        TracerOrigin = "Bottom",
-        FontSize = 11,
-        FontName = "GothamBold",
-        MaxDistance = 500,
-        IgnoreTeam = false,
-        LocalGunCham = false,
-        LocalGunChamColor1 = Color3.fromRGB(0, 255, 255)
+    local CHECKS = {
+        { label = "Aimbot",              badge = "None" },
+        { label = "Draw Fov",            badge = nil },
+        { label = "Visible Check",       badge = nil },
+        { label = "Ignore Dead Players", badge = nil },
+        { label = "Humanize Aimbot",     badge = nil },
     }
 
-    AddESPSetting(espContent, "Enabled", false, 0, true,
-        function(v, c, k)
-            getgenv().ESP_CFG.Enabled = v; if k then getgenv().ESP_CFG.Keybind = k end
-        end)
-    AddESPSetting(espContent, "Enable Bots", false, 0, false, function(v)
-        getgenv().ESP_CFG.Bots = v
-        if not v then
+    for i, data in ipairs(CHECKS) do
+        local row = NewBtn(CheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+        row.LayoutOrder = i
+        Corner(row, 5)
 
-            if getgenv().ESP_CACHE then
-                for target, e in pairs(getgenv().ESP_CACHE) do
-                    if not Players:GetPlayerFromCharacter(target) then
-                        e.FRM.Visible = false
-                        if e.CHAM then
-                            e.CHAM:Destroy(); e.CHAM = nil
-                        end
-                        if e.TCHAM then
-                            e.TCHAM:Destroy(); e.TCHAM = nil
-                        end
+        local bLbl = nil
+
+        local checked = false
+        if data.label == "Ignore Dead Players" then checked = true end
+        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+        Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
+        local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+        cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
+
+        local rowLbl = NewLabel(row, data.label, 13, TEXT)
+        rowLbl.Position = UDim2.new(0, 32, 0, 0)
+        local rightOffset = (data.badge and not IS_MOBILE) and -96 or -38
+        rowLbl.Size = UDim2.new(1, rightOffset, 1, 0)
+        rowLbl.TextScaled = true
+        local fit = Instance.new("UITextSizeConstraint")
+        fit.MaxTextSize = 13
+        fit.MinTextSize = 8
+        fit.Parent = rowLbl
+
+        local function ToggleState(state, silent)
+            if state ~= nil then checked = state else checked = not checked end
+            cbCheck.Visible = checked
+            Tw(cbBg, 0.1, "Quad", "Out", {
+                BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+            })
+
+            if data.label == "Aimbot" then
+                getgenv().AIMBOT_CFG.Enabled = checked
+            elseif data.label == "Draw Fov" then
+                getgenv().AIMBOT_CFG.DrawFov = checked
+            elseif data.label == "Visible Check" then
+                getgenv().AIMBOT_CFG.VisibleCheck = checked
+            elseif data.label == "Humanize Aimbot" then
+                getgenv().AIMBOT_CFG.Humanize = checked
+            elseif data.label == "Ignore Dead Players" then
+                getgenv().AIMBOT_CFG.IgnoreDead = checked
+            end
+            if not silent then NOTIFY(data.label, checked and "Enabled" or "Disabled", 2) end
+        end
+
+        getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+        table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+            local ns = checked
+            if data.label == "Aimbot" then
+                ns = getgenv().AIMBOT_CFG.Enabled
+
+                if data.badge and getgenv().AIMBOT_CFG.Keybind and bLbl then
+                    local k = getgenv().AIMBOT_CFG.Keybind
+                    local name = (typeof(k) == "EnumItem" and k.Name or tostring(k):gsub("Enum.UserInputType.", ""))
+                    if name ~= "None" and name ~= "" then
+                        bLbl.Text = name:sub(1, 6)
+                    else
+                        bLbl.Text = "None"
                     end
                 end
+            elseif data.label == "Draw Fov" then
+                ns = getgenv().AIMBOT_CFG.DrawFov
+            elseif data.label == "Visible Check" then
+                ns = getgenv().AIMBOT_CFG.VisibleCheck
+            elseif data.label == "Humanize Aimbot" then
+                ns = getgenv().AIMBOT_CFG.Humanize
+            elseif data.label == "Ignore Dead Players" then
+                ns = getgenv().AIMBOT_CFG.IgnoreDead
             end
-        end
-    end)
+            if ns == nil then ns = checked end
+            ToggleState(ns, true)
+        end)
 
-    if IsMurderVsSheriff() or IsDuelist() then
-        AddESPSetting(espContent, "Ignore Team", false, 0, false, function(v) getgenv().ESP_CFG.IgnoreTeam = v end)
-    end
-    AddESPSetting(espContent, "Player Names", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.Names = v; if c then getgenv().ESP_CFG.NameColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Display Names", false, 0, false, function(v) getgenv().ESP_CFG.DisplayNames = v end)
-    AddESPSetting(espContent, "Equipped Tool", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.Tools = v; if c then getgenv().ESP_CFG.ToolColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Distance", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.Distance = v; if c then getgenv().ESP_CFG.DistColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Health Bars", false, 2, false,
-        function(v, c)
-            getgenv().ESP_CFG.HealthBar = v; if c then
-                getgenv().ESP_CFG.HealthColor1 = c[1]; getgenv().ESP_CFG.HealthColor2 = c[2]
-            end
-        end, { Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0) })
-    AddESPSetting(espContent, "Health Text", false, 0, false, function(v) getgenv().ESP_CFG.HealthText = v end)
-    AddESPSetting(espContent, "Skeleton", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.Skeleton = v; if c then getgenv().ESP_CFG.SkelColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Chams", false, 2, false,
-        function(v, c)
-            getgenv().ESP_CFG.Chams = v; if c then
-                getgenv().ESP_CFG.ChamColor1 = c[1]; getgenv().ESP_CFG.ChamColor2 = c[2]
-            end
-        end, { Color3.new(1, 1, 1), Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Tool Chams", false, 2, false,
-        function(v, c)
-            getgenv().ESP_CFG.ToolChams = v; if c then
-                getgenv().ESP_CFG.ToolChamColor1 = c[1]; getgenv().ESP_CFG.ToolChamColor2 = c[2]
-            end
-        end, { Color3.new(1, 1, 1), Color3.new(1, 1, 1) })
-    if IsDuelist() then
-        AddESPSetting(espContent, "Local Gun Cham", false, 1, false,
-            function(v, c)
-                getgenv().ESP_CFG.LocalGunCham = v; if c then
-                    getgenv().ESP_CFG.LocalGunChamColor1 = c[1]
+        if data.badge and not IS_MOBILE then
+            local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55), 1)
+            kbBox.Name = "KeybindBox"
+            Corner(kbBox, 4)
+            Stroke(kbBox, STROKE2, 1)
+
+            bLbl = NewLabel(kbBox, data.badge, 10, TEXT, false, Enum.TextXAlignment.Center)
+            bLbl.Size = UDim2.new(1, 0, 1, 0)
+
+            local waiting = false
+            kbBox.MouseButton1Click:Connect(function()
+                if waiting then return end
+                waiting = true
+                bLbl.Text = "..."
+                bLbl.TextColor3 = Color3.new(1, 1, 1)
+                Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
+
+                local conn; conn = UIS.InputBegan:Connect(function(inp, gpe)
+                    if gpe then return end
+                    if inp.UserInputType == Enum.UserInputType.Keyboard or inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.MouseButton2 then
+                        waiting = false
+                        local boundKey = inp.KeyCode ~= Enum.KeyCode.Unknown and inp.KeyCode or inp.UserInputType
+                        local name = (typeof(boundKey) == "EnumItem" and boundKey.Name or tostring(boundKey):gsub("Enum.UserInputType.", ""))
+                        bLbl.Text = name:sub(1, 6)
+                        bLbl.TextColor3 = TEXT
+                        Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                        if data.label == "Aimbot" then
+                            getgenv().AIMBOT_CFG.Keybind = boundKey
+                            if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
+                        end
+                        conn:Disconnect()
+                    end
+                end)
+            end)
+
+            table.insert(getgenv().FLUX_CONNS, UIS.InputBegan:Connect(function(inp, gp)
+                if gp or waiting then return end
+                local currentBind = (data.label == "Aimbot") and getgenv().AIMBOT_CFG.Keybind or nil
+                if not currentBind then return end
+
+                local match = false
+                if typeof(currentBind) == "EnumItem" then
+                    if currentBind.EnumType == Enum.KeyCode then
+                        match = (inp.KeyCode == currentBind)
+                    elseif currentBind.EnumType == Enum.UserInputType then
+                        match = (inp.UserInputType == currentBind)
+                    end
                 end
-            end, { Color3.fromRGB(0, 255, 255) })
-    end
-    AddESPSetting(espContent, "Snaplines", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.Snaplines = v; if c then getgenv().ESP_CFG.SnapColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(espContent, "Off-Screen Lines", false, 0, false, function(v) getgenv().ESP_CFG.OffScreen = v end)
 
-    local pbCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 140), UDim2.new(0.48, 1, 0, 3), PANEL)
-    Corner(pbCard, 8)
-    Stroke(pbCard, STROKE, 1)
-
-    local pbTitle = NewLabel(pbCard, "Player Boxes", 12, TEXT, true)
-    pbTitle.Name = "SectionTitle"
-    pbTitle.Size = UDim2.new(1, 0, 0, 30)
-    pbTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    local pbContent = NewFrame(pbCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-    local pbList = Instance.new("UIListLayout", pbContent)
-    pbList.Padding = UDim.new(0, 2)
-
-    AddESPSetting(pbContent, "Boxes", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.Boxes = v; if c then getgenv().ESP_CFG.BoxColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(pbContent, "Fill Boxes", false, 1, false,
-        function(v, c)
-            getgenv().ESP_CFG.BoxFill = v; if c then getgenv().ESP_CFG.FillColor = c[1] end
-        end, { Color3.new(1, 1, 1) })
-    AddESPSetting(pbContent, "Animated Boxes", false, 0, false,
-        function(v)
-            getgenv().ESP_CFG.AnimBoxFill = v
-        end)
-
-    local vsCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 260), UDim2.new(0.48, 1, 0, 153), PANEL)
-    Corner(vsCard, 8)
-    Stroke(vsCard, STROKE, 1)
-
-    local vsTitle = NewLabel(vsCard, "Player Visual Settings", 12, TEXT, true)
-    vsTitle.Name = "SectionTitle"
-    vsTitle.Size = UDim2.new(1, 0, 0, 30)
-    vsTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    local vsContent = NewFrame(vsCard, UDim2.new(1, -20, 1, -44), UDim2.new(0, 10, 0, 36), BG, 1)
-    local vsList = Instance.new("UIListLayout", vsContent)
-    vsList.Padding = UDim.new(0, 8)
-
-    local fontRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
-    Corner(fontRow, 6)
-    Stroke(fontRow, STROKE2, 1)
-    local fontSel = NewLabel(fontRow, "Text Font: GothamBold", 11, TEXT)
-    fontSel.Position = UDim2.new(0, 10, 0, 0)
-    fontSel.Size = UDim2.new(1, -30, 1, 0)
-    local fontArr = Instance.new("ImageLabel", fontRow)
-    fontArr.Size = UDim2.new(0, 12, 0, 12)
-    fontArr.Position = UDim2.new(1, -22, 0.5, -6)
-    fontArr.BackgroundTransparency = 1
-    fontArr.Image = "rbxassetid://6034818372"
-    fontArr.ImageColor3 = DIM
-
-    local FONT_OPTS = { "GothamBold", "Gotham", "Code", "Roboto", "Arcade", "SciFi" }
-    local fontOpen = false
-    local fontPop = NewFrame(vsCard, UDim2.new(1, -20, 0, 0), UDim2.new(0, 10, 0, 36 + 36), Color3.fromRGB(28, 28, 38))
-    fontPop.ZIndex = 100
-    fontPop.ClipsDescendants = true
-    fontPop.Visible = false
-    Corner(fontPop, 6)
-    Stroke(fontPop, STROKE2, 1)
-    local fontPList = Instance.new("UIListLayout", fontPop)
-
-    for _, f in ipairs(FONT_OPTS) do
-        local b = NewBtn(fontPop, UDim2.new(1, 0, 0, 26), nil, Color3.fromRGB(45, 45, 60), 1)
-        b.ZIndex = 101
-        local l = NewLabel(b, f, 11, TEXT)
-        l.Position = UDim2.new(0, 10, 0, 0)
-        l.Size = UDim2.new(1, -10, 1, 0)
-        l.ZIndex = 102
-        b.MouseEnter:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 }) end)
-        b.MouseLeave:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
-        b.MouseButton1Click:Connect(function()
-            fontSel.Text = "Text Font: " .. f
-            getgenv().ESP_CFG.FontName = f
-            fontOpen = false
-            Tw(fontPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
-            task.delay(0.16, function() fontPop.Visible = false end)
-            Tw(fontArr, 0.15, "Quad", "Out", { Rotation = 0 })
-        end)
-    end
-
-    local fontBtn = NewBtn(fontRow, UDim2.new(1, 0, 1, 0), nil, BG, 1)
-    fontBtn.MouseButton1Click:Connect(function()
-        fontOpen = not fontOpen
-        if fontOpen then
-            fontPop.Size = UDim2.new(1, -20, 0, 0)
-            fontPop.Visible = true
-            Tw(fontPop, 0.18, "Quad", "Out", { Size = UDim2.new(1, -20, 0, #FONT_OPTS * 26) })
-            Tw(fontArr, 0.18, "Quad", "Out", { Rotation = 180 })
-        else
-            Tw(fontPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
-            task.delay(0.16, function() fontPop.Visible = false end)
-            Tw(fontArr, 0.15, "Quad", "Out", { Rotation = 0 })
+                if match then
+                    ToggleState()
+                    if getgenv().FLUX_UI_UPDATE_FUNCS then
+                        for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do pcall(f) end
+                    end
+                end
+            end))
         end
-    end)
 
-    local function AddVSSlider(parent, label, min, max, default, suffix, callback)
+        row.MouseButton1Click:Connect(function() ToggleState() end)
+        row.MouseEnter:Connect(function()
+            Tw(row, 0.1, "Quad", "Out", { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+        end)
+        row.MouseLeave:Connect(function()
+            Tw(row, 0.1, "Quad", "Out", { BackgroundTransparency = 1, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+        end)
+    end
+
+    local targetPartDd = AddDropdown(LeftPanel, { "Head", "UpperTorso", "HumanoidRootPart" }, "Head", function(v)
+        getgenv().AIMBOT_CFG.TargetPart = v
+    end)
+    targetPartDd.Position = UDim2.new(0, 8, 0, 260)
+    targetPartDd.Size = UDim2.new(0.48, -12, 0, 32)
+
+    local aimModeDd = AddDropdown(LeftPanel, { "Mouse Aim", "Camera Aim" }, "Mouse Aim", function(v)
+        getgenv().AIMBOT_CFG.AimMode = v
+    end)
+    aimModeDd.Position = UDim2.new(0.52, 4, 0, 260)
+    aimModeDd.Size = UDim2.new(0.48, -12, 0, 32)
+
+    local RightPanel = NewFrame(AimbotPage, UDim2.new(0.46, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
+    RightPanel.LayoutOrder = 2
+    Corner(RightPanel, 8)
+    Stroke(RightPanel, STROKE, 1)
+
+    local RPTitle = NewLabel(RightPanel, "Options", 13, TEXT, true)
+    RPTitle.Name = "SectionTitle"
+    RPTitle.Size = UDim2.new(1, 0, 0, 30)
+    RPTitle.Position = UDim2.new(0, 0, 0, 0)
+    RPTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+    local SliderHolder = NewFrame(RightPanel, UDim2.new(1, -20, 0, 260), UDim2.new(0, 10, 0, 36), PANEL, 1)
+    local SliderListLayout = Instance.new("UIListLayout")
+    SliderListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    SliderListLayout.Padding = UDim.new(0, 6)
+    SliderListLayout.Parent = SliderHolder
+
+    local SLIDERS = {
+        { label = "FOV",           min = 0, max = 500,  val = 150.0, key = "FOV" },
+        { label = "Distance",      min = 0, max = 1000, val = 500.0, key = "MaxDist" },
+        { label = "Hit Chance",    min = 0, max = 100,  val = 80.0,  key = "HitChance" },
+        { label = "Prediction",    min = 0, max = 2,    val = 0.165, key = "PredictionAmount" },
+        { label = "RCS Intensity", min = 0, max = 5,    val = 1.0,   key = "RCSAmount" },
+    }
+
+    local activeSliders = {}
+
+    for i, data in ipairs(SLIDERS) do
+        local row = NewFrame(SliderHolder, UDim2.new(1, 0, 0, 52), UDim2.new(0, 0, 0, 0), PANEL, 1)
+        row.LayoutOrder = i
+
+        local topRow = NewFrame(row, UDim2.new(1, 0, 0, 18), UDim2.new(0, 0, 0, 0), PANEL, 1)
+        local sLbl = NewLabel(topRow, data.label, 12, TEXT)
+        sLbl.Size = UDim2.new(0.6, 0, 1, 0)
+
+        local valLbl = NewLabel(topRow, string.format("%.1f", data.val), 12, TEXT, false, Enum.TextXAlignment.Right)
+        valLbl.Size = UDim2.new(0.4, 0, 1, 0)
+        valLbl.Position = UDim2.new(0.6, 0, 0, 0)
+
+        local trackH = IS_MOBILE and 30 or 5
+        local track = NewBtn(row, UDim2.new(1, 0, 0, trackH), UDim2.new(0, 0, 0, 26 - (trackH / 2 - 2)), PANEL, 1)
+
+        local trackBG = NewFrame(track, UDim2.new(1, 0, 0, 5), UDim2.new(0, 0, 0.5, -2), SLBG)
+        Corner(trackBG, 3)
+
+        local pct = (data.val - data.min) / (data.max - data.min)
+        local fill = NewFrame(trackBG, UDim2.new(pct, 0, 1, 0), UDim2.new(0, 0, 0, 0), SLFILL)
+        Corner(fill, 3)
+        accentFills[#accentFills + 1] = fill
+
+        local knobS = IS_MOBILE and 20 or 15
+        local knob = NewFrame(track, UDim2.new(0, knobS, 0, knobS), UDim2.new(pct, -knobS / 2, 0.5, -knobS / 2),
+            Color3.fromRGB(228, 230, 255))
+        Corner(knob, knobS / 2)
+        Stroke(knob, Color3.fromRGB(170, 174, 210), 1.5)
+
+        local dragging = false
+
+        local function DoUpdate(inputX)
+            local ap = track.AbsolutePosition.X
+            local as = track.AbsoluteSize.X
+            local rel = math.clamp((inputX - ap) / as, 0, 1)
+            local nv = math.floor((data.min + rel * (data.max - data.min)) * 10 + 0.5) / 10
+            valLbl.Text = string.format("%.1f", nv)
+            Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
+            Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
+
+            if data.key then getgenv().AIMBOT_CFG[data.key] = nv end
+        end
+
+        track.InputBegan:Connect(function(inp)
+            if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                getgenv()._CEN_SLD_ACTIVE = true
+                DoUpdate(inp.Position.X)
+            end
+        end)
+
+        UIS.InputChanged:Connect(function(inp)
+            if not dragging then return end
+            if inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch then
+                DoUpdate(inp.Position.X)
+            end
+        end)
+
+        UIS.InputEnded:Connect(function(inp)
+            if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                if dragging then
+                    dragging = false
+                    getgenv()._CEN_SLD_ACTIVE = false
+                end
+            end
+        end)
+    end
+
+    function AddESPSetting(parent, label, default, colorCount, hasKeybind, callback, defaultColors)
+        local row = NewBtn(parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+        row.LayoutOrder = #parent:GetChildren()
+        Corner(row, 5)
+
+        local checked = default
+        local curBind = nil
+        local waiting = false
+        local colorBtns = {}
+
+        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+        Corner(cbBg, 3)
+        Stroke(cbBg, STROKE2, 1)
+
+        local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+        cbCheck.Size = UDim2.new(1, 0, 1, 0)
+        cbCheck.Visible = checked
+
+        local rightOffset = -35
+        if hasKeybind and not IS_MOBILE then
+            rightOffset = -94
+        elseif colorCount and colorCount > 0 then
+            rightOffset = -(colorCount * 28 + 38)
+        end
+
+        local lbl = NewLabel(row, label, 13, TEXT)
+        lbl.Position = UDim2.new(0, 32, 0, 0)
+        lbl.Size = UDim2.new(1, rightOffset, 1, 0)
+        lbl.TextScaled = true
+        lbl.TextWrapped = true
+        local fit = Instance.new("UITextSizeConstraint")
+        fit.MaxTextSize = 13
+        fit.MinTextSize = 8
+        fit.Parent = lbl
+
+        local function updateUI()
+            cbCheck.Visible = checked
+            Tw(cbBg, 0.1, "Quad", "Out", {
+                BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+            })
+        end
+
+        local function ToggleState(state, silent)
+            if state ~= nil then checked = state else checked = not checked end
+            updateUI()
+            local clrs = {}
+            for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
+            if callback then callback(checked, clrs, curBind) end
+            if not silent then NOTIFY("Settings", label .. ": " .. (checked and "Enabled" or "Disabled"), 1.2) end
+        end
+
+        if colorCount and colorCount > 0 then
+            local offset = -30
+            for i = 1, colorCount do
+                local defClr = (defaultColors and defaultColors[i]) or Color3.new(1, 1, 1)
+                local cBtn = NewBtn(row, UDim2.new(0, 24, 0, 24), UDim2.new(1, offset, 0.5, -12), defClr)
+                Corner(cBtn, 4)
+                Stroke(cBtn, Color3.new(1, 1, 1), 1).Transparency = 0.5
+                table.insert(colorBtns, cBtn)
+
+                cBtn.MouseButton1Click:Connect(function()
+                    if getgenv().OpenPicker then
+                        getgenv().OpenPicker(cBtn.BackgroundColor3, cBtn.AbsolutePosition, function(c)
+                            cBtn.BackgroundColor3 = c
+                            local clrs = {}
+                            for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
+                            if callback then callback(checked, clrs) end
+                        end)
+                    end
+                end)
+                offset = offset - 28
+            end
+        end
+
+        if hasKeybind and not IS_MOBILE then
+            local badge = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10), Color3.fromRGB(45, 45, 55))
+            badge.Name = "KeybindBadge"
+            Corner(badge, 4)
+            Stroke(badge, STROKE2, 1)
+            local bLbl = NewLabel(badge, "None", 10, TEXT, false, Enum.TextXAlignment.Center)
+            bLbl.Size = UDim2.new(1, 0, 1, 0)
+
+            badge.MouseButton1Click:Connect(function()
+                if waiting then return end
+                waiting = true
+                bLbl.Text = "..."
+                bLbl.TextColor3 = Color3.new(1, 1, 1)
+                Tw(badge, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
+
+                local conn
+                conn = UIS.InputBegan:Connect(function(inp, gp)
+                    if gp then return end
+                    if inp.UserInputType == Enum.UserInputType.Keyboard then
+                        curBind = inp.KeyCode
+                        bLbl.Text = curBind.Name:sub(1, 4)
+                        bLbl.TextColor3 = TEXT
+                        Tw(badge, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                        waiting = false
+
+                        local clrs = {}
+                        for _, b in ipairs(colorBtns) do table.insert(clrs, b.BackgroundColor3) end
+                        if callback then callback(checked, clrs, curBind) end
+                        if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
+
+                        conn:Disconnect()
+                    end
+                end)
+            end)
+
+            UIS.InputBegan:Connect(function(inp, gp)
+                if gp or waiting or not curBind then return end
+                if inp.KeyCode == curBind then ToggleState() end
+            end)
+        end
+
+        getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+        table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+            local ns = checked
+            if label == "Enabled" then
+                ns = getgenv().ESP_CFG.Enabled
+                if hasKeybind and getgenv().ESP_CFG.Keybind then
+                    curBind = getgenv().ESP_CFG.Keybind
+                    local badge = row:FindFirstChild("KeybindBadge")
+                    local bLbl = badge and badge:FindFirstChildOfClass("TextLabel")
+                    if bLbl then
+                        bLbl.Text = (typeof(curBind) == "EnumItem" and curBind.Name or tostring(curBind)):sub(1, 4)
+                    end
+                end
+            elseif label == "Enable Bots" then
+                ns = getgenv().ESP_CFG.Bots
+            elseif label == "Ignore Team" then
+                ns = getgenv().ESP_CFG.IgnoreTeam
+            elseif label == "Player Names" then
+                ns = getgenv().ESP_CFG.Names
+            elseif label == "Display Names" then
+                ns = getgenv().ESP_CFG.DisplayNames
+            elseif label == "Equipped Tool" then
+                ns = getgenv().ESP_CFG.Tools
+            elseif label == "Distance" then
+                ns = getgenv().ESP_CFG.Distance
+            elseif label == "Health Bars" then
+                ns = getgenv().ESP_CFG.HealthBar
+            elseif label == "Health Text" then
+                ns = getgenv().ESP_CFG.HealthText
+            elseif label == "Skeleton" then
+                ns = getgenv().ESP_CFG.Skeleton
+            elseif label == "Chams" then
+                ns = getgenv().ESP_CFG.Chams
+            elseif label == "Tool Chams" then
+                ns = getgenv().ESP_CFG.ToolChams
+            elseif label == "Snaplines" then
+                ns = getgenv().ESP_CFG.Snaplines
+            elseif label == "Off-Screen Lines" then
+                ns = getgenv().ESP_CFG.OffScreen
+            elseif label == "Boxes" then
+                ns = getgenv().ESP_CFG.Boxes
+            elseif label == "Fill Boxes" then
+                ns = getgenv().ESP_CFG.BoxFill
+            elseif label == "Full Bright" then
+                ns = getgenv().WORLD_CFG.FullBright
+            elseif label == "No Fog" then
+                ns = getgenv().WORLD_CFG.NoFog
+            elseif label == "Atmosphere Color" then
+                ns = getgenv().WORLD_CFG.AtmosColor ~= nil
+            elseif label == "FPS Booster" then
+                ns = getgenv().WORLD_CFG.FPSBooster
+            end
+            if ns == nil then ns = checked end
+            ToggleState(ns, true)
+        end)
+
+        updateUI()
+        row.MouseButton1Click:Connect(function() ToggleState() end)
+        row.MouseEnter:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 }) end)
+        row.MouseLeave:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+
+        return row
+    end
+
+    function AddVSSlider(parent, label, min, max, default, suffix, callback)
         local row = NewFrame(parent, UDim2.new(1, 0, 0, 42), nil, BG, 1)
         local top = NewFrame(row, UDim2.new(1, 0, 0, 16), nil, BG, 1)
         NewLabel(top, label, 11, TEXT).Size = UDim2.new(0.6, 0, 1, 0)
-        local valL = NewLabel(top, tostring(default) .. (suffix or ""), 11, ACCENT, false, Enum.TextXAlignment.Right)
+        local valL = NewLabel(top, string.format("%.1f", default) .. (suffix or ""), 11, ACCENT, false,
+            Enum.TextXAlignment.Right)
         valL.Size = UDim2.new(0.4, 0, 1, 0)
         valL.Position = UDim2.new(0.6, 0, 0, 0)
 
@@ -4017,10 +2681,10 @@ do
         local dragging = false
         local function update(inputX)
             local rel = math.clamp((inputX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-            local val = math.floor(min + rel * (max - min))
-            valL.Text = tostring(val) .. (suffix or "")
-            fill.Size = UDim2.new(rel, 0, 1, 0)
-            knob.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
+            local val = math.floor((min + rel * (max - min)) * 10 + 0.5) / 10
+            valL.Text = string.format("%.1f", val) .. (suffix or "")
+            Tw(fill, 0.12, "Quad", "Out", { Size = UDim2.new(rel, 0, 1, 0) })
+            Tw(knob, 0.12, "Quad", "Out", { Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2) })
             callback(val)
         end
 
@@ -4037,607 +2701,1988 @@ do
         end)
         UIS.InputEnded:Connect(function(i)
             if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                dragging = false
-                getgenv()._CEN_SLD_ACTIVE = false
+                if dragging then
+                    dragging = false
+                    getgenv()._CEN_SLD_ACTIVE = false
+                    local val = math.floor((min + (knob.Position.X.Scale) * (max - min)) * 10 + 0.5) / 10
+                    NOTIFY("Settings", label .. ": " .. tostring(val) .. (suffix or ""), 1.5)
+                end
             end
         end)
     end
 
-    AddVSSlider(vsContent, "Text Size", 8, 24, 11, "", function(v) getgenv().ESP_CFG.FontSize = v end)
-    AddVSSlider(vsContent, "Max Render Distance", 50, 2000, 500, "st", function(v) getgenv().ESP_CFG.MaxDistance = v end)
+    local function SETUP_COLOR_PICKER()
+        if PICKER_GUI then return end
+        PICKER_GUI = Instance.new("ScreenGui")
+        PICKER_GUI.Name = "DrkPicker"
+        PICKER_GUI.DisplayOrder = 2147483647
+        PICKER_GUI.IgnoreGuiInset = true
+        pcall(function() PICKER_GUI.Parent = game:GetService("CoreGui") end)
+        if not PICKER_GUI.Parent then PICKER_GUI.Parent = PG end
 
-    local tracerRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
-    Corner(tracerRow, 6)
-    Stroke(tracerRow, STROKE2, 1)
-    local tracerSel = NewLabel(tracerRow, "Tracer Origin: " .. getgenv().ESP_CFG.TracerOrigin, 11, TEXT)
-    tracerSel.Position = UDim2.new(0, 10, 0, 0)
-    tracerSel.Size = UDim2.new(1, -30, 1, 0)
-    local tracerArr = Instance.new("ImageLabel", tracerRow)
-    tracerArr.Size = UDim2.new(0, 12, 0, 12)
-    tracerArr.Position = UDim2.new(1, -22, 0.5, -6)
-    tracerArr.BackgroundTransparency = 1
-    tracerArr.Image = "rbxassetid://6034818372"
-    tracerArr.ImageColor3 = DIM
+        PICKER_MAIN = NewFrame(PICKER_GUI, UDim2.new(0, 200, 0, 220), nil, Color3.fromRGB(30, 30, 40))
+        PICKER_MAIN.Visible = false
+        PICKER_MAIN.Active = true
+        Corner(PICKER_MAIN, 10)
+        Stroke(PICKER_MAIN, STROKE, 1)
 
-    local TRACER_OPTS = { "Bottom", "Center", "Top", "Mouse" }
-    local tracerOpen = false
-    local tracerPop = NewFrame(vsCard, UDim2.new(1, -20, 0, 0), UDim2.new(0, 10, 0, 212), Color3.fromRGB(28, 28, 38))
-    tracerPop.ZIndex = 110
-    tracerPop.ClipsDescendants = true
-    tracerPop.Visible = false
-    Corner(tracerPop, 6)
-    Stroke(tracerPop, STROKE2, 1)
-    local tracerPList = Instance.new("UIListLayout", tracerPop)
+        local sv = NewFrame(PICKER_MAIN, UDim2.new(1, -20, 0, 150), UDim2.new(0, 10, 0, 10), Color3.fromHSV(0, 1, 1))
+        sv.Active = true
+        Corner(sv, 6)
 
-    for _, t in ipairs(TRACER_OPTS) do
-        local b = NewBtn(tracerPop, UDim2.new(1, 0, 0, 26), nil, Color3.fromRGB(45, 45, 60), 1)
-        b.ZIndex = 111
-        local l = NewLabel(b, t, 11, TEXT)
-        l.Position = UDim2.new(0, 10, 0, 0)
-        l.Size = UDim2.new(1, -10, 1, 0)
-        l.ZIndex = 112
-        b.MouseEnter:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 }) end)
-        b.MouseLeave:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
-        b.MouseButton1Click:Connect(function()
-            tracerSel.Text = "Tracer Origin: " .. t
-            getgenv().ESP_CFG.TracerOrigin = t
-            tracerOpen = false
-            Tw(tracerPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
-            task.delay(0.16, function() tracerPop.Visible = false end)
-            Tw(tracerArr, 0.15, "Quad", "Out", { Rotation = 0 })
-            NOTIFY("Visuals", "Snapline Position: " .. t, 1.5)
+        local white = NewFrame(sv, UDim2.new(1, 0, 1, 0), nil, Color3.new(1, 1, 1))
+        Corner(white, 6)
+        local wg = Instance.new("UIGradient", white)
+        wg.Transparency = NumberSequence.new(0, 1)
+
+        local black = NewFrame(sv, UDim2.new(1, 0, 1, 0), nil, Color3.new(0, 0, 0))
+        Corner(black, 6)
+        local bg = Instance.new("UIGradient", black)
+        bg.Rotation = 90
+        bg.Transparency = NumberSequence.new(1, 0)
+
+        local cursor = NewFrame(sv, UDim2.new(0, 10, 0, 10), UDim2.new(1, -5, 0, -5), Color3.new(1, 1, 1))
+        Corner(cursor, 10)
+        Stroke(cursor, Color3.new(0, 0, 0), 2)
+
+        local hue = NewFrame(PICKER_MAIN, UDim2.new(1, -20, 0, 12), UDim2.new(0, 10, 0, 170), Color3.new(1, 1, 1))
+        hue.Active = true
+        Corner(hue, 6)
+        local hg = Instance.new("UIGradient", hue)
+        hg.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromHSV(0, 1, 1)),
+            ColorSequenceKeypoint.new(0.16, Color3.fromHSV(0.16, 1, 1)),
+            ColorSequenceKeypoint.new(0.33, Color3.fromHSV(0.33, 1, 1)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromHSV(0.5, 1, 1)),
+            ColorSequenceKeypoint.new(0.66, Color3.fromHSV(0.66, 1, 1)),
+            ColorSequenceKeypoint.new(0.83, Color3.fromHSV(0.83, 1, 1)),
+            ColorSequenceKeypoint.new(1, Color3.fromHSV(1, 1, 1))
+        })
+
+        local hcursor = NewFrame(hue, UDim2.new(0, 4, 1, 4), UDim2.new(0, 0, 0.5, -2), Color3.new(1, 1, 1))
+        Corner(hcursor, 2)
+        Stroke(hcursor, Color3.new(0, 0, 0), 1)
+
+        local ch, cs, cv = 0, 1, 1
+        local function Update()
+            local c = Color3.fromHSV(ch, cs, cv)
+            sv.BackgroundColor3 = Color3.fromHSV(ch, 1, 1)
+            cursor.Position = UDim2.new(cs, -5, 1 - cv, -5)
+            hcursor.Position = UDim2.new(ch, -2, 0.5, -9)
+            if PICKER_CALLBACK then PICKER_CALLBACK(c) end
+        end
+
+        local function HandleInput(obj, cb)
+            local d = false
+            obj.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    d = true;
+                    getgenv()._CEN_PKR_ACTIVE = true
+                    cb(i)
+                end
+            end)
+            UIS.InputChanged:Connect(function(i)
+                if d and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+                    cb(i)
+                end
+            end)
+            UIS.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    d = false;
+                    getgenv()._CEN_PKR_ACTIVE = false
+                end
+            end)
+        end
+
+        HandleInput(sv, function(i)
+            local x = math.clamp((i.Position.X - sv.AbsolutePosition.X) / sv.AbsoluteSize.X, 0, 1)
+            local y = math.clamp((i.Position.Y - sv.AbsolutePosition.Y) / sv.AbsoluteSize.Y, 0, 1)
+            cs, cv = x, 1 - y
+            Update()
+        end)
+        HandleInput(hue, function(i)
+            ch = math.clamp((i.Position.X - hue.AbsolutePosition.X) / hue.AbsoluteSize.X, 0, 1)
+            Update()
+        end)
+
+        UIS.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 and PICKER_MAIN.Visible then
+                local mp = UIS:GetMouseLocation()
+                local p = PICKER_MAIN.AbsolutePosition
+                local s = PICKER_MAIN.AbsoluteSize
+                if mp.X < p.X or mp.X > p.X + s.X or mp.Y < p.Y + 36 or mp.Y > p.Y + s.Y + 36 then
+                    PICKER_MAIN.Visible = false
+                    PICKER_OPEN = false
+                end
+            end
+        end)
+
+        getgenv().OpenPicker = function(cur, pos, cb)
+            ch, cs, cv = cur:ToHSV()
+            PICKER_CALLBACK = cb
+            PICKER_MAIN.Position = UDim2.new(0, pos.X - 210, 0, pos.Y - 50)
+            PICKER_MAIN.Visible = true
+            PICKER_OPEN = true
+            Update()
+        end
+    end
+    SETUP_COLOR_PICKER()
+
+    local ConfigPreferencesTabPage
+
+    do
+        local ConfigPage = navPages["Config"]
+        if ConfigPage then
+            local HS = game:GetService("HttpService")
+            local CONFIG_FOLDER = "FluxConfigs"
+            local AUTOLOAD_FILE = "FluxAutoload.json"
+
+            local TAB_H = 44
+            local TabBar = NewFrame(ConfigPage, UDim2.new(1, 0, 0, TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
+            local TabSep = NewFrame(ConfigPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, TAB_H), STROKE)
+
+            local ContentRow = NewFrame(ConfigPage,
+                UDim2.new(1, -20, 1, -(TAB_H + 3 + 20)),
+                UDim2.new(0, 10, 0, TAB_H + 3 + 10),
+                BG, 1
+            )
+
+            local configTabDefs = {
+                { name = "Configs",     width = 82 },
+                { name = "Preferences", width = 96 }
+            }
+            local configTabBtns = {}
+            local configTabLines = {}
+            local configPages = {}
+            local activeConfigTabIdx = 1
+            local configTx = 18
+
+            for i, tabData in ipairs(configTabDefs) do
+                local tb = NewBtn(TabBar, UDim2.new(0, tabData.width, 1, 0), UDim2.new(0, configTx, 0, 0), BG, 1)
+                local tl = NewLabel(tb, tabData.name, 13, i == 1 and ACCENT or DIM, i == 1)
+                tl.Size = UDim2.new(1, 0, 1, 0)
+                tl.TextXAlignment = Enum.TextXAlignment.Center
+
+                local ul = NewFrame(ConfigPage, UDim2.new(0, tabData.width, 0, 2), UDim2.new(0, configTx, 0, TAB_H - 2),
+                    ACCENT)
+                ul.Visible = i == 1
+                Corner(ul, 1)
+                table.insert(accentFills, ul)
+
+                local subPage = NewScroll(ContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+                subPage.Visible = i == 1
+                subPage.ClipsDescendants = true
+
+                configTabBtns[i] = { btn = tb, lbl = tl }
+                configTabLines[i] = ul
+                configPages[i] = subPage
+                configTx = configTx + tabData.width + 14
+
+                tb.MouseButton1Click:Connect(function()
+                    if activeConfigTabIdx == i then return end
+
+                    configTabBtns[activeConfigTabIdx].lbl.TextColor3 = DIM
+                    configTabBtns[activeConfigTabIdx].lbl.Font = Enum.Font.Gotham
+                    configTabLines[activeConfigTabIdx].Visible = false
+                    configPages[activeConfigTabIdx].Visible = false
+
+                    activeConfigTabIdx = i
+                    tl.TextColor3 = ACCENT
+                    tl.Font = Enum.Font.GothamBold
+                    ul.Visible = true
+                    subPage.Visible = true
+                end)
+            end
+
+            getgenv().FLUX_CONFIG_TAB_THEME_SYNC = function()
+                for i, ref in ipairs(configTabBtns) do
+                    if ref and ref.lbl then
+                        ref.lbl.TextColor3 = (i == activeConfigTabIdx) and ACCENT or DIM
+                    end
+                end
+            end
+
+            local page = configPages[1]
+            ConfigPreferencesTabPage = configPages[2]
+
+            local function EnsureFolder()
+                if not isfolder(CONFIG_FOLDER) then makefolder(CONFIG_FOLDER) end
+            end
+
+            local function ListConfigs()
+                EnsureFolder()
+                local out = {}
+                local ok, files = pcall(listfiles, CONFIG_FOLDER)
+                if ok and files then
+                    for _, path in ipairs(files) do
+                        local name = path:match("[/\\]([^/\\]+)%.json$")
+                        if name then table.insert(out, name) end
+                    end
+                end
+                return out
+            end
+
+            local function GetAutoload()
+                if isfile and isfile(AUTOLOAD_FILE) then
+                    local ok, d = pcall(function() return HS:JSONDecode(readfile(AUTOLOAD_FILE)) end)
+                    if ok and d and d.name then return d.name end
+                end
+                return nil
+            end
+
+            local function CollectSettings()
+                local function copy(t)
+                    local r = {}
+                    for k, v in pairs(t) do r[k] = v end
+                    return r
+                end
+                return {
+                    placeId     = game.PlaceId,
+                    created     = os.date("%x %X"),
+                    AIMBOT      = copy(getgenv().AIMBOT_CFG),
+                    SILENT      = copy(getgenv().SILENT_CFG),
+                    AM          = copy(getgenv().AM_CFG),
+                    WORLD       = copy(getgenv().WORLD_CFG),
+                    LOCALPLAYER = copy(getgenv().LOCAL_PLAYER_CFG),
+                    FUN         = copy(getgenv().FUN_CFG),
+                    ESP         = getgenv().ESP_CFG and copy(getgenv().ESP_CFG) or nil,
+                    UI          = {
+                        notifications = useNotifications,
+                        watermark     = useWatermark,
+                        kbhud         = useKbHud
+                    }
+                }
+            end
+
+            local function ApplySettings(data)
+                if not data then return end
+                if GetGameGroup(data.placeId) ~= GetGameGroup(game.PlaceId) then
+                    NOTIFY("Config", "This config is for a different game!", 3)
+                    return
+                end
+                local function merge(dst, src)
+                    if not src then return end
+                    for k, v in pairs(src) do dst[k] = v end
+                end
+                merge(getgenv().AIMBOT_CFG, data.AIMBOT)
+                merge(getgenv().SILENT_CFG, data.SILENT)
+                merge(getgenv().AM_CFG, data.AM)
+                merge(getgenv().WORLD_CFG, data.WORLD)
+                if data.LOCALPLAYER then merge(getgenv().LOCAL_PLAYER_CFG, data.LOCALPLAYER) end
+                if data.FUN then merge(getgenv().FUN_CFG, data.FUN) end
+                if data.ESP and getgenv().ESP_CFG then merge(getgenv().ESP_CFG, data.ESP) end
+
+                if data.UI then
+                    if data.UI.notifications ~= nil then useNotifications = data.UI.notifications end
+                    if data.UI.watermark ~= nil then useWatermark = data.UI.watermark end
+                    if data.UI.kbhud ~= nil then useKbHud = data.UI.kbhud end
+
+                    if ApplyUIPreferences then ApplyUIPreferences() end
+                end
+
+                if getgenv().FLUX_UI_UPDATE_FUNCS then
+                    for _, f in ipairs(getgenv().FLUX_UI_UPDATE_FUNCS) do
+                        pcall(f)
+                    end
+                end
+
+                NOTIFY("Config", "Config loaded ✓", 2.5)
+            end
+
+            task.defer(function()
+                local aName = GetAutoload()
+                if aName then
+                    local path = CONFIG_FOLDER .. "/" .. aName .. ".json"
+                    if isfile(path) then
+                        local ok, d = pcall(function() return HS:JSONDecode(readfile(path)) end)
+                        if ok and d then ApplySettings(d) end
+                    end
+                end
+            end)
+
+            local LeftPanel = NewFrame(page, UDim2.new(0.46, 0, 0, 380), UDim2.new(0, 1, 0, 3), PANEL)
+            LeftPanel.LayoutOrder = 1
+            Corner(LeftPanel, 8); Stroke(LeftPanel, STROKE, 1)
+
+            local LPTitle = NewLabel(LeftPanel, "Config Management", 13, TEXT, true)
+            LPTitle.Name = "SectionTitle"
+            LPTitle.Size = UDim2.new(1, 0, 0, 30)
+            LPTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local scroll = NewFrame(LeftPanel, UDim2.new(1, -16, 1, -42), UDim2.new(0, 8, 0, 42), BG, 1)
+            Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 10)
+
+            local nameCard = NewFrame(scroll, UDim2.new(1, 0, 0, 70), nil, PANEL)
+            Corner(nameCard, 8)
+            NewLabel(nameCard, "Config name", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
+
+            local nameBoxWrap = NewFrame(nameCard, UDim2.new(1, -20, 0, 30), UDim2.new(0, 10, 0, 28),
+                Color3.fromRGB(15, 15, 20))
+            Corner(nameBoxWrap, 5); Stroke(nameBoxWrap, STROKE2, 1)
+
+            local nameBox = Instance.new("TextBox")
+            nameBox.Size = UDim2.new(1, 0, 1, 0)
+            nameBox.Position = UDim2.new(0, 0, 0, 0)
+            nameBox.BackgroundTransparency = 1; nameBox.BorderSizePixel = 0
+            nameBox.TextColor3 = TEXT; nameBox.PlaceholderColor3 = DIM
+            nameBox.PlaceholderText = "Enter name..."; nameBox.Text = ""
+            nameBox.TextSize = 11; nameBox.Font = Enum.Font.Gotham
+            nameBox.ClearTextOnFocus = false; nameBox.Parent = nameBoxWrap
+
+            local listCard = NewFrame(scroll, UDim2.new(1, 0, 0, 260), nil, PANEL)
+            Corner(listCard, 8)
+            NewLabel(listCard, "Config list", 11, DIM).Position = UDim2.new(0, 10, 0, 6)
+
+            local selectedConfig = nil
+            local ddFrame = NewFrame(listCard, UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 26),
+                Color3.fromRGB(32, 32, 44))
+            Corner(ddFrame, 6); Stroke(ddFrame, STROKE2, 1)
+
+            local ddLbl = NewLabel(ddFrame, "---", 11, TEXT)
+            ddLbl.Position = UDim2.new(0, 10, 0, 0); ddLbl.Size = UDim2.new(1, -30, 1, 0)
+
+            local ddArrow = Instance.new("ImageLabel")
+            ddArrow.BackgroundTransparency = 1; ddArrow.Size = UDim2.new(0, 12, 0, 12); ddArrow.Position = UDim2.new(1,
+                -22,
+                0.5, -6)
+            ddArrow.Image = "rbxassetid://6034818372"; ddArrow.ImageColor3 = DIM; ddArrow.Parent = ddFrame
+
+            local ddOpen = false
+            local ddPopup = NewFrame(ddFrame, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 4), Color3.fromRGB(28, 28, 38))
+            ddPopup.ZIndex = 500; ddPopup.Visible = false; ddPopup.ClipsDescendants = true
+            Corner(ddPopup, 6); Stroke(ddPopup, STROKE2, 1)
+            Instance.new("UIListLayout", ddPopup).SortOrder = Enum.SortOrder.LayoutOrder
+
+            local totalLbl
+            local function RefreshTotalCount()
+                if totalLbl then
+                    local configs = ListConfigs()
+                    totalLbl.Text = "Total Configs: " .. #configs
+                end
+            end
+
+            local configNames = {}
+            local function RefreshDD()
+                for _, c in ipairs(ddPopup:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+                configNames = ListConfigs()
+                if #configNames == 0 then
+                    ddLbl.Text = "---"; selectedConfig = nil
+                end
+                for i, n in ipairs(configNames) do
+                    local ob = NewBtn(ddPopup, UDim2.new(1, 0, 0, 26), nil, BG, 1)
+                    ob.LayoutOrder = i; ob.ZIndex = 501
+                    local ol = NewLabel(ob, n, 11, TEXT); ol.Position = UDim2.new(0, 10, 0, 0); ol.Size = UDim2.new(1,
+                        -10, 1,
+                        0); ol.ZIndex = 502
+                    ob.MouseButton1Click:Connect(function()
+                        selectedConfig = n; ddLbl.Text = n; ddOpen = false
+                        Tw(ddPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
+                        task.delay(0.16, function() ddPopup.Visible = false end)
+                        Tw(ddArrow, 0.15, "Quad", "Out", { Rotation = 0 })
+                        if getgenv().UpdateConfigDetails then getgenv().UpdateConfigDetails(n) end
+                    end)
+                end
+                RefreshTotalCount()
+            end
+
+            local ddBtn = NewBtn(ddFrame, UDim2.new(1, 0, 1, 0), nil, BG, 1)
+            ddBtn.ZIndex = 10
+            ddBtn.MouseButton1Click:Connect(function()
+                ddOpen = not ddOpen
+                if ddOpen then
+                    RefreshDD()
+                    ddPopup.Visible = true
+                    local popH = #configNames * 26
+                    Tw(ddPopup, 0.18, "Quad", "Out", { Size = UDim2.new(1, 0, 0, math.min(popH, 150)) })
+                    Tw(ddArrow, 0.18, "Quad", "Out", { Rotation = 180 })
+                else
+                    ddOpen = false; Tw(ddPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
+                    task.delay(0.16, function() ddPopup.Visible = false end)
+                    Tw(ddArrow, 0.15, "Quad", "Out", { Rotation = 0 })
+                end
+            end)
+
+            local gridY = 66
+            local btnDefs = {
+                { "Load",    "load" }, { "Overwrite", "overwrite" }, { "Delete", "delete" },
+                { "Refresh", "refresh" }, { "Autoload", "setauto" }, { "Clear Auto", "resetauto" },
+            }
+            local actionBtns = {}
+            for i, def in ipairs(btnDefs) do
+                local col = (i - 1) % 2; local row = math.floor((i - 1) / 2)
+                local ab = NewBtn(listCard, UDim2.new(0.5, -13, 0, 34),
+                    UDim2.new(col * 0.5, col == 0 and 10 or 3, 0, gridY + row * 42), Color3.fromRGB(28, 28, 38))
+                Corner(ab, 6); Stroke(ab, STROKE, 1)
+                local aLbl = NewLabel(ab, def[1], 11, TEXT, false, Enum.TextXAlignment.Center); aLbl.Size = UDim2.new(1,
+                    0, 1,
+                    0)
+                ab.MouseEnter:Connect(function()
+                    Tw(ab, 0.09, "Quad", "Out",
+                        { BackgroundColor3 = Color3.fromRGB(38, 38, 52) })
+                end)
+                ab.MouseLeave:Connect(function()
+                    Tw(ab, 0.09, "Quad", "Out",
+                        { BackgroundColor3 = Color3.fromRGB(28, 28, 38) })
+                end)
+                actionBtns[def[2]] = { btn = ab, lbl = aLbl }
+            end
+
+            local createBtn = NewBtn(listCard, UDim2.new(1, -20, 0, 38), UDim2.new(0, 10, 0, gridY + 3 * 42),
+                Color3.fromRGB(32, 32, 44))
+            Corner(createBtn, 8)
+            Stroke(createBtn, STROKE2, 1)
+            local createLbl = NewLabel(createBtn, "Create config", 13, TEXT, false, Enum.TextXAlignment.Center)
+            createLbl.Size = UDim2.new(1, 0, 1, 0)
+            createBtn.MouseEnter:Connect(function()
+                Tw(createBtn, 0.1, "Quad", "Out",
+                    { BackgroundColor3 = Color3.fromRGB(40, 40, 55) })
+            end)
+            createBtn.MouseLeave:Connect(function()
+                Tw(createBtn, 0.1, "Quad", "Out",
+                    { BackgroundColor3 = Color3.fromRGB(32, 32, 44) })
+            end)
+
+            listCard.Size = UDim2.new(1, 0, 0, gridY + 3 * 42 + 38 + 10)
+
+            local RightPanel = NewFrame(page, UDim2.new(0.52, -4, 0, 380), UDim2.new(0.48, 1, 0, 3), PANEL)
+            RightPanel.LayoutOrder = 2
+            Corner(RightPanel, 8); Stroke(RightPanel, STROKE, 1)
+
+            local RPTitle = NewLabel(RightPanel, "Settings Info", 13, TEXT, true)
+            RPTitle.Name = "SectionTitle"
+            RPTitle.Size = UDim2.new(1, 0, 0, 30); RPTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local InfoScroll = NewFrame(RightPanel, UDim2.new(1, -16, 1, -42), UDim2.new(0, 8, 0, 42), BG, 1)
+            Instance.new("UIListLayout", InfoScroll).Padding = UDim.new(0, 10)
+
+            totalLbl = NewLabel(InfoScroll, "Total Configs: 0", 11, TEXT)
+            totalLbl.Size = UDim2.new(1, 0, 0, 20)
+
+            local autoLbl = NewLabel(InfoScroll, "Autoload: none", 11, ACCENT)
+            autoLbl.Size = UDim2.new(1, 0, 0, 20)
+
+            local function RefreshAutoLbl()
+                local n = GetAutoload(); autoLbl.Text = "Autoload: " .. (n or "none"); autoLbl.TextColor3 = n and ACCENT or
+                    DIM
+            end
+            RefreshAutoLbl()
+
+            local detailTitle = NewLabel(InfoScroll, "Config Details:", 11, ACCENT)
+            detailTitle.Size = UDim2.new(1, 0, 0, 20)
+
+            local infoList = NewLabel(InfoScroll, "Select a config to see details", 11, DIM)
+            infoList.Size = UDim2.new(1, 0, 0, 160); infoList.TextWrapped = true; infoList.TextYAlignment = Enum
+                .TextYAlignment.Top
+
+            getgenv().UpdateConfigDetails = function(name)
+                if not name then
+                    infoList.Text = "No config selected"; return
+                end
+                local path = CONFIG_FOLDER .. "/" .. name .. ".json"
+                if not isfile(path) then
+                    infoList.Text = "File not found"; return
+                end
+                local ok, d = pcall(function() return HS:JSONDecode(readfile(path)) end)
+                if not (ok and d) then
+                    infoList.Text = "Could not read config"; return
+                end
+
+                local txt = "• Created: " .. (d.created or "N/A") .. "\n"
+                txt = txt .. "• GameID: " .. tostring(d.placeId or "N/A") .. "\n\n"
+
+                local function listEnabled(tbl, labelMap)
+                    if not tbl then return "" end
+                    local out = ""
+                    for key, label in pairs(labelMap) do
+                        if tbl[key] == true then
+                            out = out .. "  ✓ " .. label .. "\n"
+                        end
+                    end
+                    return out
+                end
+
+                local aimbotMap = {
+                    Enabled = "Aimbot",
+                    DrawFov = "Draw FOV",
+                    VisibleCheck = "Visible Check",
+                    Humanize = "Humanize",
+                    IgnoreDead = "Ignore Dead"
+                }
+                local aimbotLines = listEnabled(d.AIMBOT, aimbotMap)
+                if aimbotLines ~= "" then
+                    txt = txt .. "Combat:\n" .. aimbotLines
+                end
+
+                local silentMap = {
+                    Enabled = "Silent Aim",
+                    AutoHead = "Auto Head",
+                    AntiAim = "Anti-Aim",
+                    NoRecoil = "No Recoil",
+                    TargetLock = "Target Lock"
+                }
+                local silentLines = listEnabled(d.SILENT, silentMap)
+                if silentLines ~= "" then
+                    txt = txt .. "Silent Aim:\n" .. silentLines
+                end
+
+                local amMap = { Enabled = "Auto Match" }
+                local amLines = listEnabled(d.AM, amMap)
+                if amLines ~= "" then
+                    txt = txt .. "Auto Match:\n" .. amLines
+                end
+
+                local espMap = {
+                    Enabled = "ESP",
+                    Names = "Player Names",
+                    Boxes = "Boxes",
+                    HealthBar = "Health Bars",
+                    Skeleton = "Skeleton",
+                    Snaplines = "Snaplines",
+                    Chams = "Chams",
+                    OffScreen = "Off-Screen Lines",
+                    Bots = "Enable Bots"
+                }
+                local espLines = listEnabled(d.ESP, espMap)
+                if espLines ~= "" then
+                    txt = txt .. "ESP:\n" .. espLines
+                end
+
+                local worldMap = {
+                    FullBright = "Full Bright", NoFog = "No Fog"
+                }
+                local worldLines = listEnabled(d.WORLD, worldMap)
+                if d.WORLD and d.WORLD.AtmosColor then
+                    worldLines = worldLines .. "  ✓ Atmosphere Color\n"
+                end
+                if worldLines ~= "" then
+                    txt = txt .. "World Visuals:\n" .. worldLines
+                end
+
+                if txt:match("✓") == nil then
+                    txt = txt .. "(No options enabled)"
+                end
+
+                infoList.Text = txt
+            end
+
+            RefreshTotalCount()
+
+            createBtn.MouseButton1Click:Connect(function()
+                local n = nameBox.Text:match("^%s*(.-)%s*$")
+                if n == "" then
+                    NOTIFY("Config", "Enter name!", 2); return
+                end
+                EnsureFolder(); local path = CONFIG_FOLDER .. "/" .. n .. ".json"
+                local data = CollectSettings()
+                local ok = pcall(function() writefile(path, HS:JSONEncode(data)) end)
+                if ok then
+                    NOTIFY("Config", "Saved ✓", 2.5); nameBox.Text = ""; RefreshDD()
+                else
+                    NOTIFY("Config", "Save failed", 3)
+                end
+            end)
+
+            actionBtns.load.btn.MouseButton1Click:Connect(function()
+                if not selectedConfig then
+                    NOTIFY("Config", "Select one!", 2); return
+                end
+                local path = CONFIG_FOLDER .. "/" .. selectedConfig .. ".json"
+                if not isfile(path) then
+                    NOTIFY("Config", "Not found!", 2); return
+                end
+                local ok, d = pcall(function() return HS:JSONDecode(readfile(path)) end)
+                if ok then ApplySettings(d) else NOTIFY("Config", "Load error!", 2) end
+            end)
+
+            actionBtns.overwrite.btn.MouseButton1Click:Connect(function()
+                if not selectedConfig then
+                    NOTIFY("Config", "Select one!", 2); return
+                end
+                EnsureFolder(); local path = CONFIG_FOLDER .. "/" .. selectedConfig .. ".json"
+                local data = CollectSettings()
+                local ok = pcall(function() writefile(path, HS:JSONEncode(data)) end)
+                if ok then NOTIFY("Config", "Updated ✓", 2.5) else NOTIFY("Config", "Failed!", 2) end
+            end)
+
+            actionBtns.delete.btn.MouseButton1Click:Connect(function()
+                if not selectedConfig then
+                    NOTIFY("Config", "Select one!", 2); return
+                end
+                local path = CONFIG_FOLDER .. "/" .. selectedConfig .. ".json"
+                local ok = pcall(delfile, path)
+                if ok then
+                    NOTIFY("Config", "Deleted", 2); selectedConfig = nil; ddLbl.Text = "---"; RefreshDD(); RefreshAutoLbl()
+                else
+                    NOTIFY("Config", "Failed!", 2)
+                end
+            end)
+
+            actionBtns.refresh.btn.MouseButton1Click:Connect(function()
+                RefreshDD(); NOTIFY("Config", "Refreshed", 1.5)
+            end)
+
+            actionBtns.setauto.btn.MouseButton1Click:Connect(function()
+                if not selectedConfig then
+                    NOTIFY("Config", "Select one!", 2); return
+                end
+                local ok = pcall(function() writefile(AUTOLOAD_FILE, HS:JSONEncode({ name = selectedConfig })) end)
+                if ok then
+                    NOTIFY("Config", "Autoload set!", 2.5); RefreshAutoLbl()
+                else
+                    NOTIFY("Config", "Failed!", 2)
+                end
+            end)
+
+            actionBtns.resetauto.btn.MouseButton1Click:Connect(function()
+                local ok = pcall(delfile, AUTOLOAD_FILE)
+                if ok or not isfile(AUTOLOAD_FILE) then
+                    NOTIFY("Config", "Cleared", 2); RefreshAutoLbl()
+                else
+                    NOTIFY("Config", "Failed!", 2)
+                end
+            end)
+        end
+    end
+
+    do
+        local PreferencesPage = ConfigPreferencesTabPage or navPages["Preferences"]
+        if PreferencesPage then
+            local isEmbeddedInConfig = PreferencesPage == ConfigPreferencesTabPage
+            local prefScroll
+
+            if isEmbeddedInConfig then
+                prefScroll = NewScroll(PreferencesPage, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+            else
+                local PREF_TAB_H = 44
+                local PrefTabBar = NewFrame(PreferencesPage, UDim2.new(1, 0, 0, PREF_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
+                local PrefTabSep = NewFrame(PreferencesPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, PREF_TAB_H),
+                    STROKE)
+
+                local PrefContentRow = NewFrame(PreferencesPage,
+                    UDim2.new(1, -20, 1, -(PREF_TAB_H + 3 + 20)),
+                    UDim2.new(0, 10, 0, PREF_TAB_H + 3 + 10),
+                    BG, 1
+                )
+
+                local prefTabBtn = NewBtn(PrefTabBar, UDim2.new(0, 96, 1, 0), UDim2.new(0, 18, 0, 0), BG, 1)
+                local prefTabLbl = NewLabel(prefTabBtn, "Preferences", 13, ACCENT, true)
+                prefTabLbl.Name = "SectionTitle"
+                prefTabLbl.Size = UDim2.new(1, 0, 1, 0)
+                prefTabLbl.TextXAlignment = Enum.TextXAlignment.Center
+
+                local prefTabLine = NewFrame(PreferencesPage, UDim2.new(0, 96, 0, 2),
+                    UDim2.new(0, 18, 0, PREF_TAB_H - 2), ACCENT)
+                Corner(prefTabLine, 1)
+                table.insert(accentFills, prefTabLine)
+
+                prefScroll = NewScroll(PrefContentRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+            end
+
+            prefScroll.ClipsDescendants = true
+
+            local ignoreCard = NewFrame(prefScroll, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
+            Corner(ignoreCard, 8)
+            Stroke(ignoreCard, STROKE, 1)
+
+            local ignoreTitle = NewLabel(ignoreCard, "Ignore Players", 13, TEXT, true)
+            ignoreTitle.Name = "SectionTitle"
+            ignoreTitle.Size = UDim2.new(1, 0, 0, 30)
+            ignoreTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local ignoreDesc = NewLabel(ignoreCard,
+                "Los jugadores ignorados se excluyen de ESP, aimbot, silent aim, insta kill, kill aura y hitbox expander.",
+                11, DIM)
+            ignoreDesc.Position = UDim2.new(0, 10, 0, 36)
+            ignoreDesc.Size = UDim2.new(1, -20, 0, 32)
+            ignoreDesc.TextWrapped = true
+            ignoreDesc.TextYAlignment = Enum.TextYAlignment.Top
+
+            local ignoredCountLbl = NewLabel(ignoreCard, "Ignored: 0", 11, ACCENT, true, Enum.TextXAlignment.Right)
+            ignoredCountLbl.Name = "SectionTitle"
+            ignoredCountLbl.Position = UDim2.new(0, 10, 0, 70)
+            ignoredCountLbl.Size = UDim2.new(1, -20, 0, 18)
+
+            local searchWrap = NewFrame(ignoreCard, UDim2.new(1, -16, 0, 30), UDim2.new(0, 8, 0, 96),
+                Color3.fromRGB(15, 15, 20))
+            Corner(searchWrap, 5)
+            Stroke(searchWrap, STROKE2, 1)
+
+            local searchBox = Instance.new("TextBox")
+            searchBox.Size = UDim2.new(1, -16, 1, 0)
+            searchBox.Position = UDim2.new(0, 8, 0, 0)
+            searchBox.BackgroundTransparency = 1
+            searchBox.BorderSizePixel = 0
+            searchBox.TextColor3 = TEXT
+            searchBox.PlaceholderColor3 = DIM
+            searchBox.PlaceholderText = "Buscar jugador por nombre o display..."
+            searchBox.Text = ""
+            searchBox.TextSize = 11
+            searchBox.TextScaled = true
+            local sFit = Instance.new("UITextSizeConstraint")
+            sFit.MaxTextSize = 11
+            sFit.MinTextSize = 8
+            sFit.Parent = searchBox
+            searchBox.Font = Enum.Font.Gotham
+            searchBox.ClearTextOnFocus = false
+            searchBox.Parent = searchWrap
+
+            local buttonRow = NewFrame(ignoreCard, UDim2.new(1, -16, 0, 32), UDim2.new(0, 8, 0, 132), BG, 1)
+
+            local refreshBtn = NewBtn(buttonRow, UDim2.new(0.5, -4, 1, 0), UDim2.new(0, 0, 0, 0),
+                Color3.fromRGB(36, 36, 48))
+            Corner(refreshBtn, 6)
+            Stroke(refreshBtn, STROKE2, 1)
+            local refreshLbl = NewLabel(refreshBtn, "Refresh List", 11, TEXT, false, Enum.TextXAlignment.Center)
+            refreshLbl.Size = UDim2.new(1, 0, 1, 0)
+
+            local clearBtn = NewBtn(buttonRow, UDim2.new(0.5, -4, 1, 0), UDim2.new(0.5, 4, 0, 0),
+                Color3.fromRGB(36, 36, 48))
+            Corner(clearBtn, 6)
+            Stroke(clearBtn, STROKE2, 1)
+            local clearLbl = NewLabel(clearBtn, "Clear Ignored", 11, TEXT, false, Enum.TextXAlignment.Center)
+            clearLbl.Size = UDim2.new(1, 0, 1, 0)
+
+            local playersList = NewScroll(ignoreCard, UDim2.new(1, -16, 1, -180), UDim2.new(0, 8, 0, 172),
+                Color3.fromRGB(15, 15, 20))
+            playersList.ScrollBarThickness = 4
+            playersList.ScrollBarImageColor3 = ACCENT
+            Corner(playersList, 6)
+            Stroke(playersList, STROKE2, 1)
+
+            local playersLayout = Instance.new("UIListLayout", playersList)
+            playersLayout.Padding = UDim.new(0, 4)
+            playersLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+            local function RefreshIgnoredCount()
+                local total = 0
+                for _ in pairs(NormalizeIgnoredPlayers()) do
+                    total = total + 1
+                end
+                ignoredCountLbl.Text = "Ignored: " .. total
+            end
+
+            local function RefreshIgnorePlayers()
+                if not playersList or not playersList.Parent then return end
+                playersList.ScrollBarImageColor3 = ACCENT
+
+                for _, child in ipairs(playersList:GetChildren()) do
+                    if child:IsA("TextButton") or child.Name == "EmptyState" then
+                        child:Destroy()
+                    end
+                end
+
+                local query = searchBox.Text:lower()
+                local serverPlayers = Players:GetPlayers()
+                table.sort(serverPlayers, function(a, b)
+                    return a.Name:lower() < b.Name:lower()
+                end)
+
+                local shown = 0
+                for _, player in ipairs(serverPlayers) do
+                    if player ~= LP then
+                        local haystack = (player.Name .. " " .. player.DisplayName):lower()
+                        if query == "" or string.find(haystack, query, 1, true) then
+                            shown = shown + 1
+
+                            local row = NewBtn(playersList, UDim2.new(1, -8, 0, 40), nil, Color3.fromRGB(32, 32, 42), 1)
+                            row.Name = "PlayerRow"
+                            Corner(row, 5)
+
+                            local ignored = IsIgnoredPlayer(player)
+                            local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                                Color3.fromRGB(36, 36, 48))
+                            Corner(cbBg, 3)
+                            Stroke(cbBg, STROKE2, 1)
+
+                            local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                            cbCheck.Size = UDim2.new(1, 0, 1, 0)
+
+                            local nameLbl = NewLabel(row, player.Name, 12, TEXT, true)
+                            nameLbl.Position = UDim2.new(0, 34, 0, 4)
+                            nameLbl.Size = UDim2.new(1, -95, 0, 16)
+                            nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+                            local displayLbl = NewLabel(row, "Display: " .. player.DisplayName, 10, DIM)
+                            displayLbl.Position = UDim2.new(0, 34, 0, 20)
+                            displayLbl.Size = UDim2.new(1, -95, 0, 14)
+                            displayLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+                            local statusLbl = NewLabel(row, "", 10, DIM, true, Enum.TextXAlignment.Right)
+                            statusLbl.Position = UDim2.new(1, -60, 0, 0)
+                            statusLbl.Size = UDim2.new(0, 50, 1, 0)
+
+                            local function ApplyRowState()
+                                cbCheck.Visible = ignored
+                                statusLbl.Text = ignored and "Ignored" or "Active"
+                                statusLbl.TextColor3 = ignored and ACCENT or DIM
+                                Tw(cbBg, 0.1, "Quad", "Out", {
+                                    BackgroundColor3 = ignored and Color3.fromRGB(48, 50, 70) or
+                                        Color3.fromRGB(36, 36, 48)
+                                })
+                            end
+
+                            row.MouseButton1Click:Connect(function()
+                                ignored = not ignored
+                                SetIgnoredPlayer(player.Name, ignored)
+                                SaveUI()
+                                RefreshIgnoredCount()
+                                ApplyRowState()
+                            end)
+
+                            row.MouseEnter:Connect(function()
+                                Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 })
+                            end)
+                            row.MouseLeave:Connect(function()
+                                Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 })
+                            end)
+
+                            ApplyRowState()
+                        end
+                    end
+                end
+
+                if shown == 0 then
+                    local emptyLbl = NewLabel(playersList,
+                        query ~= "" and "No hay jugadores que coincidan." or "No hay otros jugadores en el servidor.",
+                        11, DIM, false, Enum.TextXAlignment.Center)
+                    emptyLbl.Name = "EmptyState"
+                    emptyLbl.Size = UDim2.new(1, -8, 0, 32)
+                end
+
+                RefreshIgnoredCount()
+            end
+
+            searchBox:GetPropertyChangedSignal("Text"):Connect(RefreshIgnorePlayers)
+
+            refreshBtn.MouseButton1Click:Connect(RefreshIgnorePlayers)
+            refreshBtn.MouseEnter:Connect(function()
+                Tw(refreshBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+            end)
+            refreshBtn.MouseLeave:Connect(function()
+                Tw(refreshBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+            end)
+
+            clearBtn.MouseButton1Click:Connect(function()
+                getgenv().PREFERENCES_CFG.IgnoredPlayers = {}
+                SaveUI()
+                RefreshIgnorePlayers()
+            end)
+            clearBtn.MouseEnter:Connect(function()
+                Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+            end)
+            clearBtn.MouseLeave:Connect(function()
+                Tw(clearBtn, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+            end)
+
+            table.insert(getgenv().FLUX_CONNS, Players.PlayerAdded:Connect(RefreshIgnorePlayers))
+            table.insert(getgenv().FLUX_CONNS, Players.PlayerRemoving:Connect(function(player)
+                if IsIgnoredPlayer(player) then
+                    RefreshIgnoredCount()
+                end
+                RefreshIgnorePlayers()
+            end))
+
+            getgenv().FLUX_PREFERENCES_REFRESH = RefreshIgnorePlayers
+            RefreshIgnorePlayers()
+        end
+    end
+
+    do
+        local Handle = NewBtn(Root, UDim2.new(0, 24, 0, 24), UDim2.new(1, 0, 1, 0), Color3.new(1, 1, 1), 1)
+        Handle.AnchorPoint = Vector2.new(0.5, 0.5)
+        Handle.ZIndex = 200
+
+        local hIcon = Instance.new("Frame")
+        hIcon.Size = UDim2.new(0, 12, 0, 12)
+        hIcon.Position = UDim2.new(0.5, -6, 0.5, -6)
+        hIcon.BackgroundTransparency = 1
+        hIcon.ZIndex = 201
+        hIcon.Parent = Handle
+
+        local clipper = Instance.new("Frame")
+        clipper.Name = "Clipper"
+        clipper.Size = UDim2.new(0, 14, 0, 14)
+        clipper.Position = UDim2.new(0.5, -7, 0.5, -7)
+        clipper.BackgroundTransparency = 1
+        clipper.ClipsDescendants = true
+        clipper.ZIndex = 201
+        clipper.Parent = Handle
+
+        local circle = Instance.new("Frame")
+        circle.Name = "Circle"
+        circle.Size = UDim2.new(0, 24, 0, 24)
+        circle.Position = UDim2.new(1, -24, 1, -24)
+        circle.BackgroundTransparency = 1
+        circle.ZIndex = 202
+        circle.Parent = clipper
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = Color3.new(1, 1, 1)
+        stroke.Thickness = 2
+        stroke.Transparency = 0.8
+        stroke.Parent = circle
+        Corner(circle, 12)
+
+        local resizing = false
+        local rStart = nil
+        local rW, rH = 0, 0
+
+        Handle.InputBegan:Connect(function(inp)
+            if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                resizing = true
+                rStart = inp.Position
+                rW = Root.AbsoluteSize.X
+                rH = Root.AbsoluteSize.Y
+                inp.Changed:Connect(function()
+                    if inp.UserInputState == Enum.UserInputState.End then resizing = false end
+                end)
+            end
+        end)
+
+        UIS.InputChanged:Connect(function(inp)
+            if resizing and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+                local d = inp.Position - rStart
+                curW = math.clamp(rW + d.X, 620, 1100)
+                curH = math.clamp(rH + d.Y, 380, 700)
+                Tw(Root, 0.04, "Linear", "Out", { Size = UDim2.new(0, curW, 0, curH) })
+            end
+        end)
+
+        Handle.MouseEnter:Connect(function() Tw(stroke, 0.09, "Quad", "Out", { Transparency = 0 }) end)
+        Handle.MouseLeave:Connect(function()
+            if not resizing then
+                Tw(stroke, 0.09, "Quad", "Out", { Transparency = 0.8 })
+            end
         end)
     end
 
-    local tracerBtn = NewBtn(tracerRow, UDim2.new(1, 0, 1, 0), nil, BG, 1)
-    tracerBtn.MouseButton1Click:Connect(function()
-        tracerOpen = not tracerOpen
-        if tracerOpen then
-            tracerPop.Size = UDim2.new(1, -20, 0, 0)
-            tracerPop.Visible = true
-            Tw(tracerPop, 0.18, "Quad", "Out", { Size = UDim2.new(1, -20, 0, #TRACER_OPTS * 26) })
-            Tw(tracerArr, 0.18, "Quad", "Out", { Rotation = 180 })
+    local stLines = {}
+    local stBtns = {}
+    local activeStIdx = 1
+
+    local vsLines = {}
+    local vsBtns = {}
+    local activeVsIdx = 1
+
+    local UI_THEMES = {
+        ["Default"]     = { accent = Color3.fromRGB(238, 240, 255), side = Color3.fromRGB(15, 15, 20), bg = Color3.fromRGB(20, 20, 26), gradBot = nil },
+        ["Dark Blue"]   = { accent = Color3.fromRGB(100, 190, 255), side = Color3.fromRGB(12, 12, 20), bg = Color3.fromRGB(14, 16, 26), gradBot = Color3.fromRGB(50, 140, 255) },
+        ["Dark Purple"] = { accent = Color3.fromRGB(210, 130, 255), side = Color3.fromRGB(16, 10, 24), bg = Color3.fromRGB(18, 12, 30), gradBot = Color3.fromRGB(180, 50, 240) },
+        ["Dark White"]  = { accent = Color3.fromRGB(230, 235, 255), side = Color3.fromRGB(18, 18, 25), bg = Color3.fromRGB(22, 22, 30), gradBot = Color3.fromRGB(255, 255, 255) },
+    }
+    local currentUITheme = "Default"
+
+    local function applyUITheme(name)
+        local t = UI_THEMES[name]
+        if not t then return end
+        currentUITheme = name
+        ACCENT = t.accent
+
+        local dur = 1.2
+        local ease = "Exponential"
+
+        Tw(Sidebar, dur, ease, "Out", { BackgroundColor3 = t.side })
+        Tw(RightBox, dur, ease, "Out", { BackgroundColor3 = t.bg })
+
+        if t.gradBot then
+            local sideSeq     = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, t.side),
+                ColorSequenceKeypoint.new(0.4, t.side:Lerp(t.gradBot, 0.35)),
+                ColorSequenceKeypoint.new(1, t.gradBot)
+            })
+            local rightSeq    = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, t.bg),
+                ColorSequenceKeypoint.new(0.4, t.bg:Lerp(t.gradBot, 0.35)),
+                ColorSequenceKeypoint.new(1, t.gradBot)
+            })
+            sideGrad.Color    = sideSeq
+            rightGrad.Color   = rightSeq
+            sideGrad.Enabled  = true
+            rightGrad.Enabled = true
         else
-            Tw(tracerPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
-            task.delay(0.16, function() tracerPop.Visible = false end)
-            Tw(tracerArr, 0.15, "Quad", "Out", { Rotation = 0 })
+            sideGrad.Enabled  = false
+            rightGrad.Enabled = false
+        end
+
+        if currentNav then
+            currentNav.sym.ImageColor3 = t.accent
+            currentNav.lbl.TextColor3 = t.accent
+            currentNav.dot.BackgroundColor3 = t.accent
+        end
+
+        for _, f in ipairs(accentFills) do
+            if f:IsA("UIGradient") then
+                f.Color = ColorSequence.new(t.side, t.bg)
+            else
+                Tw(f, dur, ease, "Out", { BackgroundColor3 = t.accent })
+            end
+        end
+
+        for _, v in ipairs(SG:GetDescendants()) do
+            if v:IsA("TextLabel") then
+                if v.Name == "SectionTitle" or v.TextColor3 == ACCENT then
+                    Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+                end
+            elseif v:IsA("ScrollingFrame") then
+                Tw(v, dur, ease, "Out", { ScrollBarImageColor3 = t.accent })
+            elseif v:IsA("Frame") and (v.Name == "Fill" or v.BackgroundColor3 == ACCENT) then
+                Tw(v, dur, ease, "Out", { BackgroundColor3 = t.accent })
+            end
+        end
+
+        for _, ul in ipairs(tabLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+        if tabBtns[activeTabIdx] then Tw(tabBtns[activeTabIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+        for _, ul in ipairs(stLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+        if stBtns[activeStIdx] then Tw(stBtns[activeStIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+        for _, ul in ipairs(vsLines) do Tw(ul, dur, ease, "Out", { BackgroundColor3 = t.accent }) end
+        if vsBtns[activeVsIdx] then Tw(vsBtns[activeVsIdx].lbl, dur, ease, "Out", { TextColor3 = t.accent }) end
+        if getgenv().FLUX_CONFIG_TAB_THEME_SYNC then pcall(getgenv().FLUX_CONFIG_TAB_THEME_SYNC) end
+
+        for _, v in ipairs(SG:GetDescendants()) do
+            if v:IsA("TextLabel") and v.Text == "✓" then
+                Tw(v, dur, ease, "Out", { TextColor3 = t.accent })
+            end
+        end
+
+        for _, dat in pairs(activeNotifs) do
+            Tw(dat.t, dur, ease, "Out", { TextColor3 = t.accent })
+            Tw(dat.b, dur, ease, "Out", { BackgroundColor3 = t.accent })
+        end
+
+        Tw(wmIcon, dur, ease, "Out", { ImageColor3 = t.accent })
+
+        if getgenv().FLUX_KB_HUD_ACCENT_UPDATE then getgenv().FLUX_KB_HUD_ACCENT_UPDATE() end
+        if getgenv().FLUX_PREFERENCES_REFRESH then pcall(getgenv().FLUX_PREFERENCES_REFRESH) end
+    end
+
+    local VisualsPage = navPages["Visuals"]
+    local VS_TAB_H = 44
+    local VS_TabBar = NewFrame(VisualsPage, UDim2.new(1, 0, 0, VS_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
+
+    local VS_TabSep = NewFrame(VisualsPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, VS_TAB_H), STROKE)
+    local VS_Content = NewFrame(VisualsPage, UDim2.new(1, -20, 1, -(VS_TAB_H + 20)), UDim2.new(0, 10, 0, VS_TAB_H + 10),
+        BG,
+        1)
+
+    local VS_TABS = { "Player Visuals", "World Visuals" }
+    local vsPages = {}
+
+    local vs_x = 18
+    for i, name in ipairs(VS_TABS) do
+        local tw = (i == 1 and 110 or 110)
+        local tb = NewBtn(VS_TabBar, UDim2.new(0, tw, 1, 0), UDim2.new(0, vs_x, 0, 0), BG, 1)
+        local tl = NewLabel(tb, name, 13, i == 1 and ACCENT or DIM, i == 1)
+        tl.Size = UDim2.new(1, 0, 1, 0)
+        tl.TextXAlignment = Enum.TextXAlignment.Center
+
+        local ul = NewFrame(VisualsPage, UDim2.new(0, tw, 0, 2), UDim2.new(0, vs_x, 0, VS_TAB_H - 2), ACCENT)
+        ul.Visible = i == 1
+        Corner(ul, 1)
+
+        local page = NewScroll(VS_Content, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+        page.Visible = (i == 1)
+
+        vsPages[i] = page
+        vsBtns[i] = { btn = tb, lbl = tl }
+        vsLines[i] = ul
+        vs_x = vs_x + tw + 14
+
+        tb.MouseButton1Click:Connect(function()
+            if activeVsIdx == i then return end
+            vsBtns[activeVsIdx].lbl.TextColor3 = DIM
+            vsBtns[activeVsIdx].lbl.Font = Enum.Font.Gotham
+            vsLines[activeVsIdx].Visible = false
+            vsPages[activeVsIdx].Visible = false
+
+            activeVsIdx = i
+            tl.TextColor3 = ACCENT
+            tl.Font = Enum.Font.GothamBold
+            ul.Visible = true
+            page.Visible = true
+        end)
+    end
+
+    do
+        local espPage = vsPages[1]
+        local list = Instance.new("UIListLayout")
+        list.Padding = UDim.new(0, 4)
+        list.Parent = NewFrame(espPage, UDim2.new(1, -20, 1, -20), UDim2.new(0, 10, 0, 10), BG, 1)
+
+        local espCard = NewFrame(espPage, UDim2.new(0.46, 0, 0, 620), UDim2.new(0, 1, 0, 3), PANEL)
+        Corner(espCard, 8)
+        Stroke(espCard, STROKE, 1)
+
+        local espTitle = NewLabel(espCard, "ESP Options", 12, TEXT, true)
+        espTitle.Name = "SectionTitle"
+        espTitle.Size = UDim2.new(1, 0, 0, 30)
+        espTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local espContent = NewFrame(espCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+        local espList = Instance.new("UIListLayout")
+        espList.Padding = UDim.new(0, 2)
+        espList.Parent = espContent
+
+        getgenv().ESP_CFG = {
+            Enabled = false,
+            Names = false,
+            DisplayNames = false,
+            Tools = false,
+            Distance = false,
+            HealthBar = false,
+            HealthText = false,
+            Skeleton = false,
+            Chams = false,
+            Snaplines = false,
+            OffScreen = false,
+            HealthColor1 = Color3.fromRGB(255, 0, 0),
+            HealthColor2 = Color3.fromRGB(0, 255, 0),
+            Boxes = false,
+            BoxFill = false,
+            BoxColor = Color3.new(1, 1, 1),
+            FillColor = Color3.new(1, 1, 1),
+            TracerOrigin = "Bottom",
+            FontSize = 11,
+            FontName = "GothamBold",
+            MaxDistance = 500,
+            IgnoreTeam = false,
+            LocalGunCham = false,
+            LocalGunChamColor1 = Color3.fromRGB(0, 255, 255)
+        }
+
+        AddESPSetting(espContent, "Enabled", false, 0, true,
+            function(v, c, k)
+                getgenv().ESP_CFG.Enabled = v; if k then getgenv().ESP_CFG.Keybind = k end
+            end)
+        AddESPSetting(espContent, "Enable Bots", false, 0, false, function(v)
+            getgenv().ESP_CFG.Bots = v
+            if not v then
+                if getgenv().ESP_CACHE then
+                    for target, e in pairs(getgenv().ESP_CACHE) do
+                        if not Players:GetPlayerFromCharacter(target) then
+                            e.FRM.Visible = false
+                            if e.CHAM then
+                                e.CHAM:Destroy(); e.CHAM = nil
+                            end
+                            if e.TCHAM then
+                                e.TCHAM:Destroy(); e.TCHAM = nil
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+
+        if IsMurderVsSheriff() or IsDuelist() then
+            AddESPSetting(espContent, "Ignore Team", false, 0, false, function(v) getgenv().ESP_CFG.IgnoreTeam = v end)
+        end
+        AddESPSetting(espContent, "Player Names", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.Names = v; if c then getgenv().ESP_CFG.NameColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(espContent, "Display Names", false, 0, false, function(v) getgenv().ESP_CFG.DisplayNames = v end)
+        AddESPSetting(espContent, "Equipped Tool", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.Tools = v; if c then getgenv().ESP_CFG.ToolColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(espContent, "Distance", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.Distance = v; if c then getgenv().ESP_CFG.DistColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(espContent, "Health Bars", false, 2, false,
+            function(v, c)
+                getgenv().ESP_CFG.HealthBar = v; if c then
+                    getgenv().ESP_CFG.HealthColor1 = c[1]; getgenv().ESP_CFG.HealthColor2 = c[2]
+                end
+            end, { Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0) })
+        AddESPSetting(espContent, "Health Text", false, 0, false, function(v) getgenv().ESP_CFG.HealthText = v end)
+        AddESPSetting(espContent, "Skeleton", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.Skeleton = v; if c then getgenv().ESP_CFG.SkelColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(espContent, "Chams", false, 2, false,
+            function(v, c)
+                getgenv().ESP_CFG.Chams = v; if c then
+                    getgenv().ESP_CFG.ChamColor1 = c[1]; getgenv().ESP_CFG.ChamColor2 = c[2]
+                end
+            end, { Color3.new(1, 1, 1), Color3.new(1, 1, 1) })
+        AddESPSetting(espContent, "Tool Chams", false, 2, false,
+            function(v, c)
+                getgenv().ESP_CFG.ToolChams = v; if c then
+                    getgenv().ESP_CFG.ToolChamColor1 = c[1]; getgenv().ESP_CFG.ToolChamColor2 = c[2]
+                end
+            end, { Color3.new(1, 1, 1), Color3.new(1, 1, 1) })
+        if IsDuelist() then
+            AddESPSetting(espContent, "Local Gun Cham", false, 1, false,
+                function(v, c)
+                    getgenv().ESP_CFG.LocalGunCham = v; if c then
+                        getgenv().ESP_CFG.LocalGunChamColor1 = c[1]
+                    end
+                end, { Color3.fromRGB(0, 255, 255) })
+        end
+        AddESPSetting(espContent, "Snaplines", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.Snaplines = v; if c then getgenv().ESP_CFG.SnapColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(espContent, "Off-Screen Lines", false, 0, false, function(v) getgenv().ESP_CFG.OffScreen = v end)
+
+        local pbCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 140), UDim2.new(0.48, 1, 0, 3), PANEL)
+        Corner(pbCard, 8)
+        Stroke(pbCard, STROKE, 1)
+
+        local pbTitle = NewLabel(pbCard, "Player Boxes", 12, TEXT, true)
+        pbTitle.Name = "SectionTitle"
+        pbTitle.Size = UDim2.new(1, 0, 0, 30)
+        pbTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local pbContent = NewFrame(pbCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+        local pbList = Instance.new("UIListLayout", pbContent)
+        pbList.Padding = UDim.new(0, 2)
+
+        AddESPSetting(pbContent, "Boxes", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.Boxes = v; if c then getgenv().ESP_CFG.BoxColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(pbContent, "Fill Boxes", false, 1, false,
+            function(v, c)
+                getgenv().ESP_CFG.BoxFill = v; if c then getgenv().ESP_CFG.FillColor = c[1] end
+            end, { Color3.new(1, 1, 1) })
+        AddESPSetting(pbContent, "Animated Boxes", false, 0, false,
+            function(v)
+                getgenv().ESP_CFG.AnimBoxFill = v
+            end)
+
+        local vsCard = NewFrame(espPage, UDim2.new(0.52, -4, 0, 260), UDim2.new(0.48, 1, 0, 153), PANEL)
+        Corner(vsCard, 8)
+        Stroke(vsCard, STROKE, 1)
+
+        local vsTitle = NewLabel(vsCard, "Player Visual Settings", 12, TEXT, true)
+        vsTitle.Name = "SectionTitle"
+        vsTitle.Size = UDim2.new(1, 0, 0, 30)
+        vsTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local vsContent = NewFrame(vsCard, UDim2.new(1, -20, 1, -44), UDim2.new(0, 10, 0, 36), BG, 1)
+        local vsList = Instance.new("UIListLayout", vsContent)
+        vsList.Padding = UDim.new(0, 8)
+
+        local fontRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
+        Corner(fontRow, 6)
+        Stroke(fontRow, STROKE2, 1)
+        local fontSel = NewLabel(fontRow, "Text Font: GothamBold", 11, TEXT)
+        fontSel.Position = UDim2.new(0, 10, 0, 0)
+        fontSel.Size = UDim2.new(1, -30, 1, 0)
+        local fontArr = Instance.new("ImageLabel", fontRow)
+        fontArr.Size = UDim2.new(0, 12, 0, 12)
+        fontArr.Position = UDim2.new(1, -22, 0.5, -6)
+        fontArr.BackgroundTransparency = 1
+        fontArr.Image = "rbxassetid://6034818372"
+        fontArr.ImageColor3 = DIM
+
+        local FONT_OPTS = { "GothamBold", "Gotham", "Code", "Roboto", "Arcade", "SciFi" }
+        local fontOpen = false
+        local fontPop = NewFrame(vsCard, UDim2.new(1, -20, 0, 0), UDim2.new(0, 10, 0, 36 + 36),
+            Color3.fromRGB(28, 28, 38))
+        fontPop.ZIndex = 100
+        fontPop.ClipsDescendants = true
+        fontPop.Visible = false
+        Corner(fontPop, 6)
+        Stroke(fontPop, STROKE2, 1)
+        local fontPList = Instance.new("UIListLayout", fontPop)
+
+        for _, f in ipairs(FONT_OPTS) do
+            local b = NewBtn(fontPop, UDim2.new(1, 0, 0, 26), nil, Color3.fromRGB(45, 45, 60), 1)
+            b.ZIndex = 101
+            local l = NewLabel(b, f, 11, TEXT)
+            l.Position = UDim2.new(0, 10, 0, 0)
+            l.Size = UDim2.new(1, -10, 1, 0)
+            l.ZIndex = 102
+            b.MouseEnter:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 }) end)
+            b.MouseLeave:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+            b.MouseButton1Click:Connect(function()
+                fontSel.Text = "Text Font: " .. f
+                getgenv().ESP_CFG.FontName = f
+                fontOpen = false
+                Tw(fontPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
+                task.delay(0.16, function() fontPop.Visible = false end)
+                Tw(fontArr, 0.15, "Quad", "Out", { Rotation = 0 })
+            end)
+        end
+
+        local fontBtn = NewBtn(fontRow, UDim2.new(1, 0, 1, 0), nil, BG, 1)
+        fontBtn.MouseButton1Click:Connect(function()
+            fontOpen = not fontOpen
+            if fontOpen then
+                fontPop.Size = UDim2.new(1, -20, 0, 0)
+                fontPop.Visible = true
+                Tw(fontPop, 0.18, "Quad", "Out", { Size = UDim2.new(1, -20, 0, #FONT_OPTS * 26) })
+                Tw(fontArr, 0.18, "Quad", "Out", { Rotation = 180 })
+            else
+                Tw(fontPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
+                task.delay(0.16, function() fontPop.Visible = false end)
+                Tw(fontArr, 0.15, "Quad", "Out", { Rotation = 0 })
+            end
+        end)
+
+        local function AddVSSlider(parent, label, min, max, default, suffix, callback)
+            local row = NewFrame(parent, UDim2.new(1, 0, 0, 42), nil, BG, 1)
+            local top = NewFrame(row, UDim2.new(1, 0, 0, 16), nil, BG, 1)
+            NewLabel(top, label, 11, TEXT).Size = UDim2.new(0.6, 0, 1, 0)
+            local valL = NewLabel(top, tostring(default) .. (suffix or ""), 11, ACCENT, false, Enum.TextXAlignment.Right)
+            valL.Size = UDim2.new(0.4, 0, 1, 0)
+            valL.Position = UDim2.new(0.6, 0, 0, 0)
+
+            local trackH = IS_MOBILE and 32 or 24
+            local track = NewBtn(row, UDim2.new(1, 0, 0, trackH), UDim2.new(0, 0, 0, 20), BG, 1)
+
+            local trackBG = NewFrame(track, UDim2.new(1, 0, 0, 4), UDim2.new(0, 0, 0.5, -2), Color3.fromRGB(45, 45, 55))
+            Corner(trackBG, 2)
+
+            local fill = NewFrame(trackBG, UDim2.new((default - min) / (max - min), 0, 1, 0), nil, ACCENT)
+            Corner(fill, 2)
+            accentFills[#accentFills + 1] = fill
+
+            local knobS = IS_MOBILE and 18 or 12
+            local knob = NewFrame(track, UDim2.new(0, knobS, 0, knobS),
+                UDim2.new((default - min) / (max - min), -knobS / 2, 0.5, -knobS / 2),
+                Color3.new(1, 1, 1))
+            Corner(knob, knobS / 2)
+
+            local dragging = false
+            local function update(inputX)
+                local rel = math.clamp((inputX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+                local val = math.floor(min + rel * (max - min))
+                valL.Text = tostring(val) .. (suffix or "")
+                fill.Size = UDim2.new(rel, 0, 1, 0)
+                knob.Position = UDim2.new(rel, -knobS / 2, 0.5, -knobS / 2)
+                callback(val)
+            end
+
+            track.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    getgenv()._CEN_SLD_ACTIVE = true
+                    dragging = true; update(i.Position.X)
+                end
+            end)
+            UIS.InputChanged:Connect(function(i)
+                if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+                    update(i.Position.X)
+                end
+            end)
+            UIS.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                    getgenv()._CEN_SLD_ACTIVE = false
+                end
+            end)
+        end
+
+        AddVSSlider(vsContent, "Text Size", 8, 24, 11, "", function(v) getgenv().ESP_CFG.FontSize = v end)
+        AddVSSlider(vsContent, "Max Render Distance", 50, 2000, 500, "st",
+            function(v) getgenv().ESP_CFG.MaxDistance = v end)
+
+        local tracerRow = NewFrame(vsContent, UDim2.new(1, 0, 0, 32), nil, Color3.fromRGB(32, 32, 44))
+        Corner(tracerRow, 6)
+        Stroke(tracerRow, STROKE2, 1)
+        local tracerSel = NewLabel(tracerRow, "Tracer Origin: " .. getgenv().ESP_CFG.TracerOrigin, 11, TEXT)
+        tracerSel.Position = UDim2.new(0, 10, 0, 0)
+        tracerSel.Size = UDim2.new(1, -30, 1, 0)
+        local tracerArr = Instance.new("ImageLabel", tracerRow)
+        tracerArr.Size = UDim2.new(0, 12, 0, 12)
+        tracerArr.Position = UDim2.new(1, -22, 0.5, -6)
+        tracerArr.BackgroundTransparency = 1
+        tracerArr.Image = "rbxassetid://6034818372"
+        tracerArr.ImageColor3 = DIM
+
+        local TRACER_OPTS = { "Bottom", "Center", "Top", "Mouse" }
+        local tracerOpen = false
+        local tracerPop = NewFrame(vsCard, UDim2.new(1, -20, 0, 0), UDim2.new(0, 10, 0, 212), Color3.fromRGB(28, 28, 38))
+        tracerPop.ZIndex = 110
+        tracerPop.ClipsDescendants = true
+        tracerPop.Visible = false
+        Corner(tracerPop, 6)
+        Stroke(tracerPop, STROKE2, 1)
+        local tracerPList = Instance.new("UIListLayout", tracerPop)
+
+        for _, t in ipairs(TRACER_OPTS) do
+            local b = NewBtn(tracerPop, UDim2.new(1, 0, 0, 26), nil, Color3.fromRGB(45, 45, 60), 1)
+            b.ZIndex = 111
+            local l = NewLabel(b, t, 11, TEXT)
+            l.Position = UDim2.new(0, 10, 0, 0)
+            l.Size = UDim2.new(1, -10, 1, 0)
+            l.ZIndex = 112
+            b.MouseEnter:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 }) end)
+            b.MouseLeave:Connect(function() Tw(b, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+            b.MouseButton1Click:Connect(function()
+                tracerSel.Text = "Tracer Origin: " .. t
+                getgenv().ESP_CFG.TracerOrigin = t
+                tracerOpen = false
+                Tw(tracerPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
+                task.delay(0.16, function() tracerPop.Visible = false end)
+                Tw(tracerArr, 0.15, "Quad", "Out", { Rotation = 0 })
+                NOTIFY("Visuals", "Snapline Position: " .. t, 1.5)
+            end)
+        end
+
+        local tracerBtn = NewBtn(tracerRow, UDim2.new(1, 0, 1, 0), nil, BG, 1)
+        tracerBtn.MouseButton1Click:Connect(function()
+            tracerOpen = not tracerOpen
+            if tracerOpen then
+                tracerPop.Size = UDim2.new(1, -20, 0, 0)
+                tracerPop.Visible = true
+                Tw(tracerPop, 0.18, "Quad", "Out", { Size = UDim2.new(1, -20, 0, #TRACER_OPTS * 26) })
+                Tw(tracerArr, 0.18, "Quad", "Out", { Rotation = 180 })
+            else
+                Tw(tracerPop, 0.15, "Quad", "Out", { Size = UDim2.new(1, -20, 0, 0) })
+                task.delay(0.16, function() tracerPop.Visible = false end)
+                Tw(tracerArr, 0.15, "Quad", "Out", { Rotation = 0 })
+            end
+        end)
+    end
+
+    local ESP_HOLDER = Instance.new("ScreenGui")
+    ESP_HOLDER.Name = "ESP_HOLDER"
+    ESP_HOLDER.IgnoreGuiInset = true
+    ESP_HOLDER.DisplayOrder = -1100
+    pcall(function() ESP_HOLDER.Parent = game:GetService("CoreGui") end)
+    if not ESP_HOLDER.Parent then ESP_HOLDER.Parent = PG end
+
+    local CACHE = {}
+    local R15_BONES = {
+        { "Head",         "UpperTorso" }, { "UpperTorso", "LowerTorso" }, { "UpperTorso", "LeftUpperArm" },
+        { "LeftUpperArm", "LeftLowerArm" }, { "LeftLowerArm", "LeftHand" }, { "UpperTorso", "RightUpperArm" },
+        { "RightUpperArm", "RightLowerArm" }, { "RightLowerArm", "RightHand" }, { "LowerTorso", "LeftUpperLeg" },
+        { "LeftUpperLeg",  "LeftLowerLeg" }, { "LeftLowerLeg", "LeftFoot" }, { "LowerTorso", "RightUpperLeg" },
+        { "RightUpperLeg", "RightLowerLeg" }, { "RightLowerLeg", "RightFoot" }
+    }
+    local R6_BONES = {
+        { "Head",  "Torso" }, { "Torso", "Left Arm" }, { "Torso", "Right Arm" },
+        { "Torso", "Left Leg" }, { "Torso", "Right Leg" }
+    }
+    if getgenv().ESP_CACHE then
+        for _, obj in pairs(getgenv().ESP_CACHE) do
+            if obj.FRM then obj.FRM:Destroy() end
+            if obj.CHAM then obj.CHAM:Destroy() end
+            if obj.TCHAM then obj.TCHAM:Destroy() end
+        end
+    end
+    local CACHE = {}
+    getgenv().ESP_CACHE = CACHE
+    local LOCAL_GUN_CACHE = { Mats = {}, Colors = {}, Highlights = {}, LastTool = nil }
+
+    local function MK_ESP(p)
+        local E = {
+            FRM = Instance.new("Frame", ESP_HOLDER),
+            NAME = NewLabel(nil, "", 10, Color3.new(1, 1, 1), true, Enum.TextXAlignment.Center),
+            DIST = NewLabel(nil, "", 9, Color3.new(1, 1, 1), false, Enum.TextXAlignment.Center),
+            WEAP = NewLabel(nil, "", 9, Color3.new(1, 1, 1), false, Enum.TextXAlignment.Center),
+            BOX = Instance.new("Frame"),
+            FILL = Instance.new("Frame"),
+            BAR_BG = Instance.new("Frame"),
+            BAR_FL = Instance.new("Frame"),
+            BAR_GRAD = Instance.new("UIGradient"),
+            HEALTH_TXT = NewLabel(nil, "", 9, Color3.new(1, 1, 1), false, Enum.TextXAlignment.Center),
+            SLINE = Instance.new("Frame"),
+            SKEL = {}
+        }
+        E.SLINE.Parent = E.FRM
+        E.FRM.BackgroundTransparency = 1
+        E.FRM.Size = UDim2.new(1, 0, 1, 0)
+
+        E.SLINE.BorderSizePixel = 0
+        E.SLINE.ZIndex = -1
+        E.SLINE.AnchorPoint = Vector2.new(0.5, 0.5)
+
+        E.BOX.BackgroundTransparency = 1
+        E.BOX.BorderSizePixel = 0
+        E.BOX_LINES = {}
+        for i = 1, 8 do
+            local l = Instance.new("Frame", E.BOX)
+            l.BorderSizePixel = 0
+            l.ZIndex = 2
+            local bg = Instance.new("Frame", l)
+            bg.BackgroundColor3 = Color3.new(0, 0, 0)
+            bg.BorderSizePixel = 0
+            bg.ZIndex = 1
+            E.BOX_LINES[i] = { l = l, bg = bg }
+        end
+
+        E.FILL.BorderSizePixel = 0
+        E.FILL.BackgroundTransparency = 1
+        E.FILL.ZIndex = -1
+
+        local ff1 = Instance.new("Frame", E.FILL)
+        ff1.Name = "FF1"
+        ff1.Size = UDim2.new(1, 0, 1, 0)
+        ff1.BorderSizePixel = 0
+        local grad1 = Instance.new("UIGradient", ff1)
+        grad1.Name = "Gradient"
+        grad1.Rotation = 45
+
+        local ff2 = Instance.new("Frame", E.FILL)
+        ff2.Name = "FF2"
+        ff2.Size = UDim2.new(1, 0, 1, 0)
+        ff2.BorderSizePixel = 0
+        local grad2 = Instance.new("UIGradient", ff2)
+        grad2.Name = "Gradient"
+        grad2.Rotation = -45
+
+        E.NAME.Parent = E.FRM
+        E.DIST.Parent = E.FRM
+        E.WEAP.Parent = E.FRM
+        E.BOX.Parent = E.FRM
+        E.FILL.Parent = E.FRM
+        E.BAR_BG.Parent = E.FRM
+        E.BAR_FL.Parent = E.BAR_BG
+        E.BAR_GRAD.Parent = E.BAR_FL
+        E.HEALTH_TXT.Parent = E.FRM
+
+        E.BAR_BG.BackgroundColor3 = Color3.new(0, 0, 0)
+        E.BAR_BG.BackgroundTransparency = 0.5
+        E.BAR_BG.BorderSizePixel = 0
+        E.BAR_FL.BorderSizePixel = 0
+        E.BAR_GRAD.Rotation = 90
+
+        for i = 1, 15 do
+            local seg = Instance.new("Frame", E.FRM)
+            seg.BorderSizePixel = 0
+            seg.Visible = false
+            seg.AnchorPoint = Vector2.new(0.5, 0.5)
+            E.SKEL[i] = seg
+        end
+
+        CACHE[p] = E
+        return E
+    end
+
+    getgenv().BOT_LIST = {}
+    task.spawn(function()
+        while task.wait(1.5) do
+            if getgenv().FLUX_SESSION ~= MySession then break end
+            if getgenv().ESP_CFG and getgenv().ESP_CFG.Bots then
+                local nb = {}
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if v:IsA("Humanoid") then
+                        local char = v.Parent
+                        if char and char:IsA("Model") and char ~= LP.Character and not Players:GetPlayerFromCharacter(char) then
+                            local hrp = char:FindFirstChild("HumanoidRootPart") or v.RootPart
+                            if hrp then
+                                table.insert(nb, char)
+                            end
+                        end
+                    end
+                end
+                getgenv().BOT_LIST = nb
+            else
+                getgenv().BOT_LIST = {}
+            end
         end
     end)
-end
 
-local ESP_HOLDER = Instance.new("ScreenGui")
-ESP_HOLDER.Name = "ESP_HOLDER"
-ESP_HOLDER.IgnoreGuiInset = true
-ESP_HOLDER.DisplayOrder = -1100
-pcall(function() ESP_HOLDER.Parent = game:GetService("CoreGui") end)
-if not ESP_HOLDER.Parent then ESP_HOLDER.Parent = PG end
+    local function UPD_ESP()
+        local cam = workspace.CurrentCamera
+        local myTeamFolder = getgenv().MY_TEAM_CACHE
 
-local CACHE = {}
-local R15_BONES = {
-    { "Head",         "UpperTorso" }, { "UpperTorso", "LowerTorso" }, { "UpperTorso", "LeftUpperArm" },
-    { "LeftUpperArm", "LeftLowerArm" }, { "LeftLowerArm", "LeftHand" }, { "UpperTorso", "RightUpperArm" },
-    { "RightUpperArm", "RightLowerArm" }, { "RightLowerArm", "RightHand" }, { "LowerTorso", "LeftUpperLeg" },
-    { "LeftUpperLeg",  "LeftLowerLeg" }, { "LeftLowerLeg", "LeftFoot" }, { "LowerTorso", "RightUpperLeg" },
-    { "RightUpperLeg", "RightLowerLeg" }, { "RightLowerLeg", "RightFoot" }
-}
-local R6_BONES = {
-    { "Head",  "Torso" }, { "Torso", "Left Arm" }, { "Torso", "Right Arm" },
-    { "Torso", "Left Leg" }, { "Torso", "Right Leg" }
-}
-if getgenv().ESP_CACHE then
-    for _, obj in pairs(getgenv().ESP_CACHE) do
-        if obj.FRM then obj.FRM:Destroy() end
-        if obj.CHAM then obj.CHAM:Destroy() end
-        if obj.TCHAM then obj.TCHAM:Destroy() end
-    end
-end
-local CACHE = {}
-getgenv().ESP_CACHE = CACHE
-local LOCAL_GUN_CACHE = { Mats = {}, Colors = {}, Highlights = {}, LastTool = nil }
+        local allPlayers = Players:GetPlayers()
+        local valid_targets = {}
 
-local function MK_ESP(p)
-    local E = {
-        FRM = Instance.new("Frame", ESP_HOLDER),
-        NAME = NewLabel(nil, "", 10, Color3.new(1, 1, 1), true, Enum.TextXAlignment.Center),
-        DIST = NewLabel(nil, "", 9, Color3.new(1, 1, 1), false, Enum.TextXAlignment.Center),
-        WEAP = NewLabel(nil, "", 9, Color3.new(1, 1, 1), false, Enum.TextXAlignment.Center),
-        BOX = Instance.new("Frame"),
-        FILL = Instance.new("Frame"),
-        BAR_BG = Instance.new("Frame"),
-        BAR_FL = Instance.new("Frame"),
-        BAR_GRAD = Instance.new("UIGradient"),
-        HEALTH_TXT = NewLabel(nil, "", 9, Color3.new(1, 1, 1), false, Enum.TextXAlignment.Center),
-        SLINE = Instance.new("Frame"),
-        SKEL = {}
-    }
-    E.SLINE.Parent = E.FRM
-    E.FRM.BackgroundTransparency = 1
-    E.FRM.Size = UDim2.new(1, 0, 1, 0)
+        local hasActiveMatch = (getgenv().ACTIVE_MATCH_PLAYERS and next(getgenv().ACTIVE_MATCH_PLAYERS) ~= nil)
+        for i = 1, #allPlayers do
+            local p = allPlayers[i]
+            if p ~= LP and not IsIgnoredPlayer(p) then
+                if not hasActiveMatch or getgenv().ACTIVE_MATCH_PLAYERS[p.Name] then
+                    if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
+                        local isTeammate = false
+                        if IsBronxDuels() or IsDuelist() then
+                            local myTeam = LP:GetAttribute("DuelsTeam")
+                            local theirTeam = p:GetAttribute("DuelsTeam")
+                            local myMatch = LP:GetAttribute("DuelsMatchId")
+                            local theirMatch = p:GetAttribute("DuelsMatchId")
 
-    E.SLINE.BorderSizePixel = 0
-    E.SLINE.ZIndex = -1
-    E.SLINE.AnchorPoint = Vector2.new(0.5, 0.5)
-
-    E.BOX.BackgroundTransparency = 1
-    E.BOX.BorderSizePixel = 0
-    E.BOX_LINES = {}
-    for i = 1, 8 do
-        local l = Instance.new("Frame", E.BOX)
-        l.BorderSizePixel = 0
-        l.ZIndex = 2
-        local bg = Instance.new("Frame", l)
-        bg.BackgroundColor3 = Color3.new(0, 0, 0)
-        bg.BorderSizePixel = 0
-        bg.ZIndex = 1
-        E.BOX_LINES[i] = { l = l, bg = bg }
-    end
-
-    E.FILL.BorderSizePixel = 0
-    E.FILL.BackgroundTransparency = 1 
-    E.FILL.ZIndex = -1
-
-    local ff1 = Instance.new("Frame", E.FILL)
-    ff1.Name = "FF1"
-    ff1.Size = UDim2.new(1, 0, 1, 0)
-    ff1.BorderSizePixel = 0
-    local grad1 = Instance.new("UIGradient", ff1)
-    grad1.Name = "Gradient"
-    grad1.Rotation = 45
-
-    local ff2 = Instance.new("Frame", E.FILL)
-    ff2.Name = "FF2"
-    ff2.Size = UDim2.new(1, 0, 1, 0)
-    ff2.BorderSizePixel = 0
-    local grad2 = Instance.new("UIGradient", ff2)
-    grad2.Name = "Gradient"
-    grad2.Rotation = -45
-
-    E.NAME.Parent = E.FRM
-    E.DIST.Parent = E.FRM
-    E.WEAP.Parent = E.FRM
-    E.BOX.Parent = E.FRM
-    E.FILL.Parent = E.FRM
-    E.BAR_BG.Parent = E.FRM
-    E.BAR_FL.Parent = E.BAR_BG
-    E.BAR_GRAD.Parent = E.BAR_FL
-    E.HEALTH_TXT.Parent = E.FRM
-
-    E.BAR_BG.BackgroundColor3 = Color3.new(0, 0, 0)
-    E.BAR_BG.BackgroundTransparency = 0.5
-    E.BAR_BG.BorderSizePixel = 0
-    E.BAR_FL.BorderSizePixel = 0
-    E.BAR_GRAD.Rotation = 90
-
-    for i = 1, 15 do
-        local seg = Instance.new("Frame", E.FRM)
-        seg.BorderSizePixel = 0
-        seg.Visible = false
-        seg.AnchorPoint = Vector2.new(0.5, 0.5)
-        E.SKEL[i] = seg
-    end
-
-    CACHE[p] = E
-    return E
-end
-
-getgenv().BOT_LIST = {}
-task.spawn(function()
-    while task.wait(1.5) do
-        if getgenv().FLUX_SESSION ~= MySession then break end
-        if getgenv().ESP_CFG and getgenv().ESP_CFG.Bots then
-            local nb = {}
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Humanoid") then
-                    local char = v.Parent
-                    if char and char:IsA("Model") and char ~= LP.Character and not Players:GetPlayerFromCharacter(char) then
-                        local hrp = char:FindFirstChild("HumanoidRootPart") or v.RootPart
-                        if hrp then
-                            table.insert(nb, char)
-                        end
-                    end
-                end
-            end
-            getgenv().BOT_LIST = nb
-        else
-            getgenv().BOT_LIST = {}
-        end
-    end
-end)
-
-local function UPD_ESP()
-    local cam = workspace.CurrentCamera
-    local myTeamFolder = getgenv().MY_TEAM_CACHE
-
-    local allPlayers = Players:GetPlayers()
-    local valid_targets = {}
-
-    local hasActiveMatch = (getgenv().ACTIVE_MATCH_PLAYERS and next(getgenv().ACTIVE_MATCH_PLAYERS) ~= nil)
-    for i = 1, #allPlayers do
-        local p = allPlayers[i]
-        if p ~= LP and not IsIgnoredPlayer(p) then
-            if not hasActiveMatch or getgenv().ACTIVE_MATCH_PLAYERS[p.Name] then
-                if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
-                    local isTeammate = false
-                    if IsBronxDuels() or IsDuelist() then
-                        local myTeam = LP:GetAttribute("DuelsTeam")
-                        local theirTeam = p:GetAttribute("DuelsTeam")
-                        local myMatch = LP:GetAttribute("DuelsMatchId")
-                        local theirMatch = p:GetAttribute("DuelsMatchId")
-
-                        if myMatch and theirMatch and myMatch == theirMatch then
-                            if myTeam and theirTeam and myTeam == theirTeam then
-                                isTeammate = true
+                            if myMatch and theirMatch and myMatch == theirMatch then
+                                if myTeam and theirTeam and myTeam == theirTeam then
+                                    isTeammate = true
+                                end
                             end
+                        else
+                            isTeammate = myTeamFolder and myTeamFolder:FindFirstChild(p.Name)
+                        end
+                        if not isTeammate then
+                            valid_targets[p] = true
                         end
                     else
-                        isTeammate = myTeamFolder and myTeamFolder:FindFirstChild(p.Name)
-                    end
-                    if not isTeammate then
                         valid_targets[p] = true
                     end
-                else
-                    valid_targets[p] = true
                 end
             end
         end
-    end
 
-    if getgenv().ESP_CFG.Bots then
-        local bots = getgenv().BOT_LIST or {}
-        for i = 1, #bots do
-            valid_targets[bots[i]] = true
-        end
-    end
-
-    for target, E in pairs(CACHE) do
-        if not valid_targets[target] then
-            E.FRM.Visible = false
-            if E.CHAM then E.CHAM.Enabled = false end
-            if E.TCHAM then E.TCHAM.Enabled = false end
-            if E.IsMaterialCham and E.CharCache and E.CharCache.Mats then
-                for part, mat in pairs(E.CharCache.Mats) do
-                    if part.Parent then part.Material = mat end
-                end
-                E.IsMaterialCham = false
-            end
-            if E.IsToolMatCham and E.CharCache and E.CharCache.ToolMats then
-                for part, mat in pairs(E.CharCache.ToolMats) do
-                    if part.Parent then part.Material = mat end
-                end
-                E.IsToolMatCham = false
+        if getgenv().ESP_CFG.Bots then
+            local bots = getgenv().BOT_LIST or {}
+            for i = 1, #bots do
+                valid_targets[bots[i]] = true
             end
         end
-    end
 
-    local fontCache = Enum.Font[getgenv().ESP_CFG.FontName or "GothamBold"]
-    local fontSizeCache = getgenv().ESP_CFG.FontSize or 11
-
-    for p, _ in pairs(valid_targets) do
-        local E = CACHE[p]
-        if not E or not E.FRM or not E.FRM.Parent then
-            if E and E.FRM then pcall(function() E.FRM:Destroy() end) end
-            E = MK_ESP(p)
+        for target, E in pairs(CACHE) do
+            if not valid_targets[target] then
+                E.FRM.Visible = false
+                if E.CHAM then E.CHAM.Enabled = false end
+                if E.TCHAM then E.TCHAM.Enabled = false end
+                if E.IsMaterialCham and E.CharCache and E.CharCache.Mats then
+                    for part, mat in pairs(E.CharCache.Mats) do
+                        if part.Parent then part.Material = mat end
+                    end
+                    E.IsMaterialCham = false
+                end
+                if E.IsToolMatCham and E.CharCache and E.CharCache.ToolMats then
+                    for part, mat in pairs(E.CharCache.ToolMats) do
+                        if part.Parent then part.Material = mat end
+                    end
+                    E.IsToolMatCham = false
+                end
+            end
         end
 
-        local isPlayer = p:IsA("Player")
-        local C = isPlayer and p.Character or p
+        local fontCache = Enum.Font[getgenv().ESP_CFG.FontName or "GothamBold"]
+        local fontSizeCache = getgenv().ESP_CFG.FontSize or 11
 
-        if not E.CharCache or E.CharCache.C ~= C or not E.CharCache.HUM or not E.CharCache.H then
-            local hum = C and C:FindFirstChildOfClass("Humanoid")
-            E.CharCache = {
-                C = C,
-                HUM = hum,
-                H = hum and hum.RootPart or
-                    C and
-                    (C:FindFirstChild("Torso") or C:FindFirstChild("UpperTorso") or C:FindFirstChild("HumanoidRootPart"))
-            }
-        end
+        for p, _ in pairs(valid_targets) do
+            local E = CACHE[p]
+            if not E or not E.FRM or not E.FRM.Parent then
+                if E and E.FRM then pcall(function() E.FRM:Destroy() end) end
+                E = MK_ESP(p)
+            end
 
-        local HUM = E.CharCache.HUM
-        local H = E.CharCache.H
+            local isPlayer = p:IsA("Player")
+            local C = isPlayer and p.Character or p
 
-        if C and H and HUM then
-            local pos, vis = cam:WorldToViewportPoint(H.Position)
-            local dist = (cam.CFrame.Position - H.Position).Magnitude
+            if not E.CharCache or E.CharCache.C ~= C or not E.CharCache.HUM or not E.CharCache.H then
+                local hum = C and C:FindFirstChildOfClass("Humanoid")
+                E.CharCache = {
+                    C = C,
+                    HUM = hum,
+                    H = hum and hum.RootPart or
+                        C and
+                        (C:FindFirstChild("Torso") or C:FindFirstChild("UpperTorso") or C:FindFirstChild("HumanoidRootPart"))
+                }
+            end
 
-            local isAlive = (HUM.Health > 0.1) and
-                (HUM:GetState() ~= Enum.HumanoidStateType.Dead) and
-                (C:IsDescendantOf(workspace)) and
-                not (C:GetAttribute("Downed") or C:GetAttribute("IsDead"))
+            local HUM = E.CharCache.HUM
+            local H = E.CharCache.H
 
-            if getgenv().ESP_CFG.Enabled and isAlive then
-                E.FRM.Visible = vis or (getgenv().ESP_CFG.OffScreen and getgenv().ESP_CFG.Snaplines)
+            if C and H and HUM then
+                local pos, vis = cam:WorldToViewportPoint(H.Position)
+                local dist = (cam.CFrame.Position - H.Position).Magnitude
 
-                if E.FRM.Visible then
-                    local fovFactor = 2 * math.tan(math.rad(cam.FieldOfView / 2))
-                    local s_y = (H.Size.Y * 3.361 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
-                    local s_x = s_y * 0.7
+                local isAlive = (HUM.Health > 0.1) and
+                    (HUM:GetState() ~= Enum.HumanoidStateType.Dead) and
+                    (C:IsDescendantOf(workspace)) and
+                    not (C:GetAttribute("Downed") or C:GetAttribute("IsDead"))
 
-                    if IsDuelist() then
+                if getgenv().ESP_CFG.Enabled and isAlive then
+                    E.FRM.Visible = vis or (getgenv().ESP_CFG.OffScreen and getgenv().ESP_CFG.Snaplines)
 
-                        s_y = (5.91 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
-                        s_x = (3.00 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
-                    end
+                    if E.FRM.Visible then
+                        local fovFactor = 2 * math.tan(math.rad(cam.FieldOfView / 2))
+                        local s_y = (H.Size.Y * 3.361 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
+                        local s_x = s_y * 0.7
 
-                    local x, y = pos.X - s_x / 2, pos.Y - s_y / 2
-
-                    if getgenv().ESP_CFG.Chams then
-                        if not E.CHAM or E.CHAM.Parent ~= C then
-                            if E.CHAM then E.CHAM:Destroy() end
-                            E.CHAM = Instance.new("Highlight", C)
-                            E.CHAM.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        if IsDuelist() then
+                            s_y = (5.91 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
+                            s_x = (3.00 * 1.05 * cam.ViewportSize.Y) / (pos.Z * fovFactor)
                         end
 
-                        for _, part in ipairs(C:GetDescendants()) do
-                            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                                if not E.CharCache.Mats then E.CharCache.Mats = {} end
-                                if not E.CharCache.Mats[part] then E.CharCache.Mats[part] = part.Material end
-                                part.Material = Enum.Material.ForceField
-                                part.Color = getgenv().ESP_CFG.ChamColor1 or Color3.new(1, 1, 1)
-                            end
-                        end
-                        E.IsMaterialCham = true
+                        local x, y = pos.X - s_x / 2, pos.Y - s_y / 2
 
-                        E.CHAM.FillTransparency = 1 
-                        E.CHAM.OutlineColor = getgenv().ESP_CFG.ChamColor2 or Color3.new(1, 1, 1)
-                        E.CHAM.OutlineTransparency = 0
-                        E.CHAM.Enabled = true
-                    elseif E.CHAM or E.IsMaterialCham then
-                        if E.CHAM then
-                            E.CHAM:Destroy(); E.CHAM = nil
-                        end
-                        if E.IsMaterialCham and E.CharCache and E.CharCache.Mats then
-                            for part, mat in pairs(E.CharCache.Mats) do
-                                if part.Parent then part.Material = mat end
-                            end
-                            E.IsMaterialCham = false
-                        end
-                    end
-
-                    local tool = C:FindFirstChildOfClass("Tool")
-                    if getgenv().ESP_CFG.ToolChams and tool then
-                        if not E.TCHAM or E.TCHAM.Parent ~= tool then
-                            if E.TCHAM then E.TCHAM:Destroy() end
-                            E.TCHAM = Instance.new("Highlight", tool)
-                            E.TCHAM.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                        end
-
-                        for _, part in ipairs(tool:GetDescendants()) do
-                            if part:IsA("BasePart") then
-                                if not E.CharCache.ToolMats then E.CharCache.ToolMats = {} end
-                                if not E.CharCache.ToolMats[part] then E.CharCache.ToolMats[part] = part.Material end
-                                part.Material = Enum.Material.ForceField
-                                part.Color = getgenv().ESP_CFG.ToolChamColor1 or Color3.new(1, 1, 1)
-                            end
-                        end
-                        E.IsToolMatCham = true
-
-                        E.TCHAM.FillTransparency = 1
-                        E.TCHAM.OutlineColor = getgenv().ESP_CFG.ToolChamColor2 or Color3.new(1, 1, 1)
-                        E.TCHAM.OutlineTransparency = 0
-                        E.TCHAM.Enabled = true
-                    elseif E.TCHAM or E.IsToolMatCham then
-                        if E.TCHAM then
-                            E.TCHAM:Destroy(); E.TCHAM = nil
-                        end
-                        if E.IsToolMatCham and E.CharCache and E.CharCache.ToolMats then
-                            for part, mat in pairs(E.CharCache.ToolMats) do
-                                if part.Parent then part.Material = mat end
-                            end
-                            E.IsToolMatCham = false
-                        end
-                    end
-
-                    if vis then
-
-                        E.NAME.Visible = getgenv().ESP_CFG.Names and dist <= getgenv().ESP_CFG.MaxDistance
-                        if E.NAME.Visible then
-                            E.NAME.Text = (isPlayer and getgenv().ESP_CFG.DisplayNames) and p.DisplayName or p.Name
-                            if not isPlayer then E.NAME.Text = "[BOT] " .. p.Name end
-                            E.NAME.Position = UDim2.new(0, x, 0, y - 16)
-                            E.NAME.Size = UDim2.new(0, s_x, 0, 14)
-                            E.NAME.TextColor3 = getgenv().ESP_CFG.NameColor or Color3.new(1, 1, 1)
-                            if E.NAME.Font ~= fontCache then E.NAME.Font = fontCache end
-                            if E.NAME.TextSize ~= fontSizeCache then E.NAME.TextSize = fontSizeCache end
-                        end
-
-                        local hp_per = math.clamp(HUM.Health / HUM.MaxHealth, 0, 1)
-                        E.BAR_BG.Visible = getgenv().ESP_CFG.HealthBar and dist <= getgenv().ESP_CFG.MaxDistance
-                        if E.BAR_BG.Visible then
-                            E.BAR_BG.Position = UDim2.new(0, x - 6, 0, y)
-                            E.BAR_BG.Size = UDim2.new(0, 3, 0, s_y)
-                            E.BAR_FL.Size = UDim2.new(1, 0, hp_per, 0)
-                            E.BAR_FL.Position = UDim2.new(0, 0, 1 - hp_per, 0)
-                            E.BAR_GRAD.Color = ColorSequence.new(
-                                getgenv().ESP_CFG.HealthColor1 or Color3.fromRGB(255, 0, 0),
-                                getgenv().ESP_CFG.HealthColor2 or Color3.fromRGB(0, 255, 0))
-                        end
-
-                        E.HEALTH_TXT.Visible = getgenv().ESP_CFG.HealthText and dist <= getgenv().ESP_CFG.MaxDistance
-                        if E.HEALTH_TXT.Visible then
-                            E.HEALTH_TXT.Text = math.floor(HUM.Health)
-                            E.HEALTH_TXT.Position = UDim2.new(0, x - 40, 0, y + s_y * (1 - hp_per) - 6)
-                            E.HEALTH_TXT.Size = UDim2.new(0, 30, 0, 12)
-                            if E.HEALTH_TXT.Font ~= fontCache then E.HEALTH_TXT.Font = fontCache end
-                            if E.HEALTH_TXT.TextSize ~= fontSizeCache then E.HEALTH_TXT.TextSize = fontSizeCache end
-                        end
-
-                        E.DIST.Visible = getgenv().ESP_CFG.Distance and dist <= getgenv().ESP_CFG.MaxDistance
-                        if E.DIST.Visible then
-                            E.DIST.Text = math.floor(dist) .. "m"
-                            E.DIST.Position = UDim2.new(0, x, 0, y + s_y + 2)
-                            E.DIST.Size = UDim2.new(0, s_x, 0, 12)
-                            E.DIST.TextColor3 = getgenv().ESP_CFG.DistColor or Color3.new(1, 1, 1)
-                            if E.DIST.Font ~= fontCache then E.DIST.Font = fontCache end
-                            if E.DIST.TextSize ~= fontSizeCache then E.DIST.TextSize = fontSizeCache end
-                        end
-
-                        E.WEAP.Visible = getgenv().ESP_CFG.Tools and dist <= getgenv().ESP_CFG.MaxDistance
-                        if E.WEAP.Visible then
-                            E.WEAP.Text = tool and tool.Name or "None"
-                            E.WEAP.Position = UDim2.new(0, x, 0, y + s_y + (E.DIST.Visible and 14 or 2))
-                            E.WEAP.Size = UDim2.new(0, s_x, 0, 12)
-                            E.WEAP.TextColor3 = getgenv().ESP_CFG.ToolColor or Color3.new(1, 1, 1)
-                            if E.WEAP.Font ~= fontCache then E.WEAP.Font = fontCache end
-                            if E.WEAP.TextSize ~= fontSizeCache then E.WEAP.TextSize = fontSizeCache end
-                        end
-
-                        local b_vis = getgenv().ESP_CFG.Boxes and dist <= getgenv().ESP_CFG.MaxDistance
-                        E.BOX.Visible = b_vis
-                        if b_vis then
-                            E.BOX.Position = UDim2.new(0, x, 0, y)
-                            E.BOX.Size = UDim2.new(0, s_x, 0, s_y)
-
-                            local color = getgenv().ESP_CFG.BoxColor or Color3.new(1, 1, 1)
-
-                            local len = math.clamp(s_x * 0.25, 2, 60)
-                            if getgenv().ESP_CFG.AnimBoxFill then
-
-                                local pulse = 0.25 + math.sin(tick() * 4) * 0.1
-                                len = math.clamp(s_x * pulse, 2, 60)
+                        if getgenv().ESP_CFG.Chams then
+                            if not E.CHAM or E.CHAM.Parent ~= C then
+                                if E.CHAM then E.CHAM:Destroy() end
+                                E.CHAM = Instance.new("Highlight", C)
+                                E.CHAM.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                             end
 
-                            local t = 1 
+                            for _, part in ipairs(C:GetDescendants()) do
+                                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                                    if not E.CharCache.Mats then E.CharCache.Mats = {} end
+                                    if not E.CharCache.Mats[part] then E.CharCache.Mats[part] = part.Material end
+                                    part.Material = Enum.Material.ForceField
+                                    part.Color = getgenv().ESP_CFG.ChamColor1 or Color3.new(1, 1, 1)
+                                end
+                            end
+                            E.IsMaterialCham = true
 
-                            E.BOX_LINES[1].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[1].l.Position = UDim2.new(0, 0,
-                                0, 0)
-                            E.BOX_LINES[2].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[2].l.Position = UDim2.new(0, 0,
-                                0, 0)
-
-                            E.BOX_LINES[3].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[3].l.Position = UDim2.new(1,
-                                -len, 0, 0)
-                            E.BOX_LINES[4].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[4].l.Position = UDim2.new(1, -t,
-                                0, 0)
-
-                            E.BOX_LINES[5].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[5].l.Position = UDim2.new(0, 0,
-                                1, -t)
-                            E.BOX_LINES[6].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[6].l.Position = UDim2.new(0, 0,
-                                1, -len)
-
-                            E.BOX_LINES[7].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[7].l.Position = UDim2.new(1,
-                                -len, 1, -t)
-                            E.BOX_LINES[8].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[8].l.Position = UDim2.new(1, -t,
-                                1, -len)
-
-                            for i = 1, 8 do
-                                E.BOX_LINES[i].l.BackgroundColor3 = color
-                                E.BOX_LINES[i].bg.Size = UDim2.new(1, 2, 1, 2)
-                                E.BOX_LINES[i].bg.Position = UDim2.new(0, -1, 0, -1)
+                            E.CHAM.FillTransparency = 1
+                            E.CHAM.OutlineColor = getgenv().ESP_CFG.ChamColor2 or Color3.new(1, 1, 1)
+                            E.CHAM.OutlineTransparency = 0
+                            E.CHAM.Enabled = true
+                        elseif E.CHAM or E.IsMaterialCham then
+                            if E.CHAM then
+                                E.CHAM:Destroy(); E.CHAM = nil
+                            end
+                            if E.IsMaterialCham and E.CharCache and E.CharCache.Mats then
+                                for part, mat in pairs(E.CharCache.Mats) do
+                                    if part.Parent then part.Material = mat end
+                                end
+                                E.IsMaterialCham = false
                             end
                         end
 
-                        local f_vis = getgenv().ESP_CFG.BoxFill and dist <= getgenv().ESP_CFG.MaxDistance
-                        E.FILL.Visible = f_vis
-                        if f_vis then
-                            E.FILL.Position = UDim2.new(0, x, 0, y)
-                            E.FILL.Size = UDim2.new(0, s_x, 0, s_y)
-                            local fillC = getgenv().ESP_CFG.FillColor or Color3.new(1, 1, 1)
+                        local tool = C:FindFirstChildOfClass("Tool")
+                        if getgenv().ESP_CFG.ToolChams and tool then
+                            if not E.TCHAM or E.TCHAM.Parent ~= tool then
+                                if E.TCHAM then E.TCHAM:Destroy() end
+                                E.TCHAM = Instance.new("Highlight", tool)
+                                E.TCHAM.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                            end
 
-                            local ff1 = E.FILL:FindFirstChild("FF1")
-                            local ff2 = E.FILL:FindFirstChild("FF2")
+                            for _, part in ipairs(tool:GetDescendants()) do
+                                if part:IsA("BasePart") then
+                                    if not E.CharCache.ToolMats then E.CharCache.ToolMats = {} end
+                                    if not E.CharCache.ToolMats[part] then E.CharCache.ToolMats[part] = part.Material end
+                                    part.Material = Enum.Material.ForceField
+                                    part.Color = getgenv().ESP_CFG.ToolChamColor1 or Color3.new(1, 1, 1)
+                                end
+                            end
+                            E.IsToolMatCham = true
 
-                            if getgenv().ESP_CFG.AnimBoxFill then
-                                E.FILL.BackgroundTransparency = 1
-                                if ff1 then ff1.Visible = true end
-                                if ff2 then ff2.Visible = true end
+                            E.TCHAM.FillTransparency = 1
+                            E.TCHAM.OutlineColor = getgenv().ESP_CFG.ToolChamColor2 or Color3.new(1, 1, 1)
+                            E.TCHAM.OutlineTransparency = 0
+                            E.TCHAM.Enabled = true
+                        elseif E.TCHAM or E.IsToolMatCham then
+                            if E.TCHAM then
+                                E.TCHAM:Destroy(); E.TCHAM = nil
+                            end
+                            if E.IsToolMatCham and E.CharCache and E.CharCache.ToolMats then
+                                for part, mat in pairs(E.CharCache.ToolMats) do
+                                    if part.Parent then part.Material = mat end
+                                end
+                                E.IsToolMatCham = false
+                            end
+                        end
 
-                                local seq = NumberSequence.new({
-                                    NumberSequenceKeypoint.new(0, 0.95),
-                                    NumberSequenceKeypoint.new(0.3, 0.4), 
-                                    NumberSequenceKeypoint.new(0.5, 0.95),
-                                    NumberSequenceKeypoint.new(0.7, 0.4), 
-                                    NumberSequenceKeypoint.new(1, 0.95)
-                                })
+                        if vis then
+                            E.NAME.Visible = getgenv().ESP_CFG.Names and dist <= getgenv().ESP_CFG.MaxDistance
+                            if E.NAME.Visible then
+                                E.NAME.Text = (isPlayer and getgenv().ESP_CFG.DisplayNames) and p.DisplayName or p.Name
+                                if not isPlayer then E.NAME.Text = "[BOT] " .. p.Name end
+                                E.NAME.Position = UDim2.new(0, x, 0, y - 16)
+                                E.NAME.Size = UDim2.new(0, s_x, 0, 14)
+                                E.NAME.TextColor3 = getgenv().ESP_CFG.NameColor or Color3.new(1, 1, 1)
+                                if E.NAME.Font ~= fontCache then E.NAME.Font = fontCache end
+                                if E.NAME.TextSize ~= fontSizeCache then E.NAME.TextSize = fontSizeCache end
+                            end
 
-                                local t = tick()
+                            local hp_per = math.clamp(HUM.Health / HUM.MaxHealth, 0, 1)
+                            E.BAR_BG.Visible = getgenv().ESP_CFG.HealthBar and dist <= getgenv().ESP_CFG.MaxDistance
+                            if E.BAR_BG.Visible then
+                                E.BAR_BG.Position = UDim2.new(0, x - 6, 0, y)
+                                E.BAR_BG.Size = UDim2.new(0, 3, 0, s_y)
+                                E.BAR_FL.Size = UDim2.new(1, 0, hp_per, 0)
+                                E.BAR_FL.Position = UDim2.new(0, 0, 1 - hp_per, 0)
+                                E.BAR_GRAD.Color = ColorSequence.new(
+                                    getgenv().ESP_CFG.HealthColor1 or Color3.fromRGB(255, 0, 0),
+                                    getgenv().ESP_CFG.HealthColor2 or Color3.fromRGB(0, 255, 0))
+                            end
 
-                                if ff1 then
-                                    ff1.BackgroundColor3 = fillC
-                                    local g1 = ff1:FindFirstChild("Gradient")
-                                    g1.Color = ColorSequence.new(fillC)
-                                    g1.Transparency = seq
-                                    g1.Offset = Vector2.new(math.sin(t * 1.5) * 0.4, math.sin(t * 1.5) * 0.4)
+                            E.HEALTH_TXT.Visible = getgenv().ESP_CFG.HealthText and dist <= getgenv().ESP_CFG
+                                .MaxDistance
+                            if E.HEALTH_TXT.Visible then
+                                E.HEALTH_TXT.Text = math.floor(HUM.Health)
+                                E.HEALTH_TXT.Position = UDim2.new(0, x - 40, 0, y + s_y * (1 - hp_per) - 6)
+                                E.HEALTH_TXT.Size = UDim2.new(0, 30, 0, 12)
+                                if E.HEALTH_TXT.Font ~= fontCache then E.HEALTH_TXT.Font = fontCache end
+                                if E.HEALTH_TXT.TextSize ~= fontSizeCache then E.HEALTH_TXT.TextSize = fontSizeCache end
+                            end
+
+                            E.DIST.Visible = getgenv().ESP_CFG.Distance and dist <= getgenv().ESP_CFG.MaxDistance
+                            if E.DIST.Visible then
+                                E.DIST.Text = math.floor(dist) .. "m"
+                                E.DIST.Position = UDim2.new(0, x, 0, y + s_y + 2)
+                                E.DIST.Size = UDim2.new(0, s_x, 0, 12)
+                                E.DIST.TextColor3 = getgenv().ESP_CFG.DistColor or Color3.new(1, 1, 1)
+                                if E.DIST.Font ~= fontCache then E.DIST.Font = fontCache end
+                                if E.DIST.TextSize ~= fontSizeCache then E.DIST.TextSize = fontSizeCache end
+                            end
+
+                            E.WEAP.Visible = getgenv().ESP_CFG.Tools and dist <= getgenv().ESP_CFG.MaxDistance
+                            if E.WEAP.Visible then
+                                E.WEAP.Text = tool and tool.Name or "None"
+                                E.WEAP.Position = UDim2.new(0, x, 0, y + s_y + (E.DIST.Visible and 14 or 2))
+                                E.WEAP.Size = UDim2.new(0, s_x, 0, 12)
+                                E.WEAP.TextColor3 = getgenv().ESP_CFG.ToolColor or Color3.new(1, 1, 1)
+                                if E.WEAP.Font ~= fontCache then E.WEAP.Font = fontCache end
+                                if E.WEAP.TextSize ~= fontSizeCache then E.WEAP.TextSize = fontSizeCache end
+                            end
+
+                            local b_vis = getgenv().ESP_CFG.Boxes and dist <= getgenv().ESP_CFG.MaxDistance
+                            E.BOX.Visible = b_vis
+                            if b_vis then
+                                E.BOX.Position = UDim2.new(0, x, 0, y)
+                                E.BOX.Size = UDim2.new(0, s_x, 0, s_y)
+
+                                local color = getgenv().ESP_CFG.BoxColor or Color3.new(1, 1, 1)
+
+                                local len = math.clamp(s_x * 0.25, 2, 60)
+                                if getgenv().ESP_CFG.AnimBoxFill then
+                                    local pulse = 0.25 + math.sin(tick() * 4) * 0.1
+                                    len = math.clamp(s_x * pulse, 2, 60)
                                 end
 
-                                if ff2 then
-                                    ff2.BackgroundColor3 = fillC
-                                    local g2 = ff2:FindFirstChild("Gradient")
-                                    g2.Color = ColorSequence.new(fillC)
-                                    g2.Transparency = seq
-                                    g2.Offset = Vector2.new(math.cos(t * 1.1) * 0.4, math.cos(t * 1.1) * 0.4)
-                                end
-                            else
-                                E.FILL.BackgroundTransparency = 0.6
-                                E.FILL.BackgroundColor3 = fillC
-                                if ff1 then ff1.Visible = false end
-                                if ff2 then ff2.Visible = false end
-                            end
-                        end
+                                local t = 1
 
-                        local bones = HUM.RigType == Enum.HumanoidRigType.R15 and R15_BONES or R6_BONES
-                        for i, bone in ipairs(bones) do
-                            local seg = E.SKEL[i]
-                            if seg then
-                                seg.Visible = getgenv().ESP_CFG.Skeleton
-                                if seg.Visible then
-                                    local b1, b2 = C:FindFirstChild(bone[1]), C:FindFirstChild(bone[2])
-                                    if b1 and b2 then
-                                        local v1 = cam:WorldToViewportPoint(b1.Position)
-                                        local v2 = cam:WorldToViewportPoint(b2.Position)
-                                        local d = Vector2.new(v2.X - v1.X, v2.Y - v1.Y)
-                                        seg.Size = UDim2.new(0, d.Magnitude, 0, 1)
-                                        seg.Position = UDim2.new(0, (v1.X + v2.X) / 2, 0, (v1.Y + v2.Y) / 2)
-                                        seg.Rotation = math.deg(math.atan2(d.Y, d.X))
-                                        seg.BackgroundColor3 = getgenv().ESP_CFG.SkelColor or Color3.new(1, 1, 1)
-                                    else
-                                        seg.Visible = false
+                                E.BOX_LINES[1].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[1].l.Position = UDim2.new(0,
+                                    0,
+                                    0, 0)
+                                E.BOX_LINES[2].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[2].l.Position = UDim2.new(0,
+                                    0,
+                                    0, 0)
+
+                                E.BOX_LINES[3].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[3].l.Position = UDim2.new(1,
+                                    -len, 0, 0)
+                                E.BOX_LINES[4].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[4].l.Position = UDim2.new(1,
+                                    -t,
+                                    0, 0)
+
+                                E.BOX_LINES[5].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[5].l.Position = UDim2.new(0,
+                                    0,
+                                    1, -t)
+                                E.BOX_LINES[6].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[6].l.Position = UDim2.new(0,
+                                    0,
+                                    1, -len)
+
+                                E.BOX_LINES[7].l.Size = UDim2.new(0, len, 0, t); E.BOX_LINES[7].l.Position = UDim2.new(1,
+                                    -len, 1, -t)
+                                E.BOX_LINES[8].l.Size = UDim2.new(0, t, 0, len); E.BOX_LINES[8].l.Position = UDim2.new(1,
+                                    -t,
+                                    1, -len)
+
+                                for i = 1, 8 do
+                                    E.BOX_LINES[i].l.BackgroundColor3 = color
+                                    E.BOX_LINES[i].bg.Size = UDim2.new(1, 2, 1, 2)
+                                    E.BOX_LINES[i].bg.Position = UDim2.new(0, -1, 0, -1)
+                                end
+                            end
+
+                            local f_vis = getgenv().ESP_CFG.BoxFill and dist <= getgenv().ESP_CFG.MaxDistance
+                            E.FILL.Visible = f_vis
+                            if f_vis then
+                                E.FILL.Position = UDim2.new(0, x, 0, y)
+                                E.FILL.Size = UDim2.new(0, s_x, 0, s_y)
+                                local fillC = getgenv().ESP_CFG.FillColor or Color3.new(1, 1, 1)
+
+                                local ff1 = E.FILL:FindFirstChild("FF1")
+                                local ff2 = E.FILL:FindFirstChild("FF2")
+
+                                if getgenv().ESP_CFG.AnimBoxFill then
+                                    E.FILL.BackgroundTransparency = 1
+                                    if ff1 then ff1.Visible = true end
+                                    if ff2 then ff2.Visible = true end
+
+                                    local seq = NumberSequence.new({
+                                        NumberSequenceKeypoint.new(0, 0.95),
+                                        NumberSequenceKeypoint.new(0.3, 0.4),
+                                        NumberSequenceKeypoint.new(0.5, 0.95),
+                                        NumberSequenceKeypoint.new(0.7, 0.4),
+                                        NumberSequenceKeypoint.new(1, 0.95)
+                                    })
+
+                                    local t = tick()
+
+                                    if ff1 then
+                                        ff1.BackgroundColor3 = fillC
+                                        local g1 = ff1:FindFirstChild("Gradient")
+                                        g1.Color = ColorSequence.new(fillC)
+                                        g1.Transparency = seq
+                                        g1.Offset = Vector2.new(math.sin(t * 1.5) * 0.4, math.sin(t * 1.5) * 0.4)
+                                    end
+
+                                    if ff2 then
+                                        ff2.BackgroundColor3 = fillC
+                                        local g2 = ff2:FindFirstChild("Gradient")
+                                        g2.Color = ColorSequence.new(fillC)
+                                        g2.Transparency = seq
+                                        g2.Offset = Vector2.new(math.cos(t * 1.1) * 0.4, math.cos(t * 1.1) * 0.4)
+                                    end
+                                else
+                                    E.FILL.BackgroundTransparency = 0.6
+                                    E.FILL.BackgroundColor3 = fillC
+                                    if ff1 then ff1.Visible = false end
+                                    if ff2 then ff2.Visible = false end
+                                end
+                            end
+
+                            local bones = HUM.RigType == Enum.HumanoidRigType.R15 and R15_BONES or R6_BONES
+                            for i, bone in ipairs(bones) do
+                                local seg = E.SKEL[i]
+                                if seg then
+                                    seg.Visible = getgenv().ESP_CFG.Skeleton
+                                    if seg.Visible then
+                                        local b1, b2 = C:FindFirstChild(bone[1]), C:FindFirstChild(bone[2])
+                                        if b1 and b2 then
+                                            local v1 = cam:WorldToViewportPoint(b1.Position)
+                                            local v2 = cam:WorldToViewportPoint(b2.Position)
+                                            local d = Vector2.new(v2.X - v1.X, v2.Y - v1.Y)
+                                            seg.Size = UDim2.new(0, d.Magnitude, 0, 1)
+                                            seg.Position = UDim2.new(0, (v1.X + v2.X) / 2, 0, (v1.Y + v2.Y) / 2)
+                                            seg.Rotation = math.deg(math.atan2(d.Y, d.X))
+                                            seg.BackgroundColor3 = getgenv().ESP_CFG.SkelColor or Color3.new(1, 1, 1)
+                                        else
+                                            seg.Visible = false
+                                        end
                                     end
                                 end
                             end
-                        end
-                    else
-
-                        E.NAME.Visible = false; E.BAR_BG.Visible = false; E.HEALTH_TXT.Visible = false;
-                        E.DIST.Visible = false; E.WEAP.Visible = false; E.BOX.Visible = false; E.FILL.Visible = false
-                        for _, s in ipairs(E.SKEL) do s.Visible = false end
-                    end
-
-                    if E.SLINE then
-                        if getgenv().ESP_CFG.Snaplines and (vis or getgenv().ESP_CFG.OffScreen) and dist <= getgenv().ESP_CFG.MaxDistance then
-                            local start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y)
-                            local origin = getgenv().ESP_CFG.TracerOrigin or "Bottom"
-
-                            if origin == "Center" then
-                                start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-                            elseif origin == "Top" then
-                                start_pos = Vector2.new(cam.ViewportSize.X / 2, 0)
-                            elseif origin == "Mouse" then
-                                start_pos = UIS:GetMouseLocation()
-                            end
-
-                            local target_2d = Vector2.new(pos.X, pos.Y)
-
-                            if not vis then
-                                local center = cam.ViewportSize / 2
-                                local dir = (target_2d - center).Unit
-                                if pos.Z < 0 then dir = -dir end
-                                local padding = 20
-                                target_2d = Vector2.new(
-                                    math.clamp(center.X + (dir.X * 10000), padding, cam.ViewportSize.X - padding),
-                                    math.clamp(center.Y + (dir.Y * 10000), padding, cam.ViewportSize.Y - padding)
-                                )
-                            end
-
-                            local diff = target_2d - start_pos
-                            local mag = diff.Magnitude
-                            E.SLINE.Visible = true
-                            E.SLINE.Size = UDim2.new(0, 1, 0, mag)
-                            E.SLINE.Position = UDim2.new(0, start_pos.X + (diff.X / 2), 0, start_pos.Y + (diff.Y / 2))
-                            E.SLINE.Rotation = math.deg(math.atan2(diff.Y, diff.X)) - 90
-                            E.SLINE.BackgroundColor3 = getgenv().ESP_CFG.SnapColor or Color3.new(1, 1, 1)
                         else
-                            E.SLINE.Visible = false
+                            E.NAME.Visible = false; E.BAR_BG.Visible = false; E.HEALTH_TXT.Visible = false;
+                            E.DIST.Visible = false; E.WEAP.Visible = false; E.BOX.Visible = false; E.FILL.Visible = false
+                            for _, s in ipairs(E.SKEL) do s.Visible = false end
                         end
+
+                        if E.SLINE then
+                            if getgenv().ESP_CFG.Snaplines and (vis or getgenv().ESP_CFG.OffScreen) and dist <= getgenv().ESP_CFG.MaxDistance then
+                                local start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y)
+                                local origin = getgenv().ESP_CFG.TracerOrigin or "Bottom"
+
+                                if origin == "Center" then
+                                    start_pos = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+                                elseif origin == "Top" then
+                                    start_pos = Vector2.new(cam.ViewportSize.X / 2, 0)
+                                elseif origin == "Mouse" then
+                                    start_pos = UIS:GetMouseLocation()
+                                end
+
+                                local target_2d = Vector2.new(pos.X, pos.Y)
+
+                                if not vis then
+                                    local center = cam.ViewportSize / 2
+                                    local dir = (target_2d - center).Unit
+                                    if pos.Z < 0 then dir = -dir end
+                                    local padding = 20
+                                    target_2d = Vector2.new(
+                                        math.clamp(center.X + (dir.X * 10000), padding, cam.ViewportSize.X - padding),
+                                        math.clamp(center.Y + (dir.Y * 10000), padding, cam.ViewportSize.Y - padding)
+                                    )
+                                end
+
+                                local diff = target_2d - start_pos
+                                local mag = diff.Magnitude
+                                E.SLINE.Visible = true
+                                E.SLINE.Size = UDim2.new(0, 1, 0, mag)
+                                E.SLINE.Position = UDim2.new(0, start_pos.X + (diff.X / 2), 0, start_pos.Y + (diff.Y / 2))
+                                E.SLINE.Rotation = math.deg(math.atan2(diff.Y, diff.X)) - 90
+                                E.SLINE.BackgroundColor3 = getgenv().ESP_CFG.SnapColor or Color3.new(1, 1, 1)
+                            else
+                                E.SLINE.Visible = false
+                            end
+                        end
+                    end
+                else
+                    E.FRM.Visible = false
+                    if E.CHAM then
+                        E.CHAM:Destroy(); E.CHAM = nil
+                    end
+                    if E.TCHAM then
+                        E.TCHAM:Destroy(); E.TCHAM = nil
                     end
                 end
             else
@@ -4649,960 +4694,859 @@ local function UPD_ESP()
                     E.TCHAM:Destroy(); E.TCHAM = nil
                 end
             end
-        else
-            E.FRM.Visible = false
-            if E.CHAM then
-                E.CHAM:Destroy(); E.CHAM = nil
-            end
-            if E.TCHAM then
-                E.TCHAM:Destroy(); E.TCHAM = nil
-            end
         end
     end
-end
 
-local function CLEAN_LOCAL_GUN()
-    for part, mat in pairs(LOCAL_GUN_CACHE.Mats) do
-        pcall(function()
-            if part.Parent then
-                part.Material = mat
-                part.Color = LOCAL_GUN_CACHE.Colors[part]
-            end
-        end)
-    end
-    for hl, enabled in pairs(LOCAL_GUN_CACHE.Highlights) do
-        pcall(function()
-            if hl.Parent then
-                hl.Enabled = enabled
-            end
-        end)
-    end
-    LOCAL_GUN_CACHE.Mats = {}
-    LOCAL_GUN_CACHE.Colors = {}
-    LOCAL_GUN_CACHE.Highlights = {}
-    LOCAL_GUN_CACHE.LastTool = nil
-end
-
-local function UPD_LOCAL_GUN()
-    local localChar = LP.Character
-    local localTool = localChar and localChar:FindFirstChildOfClass("Tool")
-
-    if getgenv().ESP_CFG and getgenv().ESP_CFG.LocalGunCham and localTool then
-
-        if LOCAL_GUN_CACHE.LastTool ~= localTool then
-            CLEAN_LOCAL_GUN()
-            LOCAL_GUN_CACHE.LastTool = localTool
-        end
-
-        for _, part in ipairs(localTool:GetDescendants()) do
-            if part:IsA("BasePart") then
-                if not LOCAL_GUN_CACHE.Mats[part] then
-                    LOCAL_GUN_CACHE.Mats[part] = part.Material
-                    LOCAL_GUN_CACHE.Colors[part] = part.Color
+    local function CLEAN_LOCAL_GUN()
+        for part, mat in pairs(LOCAL_GUN_CACHE.Mats) do
+            pcall(function()
+                if part.Parent then
+                    part.Material = mat
+                    part.Color = LOCAL_GUN_CACHE.Colors[part]
                 end
-                part.Material = Enum.Material.ForceField
-                part.Color = getgenv().ESP_CFG.LocalGunChamColor1 or Color3.fromRGB(0, 255, 255)
-            end
-        end
-
-        for _, v in ipairs(localChar:GetDescendants()) do
-            if v:IsA("Highlight") then
-                if not LOCAL_GUN_CACHE.Highlights[v] then
-                    LOCAL_GUN_CACHE.Highlights[v] = v.Enabled
-                end
-                v.Enabled = false
-            end
-        end
-    else
-        CLEAN_LOCAL_GUN()
-    end
-end
-
-RunService:BindToRenderStep("FluxESP", 2001, function()
-    if getgenv().FLUX_SESSION ~= MySession then
-        pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
-        return
-    end
-    if getgenv().ESP_CFG and getgenv().ESP_CFG.Enabled then
-        UPD_ESP()
-        UPD_LOCAL_GUN()
-    else
-
-        for _, E in pairs(CACHE) do
-            if E.FRM then E.FRM.Visible = false end
-            if E.CHAM then E.CHAM.Enabled = false end
-            if E.TCHAM then E.TCHAM.Enabled = false end
-        end
-        CLEAN_LOCAL_GUN()
-    end
-end)
-
-local worldPage = vsPages[2]
-
-local woCard = NewFrame(worldPage, UDim2.new(0.46, 0, 0, 320), UDim2.new(0, 1, 0, 3), PANEL)
-Corner(woCard, 8)
-Stroke(woCard, STROKE, 1)
-
-local woTitle = NewLabel(woCard, "Worlds Opciones", 12, TEXT, true)
-woTitle.Name = "SectionTitle"
-woTitle.Size = UDim2.new(1, 0, 0, 30)
-woTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-local woContent = NewFrame(woCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-local woList = Instance.new("UIListLayout", woContent)
-woList.Padding = UDim.new(0, 2)
-
-local Lighting = game:GetService("Lighting")
-local ORIG_LIGHT = {
-    Shadows = Lighting.GlobalShadows,
-    Fog = Lighting.FogEnd,
-    Exposure = Lighting.ExposureCompensation,
-    Ambient = Lighting.Ambient,
-    ClockTime = Lighting.ClockTime,
-    Brightness = Lighting.Brightness,
-    OutdoorAmbient = Lighting.OutdoorAmbient,
-    AtmosDensities = {}
-}
-
-for _, obj in pairs(Lighting:GetDescendants()) do
-    if obj:IsA("Atmosphere") then
-        ORIG_LIGHT.AtmosDensities[obj] = obj.Density
-    end
-end
-
-AddESPSetting(woContent, "Full Bright", false, 0, false, function(v)
-    getgenv().WORLD_CFG.FullBright = v
-    if not v then
-        Lighting.Brightness = ORIG_LIGHT.Brightness
-        Lighting.ClockTime = ORIG_LIGHT.ClockTime
-        Lighting.GlobalShadows = ORIG_LIGHT.Shadows
-        Lighting.FogEnd = ORIG_LIGHT.Fog
-        Lighting.OutdoorAmbient = ORIG_LIGHT.OutdoorAmbient
-    end
-end)
-
-AddESPSetting(woContent, "No Fog", false, 0, false, function(v)
-    getgenv().WORLD_CFG.NoFog = v
-    if not v then
-        Lighting.FogEnd = ORIG_LIGHT.Fog
-        for obj, dens in pairs(ORIG_LIGHT.AtmosDensities) do
-            if obj and obj.Parent then
-                obj.Density = dens
-            end
-        end
-    end
-end)
-
-AddESPSetting(woContent, "Atmosphere Color", false, 1, false, function(v, c)
-    if v and c then
-        getgenv().WORLD_CFG.AtmosColor = c[1]
-        NOTIFY("World", "Atmosphere Color Updated", 1.5)
-    else
-        getgenv().WORLD_CFG.AtmosColor = nil
-        Lighting.Ambient = ORIG_LIGHT.Ambient
-    end
-end, { getgenv().WORLD_CFG.AtmosColor or Color3.fromRGB(200, 200, 200) })
-
-AddESPSetting(woContent, "FPS Booster", getgenv().WORLD_CFG.FPSBooster, 0, false, function(v)
-    getgenv().WORLD_CFG.FPSBooster = v
-    if v then
-        if not getgenv().FPS_BOOSTER_EXECUTED then
-            getgenv().FPS_BOOSTER_EXECUTED = true
-            NOTIFY("System", "Executing FPS Booster...", 2)
-            task.spawn(function()
-                pcall(function()
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/Tagger83/FPS2/refs/heads/main/FPS2.lua"))()
-                end)
             end)
+        end
+        for hl, enabled in pairs(LOCAL_GUN_CACHE.Highlights) do
+            pcall(function()
+                if hl.Parent then
+                    hl.Enabled = enabled
+                end
+            end)
+        end
+        LOCAL_GUN_CACHE.Mats = {}
+        LOCAL_GUN_CACHE.Colors = {}
+        LOCAL_GUN_CACHE.Highlights = {}
+        LOCAL_GUN_CACHE.LastTool = nil
+    end
+
+    local function UPD_LOCAL_GUN()
+        local localChar = LP.Character
+        local localTool = localChar and localChar:FindFirstChildOfClass("Tool")
+
+        if getgenv().ESP_CFG and getgenv().ESP_CFG.LocalGunCham and localTool then
+            if LOCAL_GUN_CACHE.LastTool ~= localTool then
+                CLEAN_LOCAL_GUN()
+                LOCAL_GUN_CACHE.LastTool = localTool
+            end
+
+            for _, part in ipairs(localTool:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    if not LOCAL_GUN_CACHE.Mats[part] then
+                        LOCAL_GUN_CACHE.Mats[part] = part.Material
+                        LOCAL_GUN_CACHE.Colors[part] = part.Color
+                    end
+                    part.Material = Enum.Material.ForceField
+                    part.Color = getgenv().ESP_CFG.LocalGunChamColor1 or Color3.fromRGB(0, 255, 255)
+                end
+            end
+
+            for _, v in ipairs(localChar:GetDescendants()) do
+                if v:IsA("Highlight") then
+                    if not LOCAL_GUN_CACHE.Highlights[v] then
+                        LOCAL_GUN_CACHE.Highlights[v] = v.Enabled
+                    end
+                    v.Enabled = false
+                end
+            end
         else
-            NOTIFY("System", "FPS Booster already active", 2)
+            CLEAN_LOCAL_GUN()
         end
     end
-end)
 
-AddVSSlider(woContent, "Exposure", 0, 5, 1, "", function(v) getgenv().WORLD_CFG.Exposure = v end)
-AddVSSlider(woContent, "Brightness", 0, 5, 1, "", function(v) getgenv().WORLD_CFG.Brightness = v end)
-
-local exCard = NewFrame(worldPage, UDim2.new(0.52, -4, 0, 200), UDim2.new(0.48, 1, 0, 3), PANEL)
-Corner(exCard, 8)
-Stroke(exCard, STROKE, 1)
-
-local exTitle = NewLabel(exCard, "Extras", 12, TEXT, true)
-exTitle.Name = "SectionTitle"
-exTitle.Size = UDim2.new(1, 0, 0, 30)
-exTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-local exContent = NewFrame(exCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-local exList = Instance.new("UIListLayout", exContent)
-exList.Padding = UDim.new(0, 2)
-
-AddESPSetting(exContent, "Custom FOV", getgenv().WORLD_CFG.FOVEnabled, 0, false, function(v)
-    getgenv().WORLD_CFG.FOVEnabled = v
-    if not v then
-        pcall(function() workspace.CurrentCamera.FieldOfView = 70 end)
-    else
-        pcall(function() workspace.CurrentCamera.FieldOfView = getgenv().WORLD_CFG.FOV or 70 end)
-    end
-end)
-
-AddVSSlider(exContent, "Field of View", 0, 400, 70, "", function(v)
-    getgenv().WORLD_CFG.FOV = v
-    if getgenv().WORLD_CFG.FOVEnabled then
-        pcall(function() workspace.CurrentCamera.FieldOfView = v end)
-    end
-end)
-
-local SKY_ASSETS = {
-    ["Sponge Bob"] = {
-        "rbxassetid://70654252104587", "rbxassetid://85169155668096", "rbxassetid://115749804544787",
-        "rbxassetid://114736069495828", "rbxassetid://96320056467829", "rbxassetid://103246856267702",
-        "rbxassetid://100094276908098", "rbxassetid://85732725984731", "rbxassetid://103828381258742"
-    },
-    ["Purple Nebula"] = "rbxassetid://159454299",
-    ["Night Stars"] = "rbxassetid://12064107",
-    ["Cyberpunk"] = "rbxassetid://6073747120",
-    ["Space"] = {
-        Bk = "rbxassetid://16262356578",
-        Dn = "rbxassetid://16262358026",
-        Ft = "rbxassetid://16262360469",
-        Lf = "rbxassetid://16262362003",
-        Rt = "rbxassetid://16262363873",
-        Up = "rbxassetid://16262366016"
-    },
-    ["Cartoony"] = {
-        Bk = "rbxassetid://12879214960",
-        Dn = "rbxassetid://12871012589",
-        Ft = "rbxassetid://12879236088",
-        Lf = "rbxassetid://12879246392",
-        Rt = "rbxassetid://12879253901",
-        Up = "rbxassetid://12871018996"
-    }
-}
-
-local origSky = Lighting:FindFirstChildOfClass("Sky")
-local skyCache = { Bk = "", Dn = "", Ft = "", Lf = "", Rt = "", Up = "" }
-if origSky then
-    skyCache = {
-        Bk = origSky.SkyboxBk,
-        Dn = origSky.SkyboxDn,
-        Ft = origSky.SkyboxFt,
-        Lf = origSky.SkyboxLf,
-        Rt = origSky.SkyboxRt,
-        Up = origSky.SkyboxUp
-    }
-end
-
-local skyLoopIdx = 1
-local function applySky(asset)
-    local s = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
-
-    if not getgenv().WORLD_CFG.EnableSkybox or not asset or asset == "Default" then
-        if origSky then
-            s.SkyboxBk = skyCache.Bk; s.SkyboxDn = skyCache.Dn; s.SkyboxFt = skyCache.Ft
-            s.SkyboxLf = skyCache.Lf; s.SkyboxRt = skyCache.Rt; s.SkyboxUp = skyCache.Up
+    RunService:BindToRenderStep("FluxESP", 2001, function()
+        if getgenv().FLUX_SESSION ~= MySession then
+            pcall(function() RunService:UnbindFromRenderStep("FluxESP") end)
+            return
+        end
+        if getgenv().ESP_CFG and getgenv().ESP_CFG.Enabled then
+            UPD_ESP()
+            UPD_LOCAL_GUN()
         else
-            s:Destroy()
+            for _, E in pairs(CACHE) do
+                if E.FRM then E.FRM.Visible = false end
+                if E.CHAM then E.CHAM.Enabled = false end
+                if E.TCHAM then E.TCHAM.Enabled = false end
+            end
+            CLEAN_LOCAL_GUN()
         end
-        return
-    end
-
-    if typeof(asset) == "table" then
-        if asset.Bk then 
-            s.SkyboxBk = asset.Bk
-            s.SkyboxDn = asset.Dn
-            s.SkyboxFt = asset.Ft
-            s.SkyboxLf = asset.Lf
-            s.SkyboxRt = asset.Rt
-            s.SkyboxUp = asset.Up
-        else 
-            s.SkyboxBk = asset[skyLoopIdx]
-            s.SkyboxDn = asset[skyLoopIdx]
-            s.SkyboxFt = asset[skyLoopIdx]
-            s.SkyboxLf = asset[skyLoopIdx]
-            s.SkyboxRt = asset[skyLoopIdx]
-            s.SkyboxUp = asset[skyLoopIdx]
-        end
-    else 
-        s.SkyboxBk = asset; s.SkyboxDn = asset; s.SkyboxFt = asset
-        s.SkyboxLf = asset; s.SkyboxRt = asset; s.SkyboxUp = asset
-    end
-end
-
-do
-    local skyContainer = NewFrame(exContent, UDim2.new(1, 0, 0, 50 + 34 + 4), nil, BG, 1)
-    local skyList = Instance.new("UIListLayout", skyContainer)
-    skyList.SortOrder = Enum.SortOrder.LayoutOrder
-    skyList.Padding = UDim.new(0, 4)
-
-    AddESPSetting(skyContainer, "Enable Custom Sky", false, 0, false, function(v)
-        getgenv().WORLD_CFG.EnableSkybox = v
-        local asset = (getgenv().WORLD_CFG.Skybox == "Default") and "Default" or SKY_ASSETS[getgenv().WORLD_CFG.Skybox]
-        applySky(asset)
     end)
 
-    local skyRow = NewFrame(skyContainer, UDim2.new(1, 0, 0, 50), nil, BG, 1)
-    skyRow.LayoutOrder = 999
-    NewLabel(skyRow, "Custom Skybox", 11, TEXT).Size = UDim2.new(1, 0, 0, 16)
-    local skyDd = AddDropdown(skyRow,
-        { "Default", "Sponge Bob", "Purple Nebula", "Night Stars", "Cyberpunk", "Space", "Cartoony" }, "Default",
-        function(v)
-            getgenv().WORLD_CFG.Skybox = v
-            if v ~= "Sponge Bob" then
-                applySky(v == "Default" and "Default" or SKY_ASSETS[v])
-            end
-        end)
-    skyDd.Position = UDim2.new(0, 0, 0, 18)
-    skyDd.Size = UDim2.new(1, 0, 0, 28)
-end
+    local worldPage = vsPages[2]
 
-local CAMERA_CACHE = {}
-local function RefreshCameraCache()
-    CAMERA_CACHE = { workspace.CurrentCamera }
+    local woCard = NewFrame(worldPage, UDim2.new(0.46, 0, 0, 320), UDim2.new(0, 1, 0, 3), PANEL)
+    Corner(woCard, 8)
+    Stroke(woCard, STROKE, 1)
 
-    local searchIn = { workspace, game:GetService("Players"), game:GetService("StarterGui") }
-    for _, service in pairs(searchIn) do
-        for _, v in pairs(service:GetDescendants()) do
-            if v:IsA("Camera") and not table.find(CAMERA_CACHE, v) then
-                table.insert(CAMERA_CACHE, v)
-            end
+    local woTitle = NewLabel(woCard, "Worlds Opciones", 12, TEXT, true)
+    woTitle.Name = "SectionTitle"
+    woTitle.Size = UDim2.new(1, 0, 0, 30)
+    woTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+    local woContent = NewFrame(woCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+    local woList = Instance.new("UIListLayout", woContent)
+    woList.Padding = UDim.new(0, 2)
+
+    local Lighting = game:GetService("Lighting")
+    local ORIG_LIGHT = {
+        Shadows = Lighting.GlobalShadows,
+        Fog = Lighting.FogEnd,
+        Exposure = Lighting.ExposureCompensation,
+        Ambient = Lighting.Ambient,
+        ClockTime = Lighting.ClockTime,
+        Brightness = Lighting.Brightness,
+        OutdoorAmbient = Lighting.OutdoorAmbient,
+        AtmosDensities = {}
+    }
+
+    for _, obj in pairs(Lighting:GetDescendants()) do
+        if obj:IsA("Atmosphere") then
+            ORIG_LIGHT.AtmosDensities[obj] = obj.Density
         end
     end
-end
 
-task.spawn(function()
-    while task.wait(5) do
-        if getgenv().FLUX_SESSION ~= MySession then break end
-        RefreshCameraCache()
-    end
-end)
-RefreshCameraCache()
+    AddESPSetting(woContent, "Full Bright", false, 0, false, function(v)
+        getgenv().WORLD_CFG.FullBright = v
+        if not v then
+            Lighting.Brightness = ORIG_LIGHT.Brightness
+            Lighting.ClockTime = ORIG_LIGHT.ClockTime
+            Lighting.GlobalShadows = ORIG_LIGHT.Shadows
+            Lighting.FogEnd = ORIG_LIGHT.Fog
+            Lighting.OutdoorAmbient = ORIG_LIGHT.OutdoorAmbient
+        end
+    end)
 
-local function ForceFOV()
-    if not getgenv().WORLD_CFG.FOVEnabled then return end
-    local targetFOV = getgenv().WORLD_CFG.FOV or 70
-    if targetFOV <= 0 then return end
-
-    for _, cam in pairs(CAMERA_CACHE) do
-        pcall(function()
-            if cam and cam.Parent then
-                cam.FieldOfView = targetFOV
-            end
-        end)
-    end
-end
-
-RunService:BindToRenderStep("ForceFOV_OMEGA", 2000, function()
-    if getgenv().FLUX_SESSION ~= MySession then
-        return
-    end
-    ForceFOV()
-end)
-
-table.insert(getgenv().FLUX_CONNS, RunService.Heartbeat:Connect(function()
-    if getgenv().FLUX_SESSION ~= MySession then return end
-    ForceFOV()
-end))
-
-task.spawn(function()
-    local lastSkyTick = tick()
-    while task.wait(0.3) do
-        if not SG.Parent then break end
-
-        if getgenv().WORLD_CFG.Skybox == "Sponge Bob" then
-            if tick() - lastSkyTick >= 0.1 then
-                skyLoopIdx = skyLoopIdx + 1
-                if skyLoopIdx > #SKY_ASSETS["Sponge Bob"] then skyLoopIdx = 1 end
-                applySky(SKY_ASSETS["Sponge Bob"])
-                lastSkyTick = tick()
+    AddESPSetting(woContent, "No Fog", false, 0, false, function(v)
+        getgenv().WORLD_CFG.NoFog = v
+        if not v then
+            Lighting.FogEnd = ORIG_LIGHT.Fog
+            for obj, dens in pairs(ORIG_LIGHT.AtmosDensities) do
+                if obj and obj.Parent then
+                    obj.Density = dens
+                end
             end
         end
+    end)
 
-        if getgenv().WORLD_CFG.FullBright then
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.GlobalShadows = false
-            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    AddESPSetting(woContent, "Atmosphere Color", false, 1, false, function(v, c)
+        if v and c then
+            getgenv().WORLD_CFG.AtmosColor = c[1]
+            NOTIFY("World", "Atmosphere Color Updated", 1.5)
         else
-            if getgenv().WORLD_CFG.Brightness ~= 1 then
-                Lighting.Brightness = getgenv().WORLD_CFG.Brightness
-            end
-        end
-
-        if getgenv().WORLD_CFG.NoFog then
-            Lighting.FogEnd = 100000
-            for _, v in pairs(Lighting:GetDescendants()) do
-                if v:IsA("Atmosphere") then v.Density = 0 end
-            end
-        end
-
-        if getgenv().WORLD_CFG.Exposure ~= 0 then
-            Lighting.ExposureCompensation = getgenv().WORLD_CFG.Exposure
-        else
-            Lighting.ExposureCompensation = ORIG_LIGHT.Exposure
-        end
-
-        if getgenv().WORLD_CFG.AtmosColor then
-            Lighting.Ambient = getgenv().WORLD_CFG.AtmosColor
-        else
+            getgenv().WORLD_CFG.AtmosColor = nil
             Lighting.Ambient = ORIG_LIGHT.Ambient
         end
-    end
-end)
+    end, { getgenv().WORLD_CFG.AtmosColor or Color3.fromRGB(200, 200, 200) })
 
-Players.PlayerRemoving:Connect(function(p)
-    if CACHE[p] then
-        pcall(function()
-            CACHE[p].FRM:Destroy()
-            CACHE[p].BOX:Destroy()
-            CACHE[p].FILL:Destroy()
-            if CACHE[p].CHAM then CACHE[p].CHAM:Destroy() end
-            if CACHE[p].TCHAM then CACHE[p].TCHAM:Destroy() end
-        end)
-        CACHE[p] = nil
-    end
-end)
-
-local SettingsPage = navPages["Settings"]
-local ST_TAB_H = 44
-local ST_TabBar = NewFrame(SettingsPage, UDim2.new(1, 0, 0, ST_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
-
-local ST_TabSep = NewFrame(SettingsPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, ST_TAB_H), STROKE)
-
-local ST_Content = NewFrame(SettingsPage,
-    UDim2.new(1, -20, 1, -(ST_TAB_H + 20)),
-    UDim2.new(0, 10, 0, ST_TAB_H + 10),
-    BG, 1
-)
-
-local ST_TABS = { "UI Settings", "Server" }
-local stPages = {}
-
-local st_x = 18
-for i, name in ipairs(ST_TABS) do
-    local tw = (i == 1 and 90 or 60)
-    local tb = NewBtn(ST_TabBar, UDim2.new(0, tw, 1, 0), UDim2.new(0, st_x, 0, 0), BG, 1)
-    local tl = NewLabel(tb, name, 13, i == 1 and ACCENT or DIM, i == 1)
-    tl.Size = UDim2.new(1, 0, 1, 0)
-    tl.TextXAlignment = Enum.TextXAlignment.Center
-
-    local ul = NewFrame(SettingsPage, UDim2.new(0, tw, 0, 2), UDim2.new(0, st_x, 0, ST_TAB_H - 2), ACCENT)
-    ul.Visible = i == 1
-    Corner(ul, 1)
-
-    local page = NewScroll(ST_Content, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
-    page.Visible = (i == 1)
-
-    stPages[i] = page
-    stBtns[i] = { btn = tb, lbl = tl }
-    stLines[i] = ul
-    st_x = st_x + tw + 14
-
-    tb.MouseButton1Click:Connect(function()
-        if activeStIdx == i then return end
-        stBtns[activeStIdx].lbl.TextColor3 = DIM
-        stBtns[activeStIdx].lbl.Font = Enum.Font.Gotham
-        stLines[activeStIdx].Visible = false
-        stPages[activeStIdx].Visible = false
-
-        activeStIdx = i
-        tl.TextColor3 = ACCENT
-        tl.Font = Enum.Font.GothamBold
-        ul.Visible = true
-        page.Visible = true
-    end)
-end
-
-do
-    local uiPage = stPages[1]
-
-    local prefHeight = UIS.KeyboardEnabled and 295 or 265
-    ; (function()
-        local prefCard = NewFrame(uiPage, UDim2.new(0.46, 0, 0, prefHeight), UDim2.new(0, 1, 0, 3), PANEL)
-        Corner(prefCard, 8)
-        Stroke(prefCard, STROKE, 1)
-
-        local uiTitle = NewLabel(prefCard, "UI Preferences", 13, TEXT, true)
-        uiTitle.Name = "SectionTitle"
-        uiTitle.Size = UDim2.new(1, 0, 0, 30)
-        uiTitle.Position = UDim2.new(0, 0, 0, 0)
-        uiTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-        local list = Instance.new("UIListLayout")
-        list.Padding = UDim.new(0, 4)
-        list.Parent = NewFrame(prefCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-
-        local function AddSetting(label, default, callback)
-            local row = NewBtn(list.Parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(row, 5)
-
-            local checked = default
-            local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(cbBg, 3)
-            Stroke(cbBg, STROKE2, 1)
-
-            local check = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            check.Size = UDim2.new(1, 0, 1, 0)
-            check.Visible = checked
-
-            local lbl = NewLabel(row, label, 13, TEXT)
-            lbl.Position = UDim2.new(0, 32, 0, 0)
-            lbl.Size = UDim2.new(1, -32, 1, 0)
-
-            local function updateUI()
-                check.Visible = checked
-                Tw(cbBg, 0.1, "Quad", "Out", {
-                    BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                })
+    AddESPSetting(woContent, "FPS Booster", getgenv().WORLD_CFG.FPSBooster, 0, false, function(v)
+        getgenv().WORLD_CFG.FPSBooster = v
+        if v then
+            if not getgenv().FPS_BOOSTER_EXECUTED then
+                getgenv().FPS_BOOSTER_EXECUTED = true
+                NOTIFY("System", "Executing FPS Booster...", 2)
+                task.spawn(function()
+                    pcall(function()
+                        loadstring(game:HttpGet(
+                            "https://raw.githubusercontent.com/Tagger83/FPS2/refs/heads/main/FPS2.lua"))()
+                    end)
+                end)
+            else
+                NOTIFY("System", "FPS Booster already active", 2)
             end
+        end
+    end)
 
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+    AddVSSlider(woContent, "Exposure", 0, 5, 1, "", function(v) getgenv().WORLD_CFG.Exposure = v end)
+    AddVSSlider(woContent, "Brightness", 0, 5, 1, "", function(v) getgenv().WORLD_CFG.Brightness = v end)
 
-                if label == "Enable Notifications" then
-                    checked = useNotifications
-                elseif label == "Enable Watermark" then
-                    checked = useWatermark
-                elseif label == "Show Active Keybinds" then
-                    checked = useKbHud
-                end
-                updateUI()
-            end)
+    local exCard = NewFrame(worldPage, UDim2.new(0.52, -4, 0, 200), UDim2.new(0.48, 1, 0, 3), PANEL)
+    Corner(exCard, 8)
+    Stroke(exCard, STROKE, 1)
 
-            row.MouseButton1Click:Connect(function()
-                checked = not checked
-                updateUI()
-                callback(checked)
-            end)
-            row.MouseEnter:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 }) end)
-            row.MouseLeave:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+    local exTitle = NewLabel(exCard, "Extras", 12, TEXT, true)
+    exTitle.Name = "SectionTitle"
+    exTitle.Size = UDim2.new(1, 0, 0, 30)
+    exTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            updateUI()
-            return row
+    local exContent = NewFrame(exCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+    local exList = Instance.new("UIListLayout", exContent)
+    exList.Padding = UDim.new(0, 2)
+
+    AddESPSetting(exContent, "Custom FOV", getgenv().WORLD_CFG.FOVEnabled, 0, false, function(v)
+        getgenv().WORLD_CFG.FOVEnabled = v
+        if not v then
+            pcall(function() workspace.CurrentCamera.FieldOfView = 70 end)
+        else
+            pcall(function() workspace.CurrentCamera.FieldOfView = getgenv().WORLD_CFG.FOV or 70 end)
+        end
+    end)
+
+    AddVSSlider(exContent, "Field of View", 0, 400, 70, "", function(v)
+        getgenv().WORLD_CFG.FOV = v
+        if getgenv().WORLD_CFG.FOVEnabled then
+            pcall(function() workspace.CurrentCamera.FieldOfView = v end)
+        end
+    end)
+
+    local SKY_ASSETS = {
+        ["Sponge Bob"] = {
+            "rbxassetid://70654252104587", "rbxassetid://85169155668096", "rbxassetid://115749804544787",
+            "rbxassetid://114736069495828", "rbxassetid://96320056467829", "rbxassetid://103246856267702",
+            "rbxassetid://100094276908098", "rbxassetid://85732725984731", "rbxassetid://103828381258742"
+        },
+        ["Purple Nebula"] = "rbxassetid://159454299",
+        ["Night Stars"] = "rbxassetid://12064107",
+        ["Cyberpunk"] = "rbxassetid://6073747120",
+        ["Space"] = {
+            Bk = "rbxassetid://16262356578",
+            Dn = "rbxassetid://16262358026",
+            Ft = "rbxassetid://16262360469",
+            Lf = "rbxassetid://16262362003",
+            Rt = "rbxassetid://16262363873",
+            Up = "rbxassetid://16262366016"
+        },
+        ["Cartoony"] = {
+            Bk = "rbxassetid://12879214960",
+            Dn = "rbxassetid://12871012589",
+            Ft = "rbxassetid://12879236088",
+            Lf = "rbxassetid://12879246392",
+            Rt = "rbxassetid://12879253901",
+            Up = "rbxassetid://12871018996"
+        }
+    }
+
+    local origSky = Lighting:FindFirstChildOfClass("Sky")
+    local skyCache = { Bk = "", Dn = "", Ft = "", Lf = "", Rt = "", Up = "" }
+    if origSky then
+        skyCache = {
+            Bk = origSky.SkyboxBk,
+            Dn = origSky.SkyboxDn,
+            Ft = origSky.SkyboxFt,
+            Lf = origSky.SkyboxLf,
+            Rt = origSky.SkyboxRt,
+            Up = origSky.SkyboxUp
+        }
+    end
+
+    local skyLoopIdx = 1
+    local function applySky(asset)
+        local s = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
+
+        if not getgenv().WORLD_CFG.EnableSkybox or not asset or asset == "Default" then
+            if origSky then
+                s.SkyboxBk = skyCache.Bk; s.SkyboxDn = skyCache.Dn; s.SkyboxFt = skyCache.Ft
+                s.SkyboxLf = skyCache.Lf; s.SkyboxRt = skyCache.Rt; s.SkyboxUp = skyCache.Up
+            else
+                s:Destroy()
+            end
+            return
         end
 
-        AddSetting("UI Shadow", true, function(v)
-            if Tw then Tw(Shadow, 0.25, "Quad", "Out", { ImageTransparency = v and 0.35 or 1 }) end
-        end)
-        AddSetting("Smooth Drag", useSmoothDrag, function(v)
-            useSmoothDrag = v
-            SaveUI()
-        end)
-        AddSetting("Enable Notifications", useNotifications, function(v)
-            useNotifications = v
-            SaveUI()
-        end)
-        AddSetting("Enable Watermark", useWatermark, function(v)
-            useWatermark = v
-            Watermark.Visible = v
-            SaveUI()
-        end)
-
-        do
-            KbSG = Instance.new("ScreenGui")
-            KbSG.Name = "FluxKeybindHUD"
-            KbSG.ResetOnSpawn = false
-            KbSG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            KbSG.Parent = (gethui and gethui()) or game:GetService("CoreGui")
-
-            KbWin = NewFrame(KbSG, UDim2.new(0, 220, 0, 20), UDim2.new(0, 20, 0, 140), Color3.fromRGB(15, 15, 20))
-            Corner(KbWin, 8)
-            Stroke(KbWin, STROKE2, 1)
-            KbWin.Visible = false
-
-            local KbGrad = Instance.new("UIGradient")
-            KbGrad.Rotation = 90
-            KbGrad.Color = ColorSequence.new(Color3.fromRGB(15, 15, 20), Color3.fromRGB(22, 22, 30))
-            KbGrad.Parent = KbWin
-
-            local KbTitleBar = NewFrame(KbWin, UDim2.new(1, 0, 0, 28), UDim2.new(0, 0, 0, 0), Color3.fromRGB(20, 20, 28))
-            Corner(KbTitleBar, 8)
-            KbTitleBar.ClipsDescendants = false
-
-            local KbTitle = NewLabel(KbTitleBar, "⌨  Active Keybinds", 11, ACCENT, true)
-            KbTitle.Name = "SectionTitle"
-            KbTitle.Size = UDim2.new(1, -10, 1, 0)
-            KbTitle.Position = UDim2.new(0, 10, 0, 0)
-            table.insert(accentFills, KbGrad) 
-
-            local KbContent = NewFrame(KbWin, UDim2.new(1, -16, 1, -36), UDim2.new(0, 8, 0, 34), BG, 1)
-            local KbList = Instance.new("UIListLayout", KbContent)
-            KbList.Padding = UDim.new(0, 4)
-            KbList.SortOrder = Enum.SortOrder.LayoutOrder
-
-            MakeDraggable(KbTitleBar, KbWin)
-
-            local rowPool = {}
-            local function BuildKbRows()
-                local children = KbContent:GetChildren()
-                for _, c in ipairs(children) do
-                    if c:IsA("Frame") then
-                        c.Visible = false
-                        table.insert(rowPool, c)
-                    end
-                end
-
-                local binds = {}
-
-                table.insert(binds, { action = "Toggle UI", key = toggleKey and toggleKey.Name or "RightShift" })
-
-                if getgenv().AIMBOT_CFG and getgenv().AIMBOT_CFG.Keybind then
-                    local k = getgenv().AIMBOT_CFG.Keybind
-                    local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
-                    if kName ~= "None" and kName ~= "" then
-                        table.insert(binds, { action = "Aimbot", key = kName })
-                    end
-                end
-
-                if getgenv().ESP_CFG and getgenv().ESP_CFG.Keybind then
-                    local k = getgenv().ESP_CFG.Keybind
-                    local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
-                    if kName ~= "None" and kName ~= "" then
-                        table.insert(binds, { action = "ESP Toggle", key = kName })
-                    end
-                end
-
-                if getgenv().IK_CFG and getgenv().IK_CFG.Keybind then
-                    local k = getgenv().IK_CFG.Keybind
-                    local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
-                    if kName ~= "None" and kName ~= "" then
-                        table.insert(binds, { action = "Insta Kill", key = kName })
-                    end
-                end
-
-                if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.SpeedKey then
-                    local k = getgenv().LOCAL_PLAYER_CFG.SpeedKey
-                    local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
-                    if kName ~= "None" and kName ~= "" then
-                        table.insert(binds, { action = "Speed Boost", key = kName })
-                    end
-                end
-
-                if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.FlyKey then
-                    local k = getgenv().LOCAL_PLAYER_CFG.FlyKey
-                    local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
-                    if kName ~= "None" and kName ~= "" then
-                        table.insert(binds, { action = "Player Fly", key = kName })
-                    end
-                end
-
-                if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.InvisKey then
-                    local k = getgenv().LOCAL_PLAYER_CFG.InvisKey
-                    local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
-                    if kName ~= "None" and kName ~= "" then
-                        table.insert(binds, { action = "Invisibility", key = kName })
-                    end
-                end
-
-                for i, b in ipairs(binds) do
-                    local row = table.remove(rowPool)
-                    if not row then
-                        row = NewFrame(KbContent, UDim2.new(1, 0, 0, 26), nil, Color3.fromRGB(28, 28, 38))
-                        Corner(row, 5)
-                        local aLbl = NewLabel(row, b.action, 10, TEXT, false)
-                        aLbl.Name = "ActionLbl"
-                        aLbl.Position = UDim2.new(0, 8, 0, 0)
-                        aLbl.Size = UDim2.new(0.6, 0, 1, 0)
-                        local badge = NewFrame(row, UDim2.new(0, 60, 0, 18), UDim2.new(1, -66, 0.5, -9),
-                            Color3.fromRGB(40, 40, 54))
-                        badge.Name = "Badge"
-                        Corner(badge, 4)
-                        Stroke(badge, STROKE2, 1)
-                        local kLbl = NewLabel(badge, b.key, 9, ACCENT, true, Enum.TextXAlignment.Center)
-                        kLbl.Name = "SectionTitle"
-                        kLbl.Size = UDim2.new(1, 0, 1, 0)
-                    end
-                    row.LayoutOrder = i
-                    row:FindFirstChild("ActionLbl").Text = b.action
-                    row:FindFirstChild("Badge"):FindFirstChild("SectionTitle").Text = b.key
-                    row.Visible = true
-                end
-
-                for _, r in ipairs(rowPool) do r:Destroy() end
-                table.clear(rowPool)
-
-                local rowCount = math.max(1, #binds)
-                KbWin.Size = UDim2.new(0, 220, 0, 28 + rowCount * 30 + (rowCount - 1) * 4 + 12)
+        if typeof(asset) == "table" then
+            if asset.Bk then
+                s.SkyboxBk = asset.Bk
+                s.SkyboxDn = asset.Dn
+                s.SkyboxFt = asset.Ft
+                s.SkyboxLf = asset.Lf
+                s.SkyboxRt = asset.Rt
+                s.SkyboxUp = asset.Up
+            else
+                s.SkyboxBk = asset[skyLoopIdx]
+                s.SkyboxDn = asset[skyLoopIdx]
+                s.SkyboxFt = asset[skyLoopIdx]
+                s.SkyboxLf = asset[skyLoopIdx]
+                s.SkyboxRt = asset[skyLoopIdx]
+                s.SkyboxUp = asset[skyLoopIdx]
             end
-            getgenv().FLUX_UPDATE_KB_HUD = BuildKbRows
+        else
+            s.SkyboxBk = asset; s.SkyboxDn = asset; s.SkyboxFt = asset
+            s.SkyboxLf = asset; s.SkyboxRt = asset; s.SkyboxUp = asset
+        end
+    end
 
-            local kbAccentProxy = {
-                update = function()
-                    for _, lbl in ipairs(KbContent:GetDescendants()) do
-                        if lbl:IsA("TextLabel") and lbl.Name == "SectionTitle" then
-                            lbl.TextColor3 = ACCENT
-                        end
-                    end
-                    KbTitle.TextColor3 = ACCENT
-                end
-            }
-            getgenv().FLUX_KB_HUD_ACCENT_UPDATE = function() kbAccentProxy.update() end
+    do
+        local skyContainer = NewFrame(exContent, UDim2.new(1, 0, 0, 50 + 34 + 4), nil, BG, 1)
+        local skyList = Instance.new("UIListLayout", skyContainer)
+        skyList.SortOrder = Enum.SortOrder.LayoutOrder
+        skyList.Padding = UDim.new(0, 4)
 
-            task.spawn(function()
-                while true do
-                    task.wait(1)
-                    if getgenv().FLUX_SESSION ~= MySession then break end
-                    if KbWin.Visible then
-                        BuildKbRows()
-                        kbAccentProxy.update()
-                    end
+        AddESPSetting(skyContainer, "Enable Custom Sky", false, 0, false, function(v)
+            getgenv().WORLD_CFG.EnableSkybox = v
+            local asset = (getgenv().WORLD_CFG.Skybox == "Default") and "Default" or
+                SKY_ASSETS[getgenv().WORLD_CFG.Skybox]
+            applySky(asset)
+        end)
+
+        local skyRow = NewFrame(skyContainer, UDim2.new(1, 0, 0, 50), nil, BG, 1)
+        skyRow.LayoutOrder = 999
+        NewLabel(skyRow, "Custom Skybox", 11, TEXT).Size = UDim2.new(1, 0, 0, 16)
+        local skyDd = AddDropdown(skyRow,
+            { "Default", "Sponge Bob", "Purple Nebula", "Night Stars", "Cyberpunk", "Space", "Cartoony" }, "Default",
+            function(v)
+                getgenv().WORLD_CFG.Skybox = v
+                if v ~= "Sponge Bob" then
+                    applySky(v == "Default" and "Default" or SKY_ASSETS[v])
                 end
             end)
+        skyDd.Position = UDim2.new(0, 0, 0, 18)
+        skyDd.Size = UDim2.new(1, 0, 0, 28)
+    end
 
-            if not IS_MOBILE then
-                AddSetting("Show Active Keybinds", useKbHud, function(v)
-                    useKbHud = v
-                    KbWin.Visible = v and (uiVis == true)
-                    if v then BuildKbRows() end
+    local CAMERA_CACHE = {}
+    local function RefreshCameraCache()
+        CAMERA_CACHE = { workspace.CurrentCamera }
+
+        local searchIn = { workspace, game:GetService("Players"), game:GetService("StarterGui") }
+        for _, service in pairs(searchIn) do
+            for _, v in pairs(service:GetDescendants()) do
+                if v:IsA("Camera") and not table.find(CAMERA_CACHE, v) then
+                    table.insert(CAMERA_CACHE, v)
+                end
+            end
+        end
+    end
+
+    task.spawn(function()
+        while task.wait(5) do
+            if getgenv().FLUX_SESSION ~= MySession then break end
+            RefreshCameraCache()
+        end
+    end)
+    RefreshCameraCache()
+
+    local function ForceFOV()
+        if not getgenv().WORLD_CFG.FOVEnabled then return end
+        local targetFOV = getgenv().WORLD_CFG.FOV or 70
+        if targetFOV <= 0 then return end
+
+        for _, cam in pairs(CAMERA_CACHE) do
+            pcall(function()
+                if cam and cam.Parent then
+                    cam.FieldOfView = targetFOV
+                end
+            end)
+        end
+    end
+
+    RunService:BindToRenderStep("ForceFOV_OMEGA", 2000, function()
+        if getgenv().FLUX_SESSION ~= MySession then
+            return
+        end
+        ForceFOV()
+    end)
+
+    table.insert(getgenv().FLUX_CONNS, RunService.Heartbeat:Connect(function()
+        if getgenv().FLUX_SESSION ~= MySession then return end
+        ForceFOV()
+    end))
+
+    task.spawn(function()
+        local lastSkyTick = tick()
+        while task.wait(0.3) do
+            if not SG.Parent then break end
+
+            if getgenv().WORLD_CFG.Skybox == "Sponge Bob" then
+                if tick() - lastSkyTick >= 0.1 then
+                    skyLoopIdx = skyLoopIdx + 1
+                    if skyLoopIdx > #SKY_ASSETS["Sponge Bob"] then skyLoopIdx = 1 end
+                    applySky(SKY_ASSETS["Sponge Bob"])
+                    lastSkyTick = tick()
+                end
+            end
+
+            if getgenv().WORLD_CFG.FullBright then
+                Lighting.Brightness = 2
+                Lighting.ClockTime = 14
+                Lighting.FogEnd = 100000
+                Lighting.GlobalShadows = false
+                Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+            else
+                if getgenv().WORLD_CFG.Brightness ~= 1 then
+                    Lighting.Brightness = getgenv().WORLD_CFG.Brightness
+                end
+            end
+
+            if getgenv().WORLD_CFG.NoFog then
+                Lighting.FogEnd = 100000
+                for _, v in pairs(Lighting:GetDescendants()) do
+                    if v:IsA("Atmosphere") then v.Density = 0 end
+                end
+            end
+
+            if getgenv().WORLD_CFG.Exposure ~= 0 then
+                Lighting.ExposureCompensation = getgenv().WORLD_CFG.Exposure
+            else
+                Lighting.ExposureCompensation = ORIG_LIGHT.Exposure
+            end
+
+            if getgenv().WORLD_CFG.AtmosColor then
+                Lighting.Ambient = getgenv().WORLD_CFG.AtmosColor
+            else
+                Lighting.Ambient = ORIG_LIGHT.Ambient
+            end
+        end
+    end)
+
+    Players.PlayerRemoving:Connect(function(p)
+        if CACHE[p] then
+            pcall(function()
+                CACHE[p].FRM:Destroy()
+                CACHE[p].BOX:Destroy()
+                CACHE[p].FILL:Destroy()
+                if CACHE[p].CHAM then CACHE[p].CHAM:Destroy() end
+                if CACHE[p].TCHAM then CACHE[p].TCHAM:Destroy() end
+            end)
+            CACHE[p] = nil
+        end
+    end)
+
+    local SettingsPage = navPages["Settings"]
+    local ST_TAB_H = 44
+    local ST_TabBar = NewFrame(SettingsPage, UDim2.new(1, 0, 0, ST_TAB_H), UDim2.new(0, 0, 0, 0), BG, 1)
+
+    local ST_TabSep = NewFrame(SettingsPage, UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, ST_TAB_H), STROKE)
+
+    local ST_Content = NewFrame(SettingsPage,
+        UDim2.new(1, -20, 1, -(ST_TAB_H + 20)),
+        UDim2.new(0, 10, 0, ST_TAB_H + 10),
+        BG, 1
+    )
+
+    local ST_TABS = { "UI Settings", "Server" }
+    local stPages = {}
+
+    local st_x = 18
+    for i, name in ipairs(ST_TABS) do
+        local tw = (i == 1 and 90 or 60)
+        local tb = NewBtn(ST_TabBar, UDim2.new(0, tw, 1, 0), UDim2.new(0, st_x, 0, 0), BG, 1)
+        local tl = NewLabel(tb, name, 13, i == 1 and ACCENT or DIM, i == 1)
+        tl.Size = UDim2.new(1, 0, 1, 0)
+        tl.TextXAlignment = Enum.TextXAlignment.Center
+
+        local ul = NewFrame(SettingsPage, UDim2.new(0, tw, 0, 2), UDim2.new(0, st_x, 0, ST_TAB_H - 2), ACCENT)
+        ul.Visible = i == 1
+        Corner(ul, 1)
+
+        local page = NewScroll(ST_Content, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), BG, 1)
+        page.Visible = (i == 1)
+
+        stPages[i] = page
+        stBtns[i] = { btn = tb, lbl = tl }
+        stLines[i] = ul
+        st_x = st_x + tw + 14
+
+        tb.MouseButton1Click:Connect(function()
+            if activeStIdx == i then return end
+            stBtns[activeStIdx].lbl.TextColor3 = DIM
+            stBtns[activeStIdx].lbl.Font = Enum.Font.Gotham
+            stLines[activeStIdx].Visible = false
+            stPages[activeStIdx].Visible = false
+
+            activeStIdx = i
+            tl.TextColor3 = ACCENT
+            tl.Font = Enum.Font.GothamBold
+            ul.Visible = true
+            page.Visible = true
+        end)
+    end
+
+    do
+        local uiPage = stPages[1]
+
+        local prefHeight = UIS.KeyboardEnabled and 295 or 265
+        ; (function()
+            local prefCard = NewFrame(uiPage, UDim2.new(0.46, 0, 0, prefHeight), UDim2.new(0, 1, 0, 3), PANEL)
+            Corner(prefCard, 8)
+            Stroke(prefCard, STROKE, 1)
+
+            local uiTitle = NewLabel(prefCard, "UI Preferences", 13, TEXT, true)
+            uiTitle.Name = "SectionTitle"
+            uiTitle.Size = UDim2.new(1, 0, 0, 30)
+            uiTitle.Position = UDim2.new(0, 0, 0, 0)
+            uiTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local list = Instance.new("UIListLayout")
+            list.Padding = UDim.new(0, 4)
+            list.Parent = NewFrame(prefCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+
+            local function AddSetting(label, default, callback)
+                local row = NewBtn(list.Parent, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                Corner(row, 5)
+
+                local checked = default
+                local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
+                Corner(cbBg, 3)
+                Stroke(cbBg, STROKE2, 1)
+
+                local check = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                check.Size = UDim2.new(1, 0, 1, 0)
+                check.Visible = checked
+
+                local lbl = NewLabel(row, label, 13, TEXT)
+                lbl.Position = UDim2.new(0, 32, 0, 0)
+                lbl.Size = UDim2.new(1, -32, 1, 0)
+
+                local function updateUI()
+                    check.Visible = checked
+                    Tw(cbBg, 0.1, "Quad", "Out", {
+                        BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                    })
+                end
+
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    if label == "Enable Notifications" then
+                        checked = useNotifications
+                    elseif label == "Enable Watermark" then
+                        checked = useWatermark
+                    elseif label == "Show Active Keybinds" then
+                        checked = useKbHud
+                    end
+                    updateUI()
+                end)
+
+                row.MouseButton1Click:Connect(function()
+                    checked = not checked
+                    updateUI()
+                    callback(checked)
+                end)
+                row.MouseEnter:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 0.45 }) end)
+                row.MouseLeave:Connect(function() Tw(row, 0.08, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+
+                updateUI()
+                return row
+            end
+
+            AddSetting("UI Shadow", true, function(v)
+                if Tw then Tw(Shadow, 0.25, "Quad", "Out", { ImageTransparency = v and 0.35 or 1 }) end
+            end)
+            AddSetting("Smooth Drag", useSmoothDrag, function(v)
+                useSmoothDrag = v
+                SaveUI()
+            end)
+            AddSetting("Enable Notifications", useNotifications, function(v)
+                useNotifications = v
+                SaveUI()
+            end)
+            AddSetting("Enable Watermark", useWatermark, function(v)
+                useWatermark = v
+                Watermark.Visible = v
+                SaveUI()
+            end)
+
+            do
+                KbSG = Instance.new("ScreenGui")
+                KbSG.Name = "FluxKeybindHUD"
+                KbSG.ResetOnSpawn = false
+                KbSG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+                KbSG.Parent = (gethui and gethui()) or game:GetService("CoreGui")
+
+                KbWin = NewFrame(KbSG, UDim2.new(0, 220, 0, 20), UDim2.new(0, 20, 0, 140), Color3.fromRGB(15, 15, 20))
+                Corner(KbWin, 8)
+                Stroke(KbWin, STROKE2, 1)
+                KbWin.Visible = false
+
+                local KbGrad = Instance.new("UIGradient")
+                KbGrad.Rotation = 90
+                KbGrad.Color = ColorSequence.new(Color3.fromRGB(15, 15, 20), Color3.fromRGB(22, 22, 30))
+                KbGrad.Parent = KbWin
+
+                local KbTitleBar = NewFrame(KbWin, UDim2.new(1, 0, 0, 28), UDim2.new(0, 0, 0, 0),
+                    Color3.fromRGB(20, 20, 28))
+                Corner(KbTitleBar, 8)
+                KbTitleBar.ClipsDescendants = false
+
+                local KbTitle = NewLabel(KbTitleBar, "⌨  Active Keybinds", 11, ACCENT, true)
+                KbTitle.Name = "SectionTitle"
+                KbTitle.Size = UDim2.new(1, -10, 1, 0)
+                KbTitle.Position = UDim2.new(0, 10, 0, 0)
+                table.insert(accentFills, KbGrad)
+
+                local KbContent = NewFrame(KbWin, UDim2.new(1, -16, 1, -36), UDim2.new(0, 8, 0, 34), BG, 1)
+                local KbList = Instance.new("UIListLayout", KbContent)
+                KbList.Padding = UDim.new(0, 4)
+                KbList.SortOrder = Enum.SortOrder.LayoutOrder
+
+                MakeDraggable(KbTitleBar, KbWin)
+
+                local rowPool = {}
+                local function BuildKbRows()
+                    local children = KbContent:GetChildren()
+                    for _, c in ipairs(children) do
+                        if c:IsA("Frame") then
+                            c.Visible = false
+                            table.insert(rowPool, c)
+                        end
+                    end
+
+                    local binds = {}
+
+                    table.insert(binds, { action = "Toggle UI", key = toggleKey and toggleKey.Name or "RightShift" })
+
+                    if getgenv().AIMBOT_CFG and getgenv().AIMBOT_CFG.Keybind then
+                        local k = getgenv().AIMBOT_CFG.Keybind
+                        local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
+                        if kName ~= "None" and kName ~= "" then
+                            table.insert(binds, { action = "Aimbot", key = kName })
+                        end
+                    end
+
+                    if getgenv().ESP_CFG and getgenv().ESP_CFG.Keybind then
+                        local k = getgenv().ESP_CFG.Keybind
+                        local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
+                        if kName ~= "None" and kName ~= "" then
+                            table.insert(binds, { action = "ESP Toggle", key = kName })
+                        end
+                    end
+
+                    if getgenv().IK_CFG and getgenv().IK_CFG.Keybind then
+                        local k = getgenv().IK_CFG.Keybind
+                        local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
+                        if kName ~= "None" and kName ~= "" then
+                            table.insert(binds, { action = "Insta Kill", key = kName })
+                        end
+                    end
+
+                    if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.SpeedKey then
+                        local k = getgenv().LOCAL_PLAYER_CFG.SpeedKey
+                        local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
+                        if kName ~= "None" and kName ~= "" then
+                            table.insert(binds, { action = "Speed Boost", key = kName })
+                        end
+                    end
+
+                    if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.FlyKey then
+                        local k = getgenv().LOCAL_PLAYER_CFG.FlyKey
+                        local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
+                        if kName ~= "None" and kName ~= "" then
+                            table.insert(binds, { action = "Player Fly", key = kName })
+                        end
+                    end
+
+                    if getgenv().LOCAL_PLAYER_CFG and getgenv().LOCAL_PLAYER_CFG.InvisKey then
+                        local k = getgenv().LOCAL_PLAYER_CFG.InvisKey
+                        local kName = (typeof(k) == "EnumItem") and k.Name or tostring(k)
+                        if kName ~= "None" and kName ~= "" then
+                            table.insert(binds, { action = "Invisibility", key = kName })
+                        end
+                    end
+
+                    for i, b in ipairs(binds) do
+                        local row = table.remove(rowPool)
+                        if not row then
+                            row = NewFrame(KbContent, UDim2.new(1, 0, 0, 26), nil, Color3.fromRGB(28, 28, 38))
+                            Corner(row, 5)
+                            local aLbl = NewLabel(row, b.action, 10, TEXT, false)
+                            aLbl.Name = "ActionLbl"
+                            aLbl.Position = UDim2.new(0, 8, 0, 0)
+                            aLbl.Size = UDim2.new(0.6, 0, 1, 0)
+                            local badge = NewFrame(row, UDim2.new(0, 60, 0, 18), UDim2.new(1, -66, 0.5, -9),
+                                Color3.fromRGB(40, 40, 54))
+                            badge.Name = "Badge"
+                            Corner(badge, 4)
+                            Stroke(badge, STROKE2, 1)
+                            local kLbl = NewLabel(badge, b.key, 9, ACCENT, true, Enum.TextXAlignment.Center)
+                            kLbl.Name = "SectionTitle"
+                            kLbl.Size = UDim2.new(1, 0, 1, 0)
+                        end
+                        row.LayoutOrder = i
+                        row:FindFirstChild("ActionLbl").Text = b.action
+                        row:FindFirstChild("Badge"):FindFirstChild("SectionTitle").Text = b.key
+                        row.Visible = true
+                    end
+
+                    for _, r in ipairs(rowPool) do r:Destroy() end
+                    table.clear(rowPool)
+
+                    local rowCount = math.max(1, #binds)
+                    KbWin.Size = UDim2.new(0, 220, 0, 28 + rowCount * 30 + (rowCount - 1) * 4 + 12)
+                end
+                getgenv().FLUX_UPDATE_KB_HUD = BuildKbRows
+
+                local kbAccentProxy = {
+                    update = function()
+                        for _, lbl in ipairs(KbContent:GetDescendants()) do
+                            if lbl:IsA("TextLabel") and lbl.Name == "SectionTitle" then
+                                lbl.TextColor3 = ACCENT
+                            end
+                        end
+                        KbTitle.TextColor3 = ACCENT
+                    end
+                }
+                getgenv().FLUX_KB_HUD_ACCENT_UPDATE = function() kbAccentProxy.update() end
+
+                task.spawn(function()
+                    while true do
+                        task.wait(1)
+                        if getgenv().FLUX_SESSION ~= MySession then break end
+                        if KbWin.Visible then
+                            BuildKbRows()
+                            kbAccentProxy.update()
+                        end
+                    end
+                end)
+
+                if not IS_MOBILE then
+                    AddSetting("Show Active Keybinds", useKbHud, function(v)
+                        useKbHud = v
+                        KbWin.Visible = v and (uiVis == true)
+                        if v then BuildKbRows() end
+                        SaveUI()
+                    end)
+                end
+
+                getgenv().FLUX_KB_HUD_SYNC = function()
+                    if KbWin then KbWin.Visible = uiVis and useKbHud and not IS_MOBILE end
+                end
+                getgenv().FLUX_KB_HUD_GUI = KbSG
+
+                if useKbHud and not IS_MOBILE then
+                    KbWin.Visible = uiVis
+                    BuildKbRows()
+                end
+            end
+
+            if UIS.KeyboardEnabled and not IS_MOBILE then
+                AddCardKeybind(list.Parent, "Set Custom Keybind", toggleKey, function(k)
+                    toggleKey = k
                     SaveUI()
                 end)
             end
 
-            getgenv().FLUX_KB_HUD_SYNC = function()
-                if KbWin then KbWin.Visible = uiVis and useKbHud and not IS_MOBILE end
+            local themeRow = NewFrame(list.Parent, UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 0), BG, 1)
+            local themeBtn = NewBtn(themeRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
+            Corner(themeBtn, 4)
+            Stroke(themeBtn, STROKE2, 1)
+            local themeLbl = NewLabel(themeBtn, "UI Color: Default", 11, TEXT)
+            themeLbl.Position = UDim2.new(0, 8, 0, 0)
+            themeLbl.Size = UDim2.new(1, -28, 1, 0)
+            local themeArrow = Instance.new("ImageLabel")
+            themeArrow.BackgroundTransparency = 1
+            themeArrow.Size = UDim2.new(0, 12, 0, 12)
+            themeArrow.Position = UDim2.new(1, -18, 0.5, -6)
+            themeArrow.Image = "rbxassetid://6034818372"
+            themeArrow.ImageColor3 = DIM
+            themeArrow.Parent = themeBtn
+
+            local THEME_OPTIONS = { "Default", "Dark Blue", "Dark Purple", "Dark White" }
+            local themeDropOpen = false
+            local themeDropH = #THEME_OPTIONS * 26
+
+            local themeDropPanel = NewFrame(themeBtn, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 2),
+                Color3.fromRGB(28, 28, 38))
+            themeDropPanel.ZIndex = 200
+            themeDropPanel.Visible = false
+            themeDropPanel.ClipsDescendants = true
+            Corner(themeDropPanel, 6)
+            Stroke(themeDropPanel, STROKE2, 1)
+            local themeDropList = Instance.new("UIListLayout")
+            themeDropList.SortOrder = Enum.SortOrder.LayoutOrder
+            themeDropList.Parent = themeDropPanel
+
+            local function closeThemeDrop()
+                themeDropOpen = false
+                Tw(themeDropPanel, 0.12, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
+                task.delay(0.13, function() themeDropPanel.Visible = false end)
+                Tw(themeArrow, 0.12, "Quad", "Out", { Rotation = 0 })
             end
-            getgenv().FLUX_KB_HUD_GUI = KbSG
 
-            if useKbHud and not IS_MOBILE then
-                KbWin.Visible = uiVis
-                BuildKbRows()
-            end
-        end
-
-        if UIS.KeyboardEnabled and not IS_MOBILE then
-            AddCardKeybind(list.Parent, "Set Custom Keybind", toggleKey, function(k)
-                toggleKey = k
-                SaveUI()
-            end)
-        end
-
-        local themeRow = NewFrame(list.Parent, UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 0), BG, 1)
-        local themeBtn = NewBtn(themeRow, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
-        Corner(themeBtn, 4)
-        Stroke(themeBtn, STROKE2, 1)
-        local themeLbl = NewLabel(themeBtn, "UI Color: Default", 11, TEXT)
-        themeLbl.Position = UDim2.new(0, 8, 0, 0)
-        themeLbl.Size = UDim2.new(1, -28, 1, 0)
-        local themeArrow = Instance.new("ImageLabel")
-        themeArrow.BackgroundTransparency = 1
-        themeArrow.Size = UDim2.new(0, 12, 0, 12)
-        themeArrow.Position = UDim2.new(1, -18, 0.5, -6)
-        themeArrow.Image = "rbxassetid://6034818372"
-        themeArrow.ImageColor3 = DIM
-        themeArrow.Parent = themeBtn
-
-        local THEME_OPTIONS = { "Default", "Dark Blue", "Dark Purple", "Dark White" }
-        local themeDropOpen = false
-        local themeDropH = #THEME_OPTIONS * 26
-
-        local themeDropPanel = NewFrame(themeBtn, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 2),
-            Color3.fromRGB(28, 28, 38))
-        themeDropPanel.ZIndex = 200
-        themeDropPanel.Visible = false
-        themeDropPanel.ClipsDescendants = true
-        Corner(themeDropPanel, 6)
-        Stroke(themeDropPanel, STROKE2, 1)
-        local themeDropList = Instance.new("UIListLayout")
-        themeDropList.SortOrder = Enum.SortOrder.LayoutOrder
-        themeDropList.Parent = themeDropPanel
-
-        local function closeThemeDrop()
-            themeDropOpen = false
-            Tw(themeDropPanel, 0.12, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
-            task.delay(0.13, function() themeDropPanel.Visible = false end)
-            Tw(themeArrow, 0.12, "Quad", "Out", { Rotation = 0 })
-        end
-
-        for i, opt in ipairs(THEME_OPTIONS) do
-            local ob = NewBtn(themeDropPanel, UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 0), Color3.fromRGB(32, 32, 44),
-                1)
-            ob.LayoutOrder = i
-            ob.ZIndex = 201
-            Corner(ob, 4)
-            local ol = NewLabel(ob, opt, 11, TEXT)
-            ol.Size = UDim2.new(1, -12, 1, 0)
-            ol.Position = UDim2.new(0, 10, 0, 0)
-            ol.ZIndex = 202
-            ob.MouseEnter:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 0.35 }) end)
-            ob.MouseLeave:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
-            ob.MouseButton1Click:Connect(function()
-                themeLbl.Text = "UI Color: " .. opt
-                closeThemeDrop()
-                applyUITheme(opt)
-                NOTIFY("Theme System", "Switched to " .. opt, 2.5)
-            end)
-        end
-
-        themeBtn.MouseButton1Click:Connect(function()
-            themeDropOpen = not themeDropOpen
-            if themeDropOpen then
-                themeDropPanel.Visible = true
-                Tw(themeDropPanel, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, themeDropH) })
-                Tw(themeArrow, 0.15, "Quad", "Out", { Rotation = 180 })
-            else
-                closeThemeDrop()
-            end
-        end)
-
-        UIS.InputBegan:Connect(function(inp, gp)
-            if gp then return end
-            if not themeDropOpen then return end
-            if inp.UserInputType ~= Enum.UserInputType.MouseButton1 and inp.UserInputType ~= Enum.UserInputType.Touch then return end
-            local mx, my = inp.Position.X, inp.Position.Y
-            local function hit(f)
-                return mx >= f.AbsolutePosition.X and mx <= f.AbsolutePosition.X + f.AbsoluteSize.X
-                    and my >= f.AbsolutePosition.Y and my <= f.AbsolutePosition.Y + f.AbsoluteSize.Y
-            end
-            if not hit(themeDropPanel) and not hit(themeBtn) then closeThemeDrop() end
-        end)
-    end)()
-
-    local bgCard = NewFrame(uiPage, UDim2.new(0.52, -4, 0, 160), UDim2.new(0.48, 1, 0, 3), PANEL)
-    Corner(bgCard, 8)
-    Stroke(bgCard, STROKE, 1)
-
-    local bgTitle = NewLabel(bgCard, "Background Settings", 13, TEXT, true)
-    bgTitle.Name = "SectionTitle"
-    bgTitle.Size = UDim2.new(1, 0, 0, 30)
-    bgTitle.Position = UDim2.new(0, 0, 0, 0)
-    bgTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    local bgList = Instance.new("UIListLayout")
-    bgList.Padding = UDim.new(0, 4)
-    bgList.SortOrder = Enum.SortOrder.LayoutOrder
-    bgList.Parent = NewFrame(bgCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-
-    ; (function()
-        local SilentPage = tabPages[2]
-        if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
-            local SLift = NewFrame(SilentPage, UDim2.new(0.53, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
-            Corner(SLift, 8); Stroke(SLift, STROKE, 1)
-            local STitle = NewLabel(SLift, "Silent Aim Configuration", 13, TEXT, true)
-            STitle.Size = UDim2.new(1, 0, 0, 30); STitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local SCheckHolder = NewFrame(SLift, UDim2.new(1, -16, 0, 110), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            Instance.new("UIListLayout", SCheckHolder).Padding = UDim.new(0, 2)
-            local SSliderHolder = NewFrame(SLift, UDim2.new(1, -16, 0, 160), UDim2.new(0, 8, 0, 142), PANEL, 1)
-            Instance.new("UIListLayout", SSliderHolder).Padding = UDim.new(0, 6)
-
-            local function AddSilentToggle(label, cfg)
-                local row = NewBtn(SCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-                Corner(row, 5)
-                local checked = getgenv().SILENT_CFG[cfg]
-                local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-                Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
-                local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-                cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
-                local rowLbl = NewLabel(row, label, 13, TEXT)
-                rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
-                rowLbl.TextScaled = true
-                local sFit = Instance.new("UITextSizeConstraint")
-                sFit.MaxTextSize = 13
-                sFit.MinTextSize = 8
-                sFit.Parent = rowLbl
-
-                local function ToggleState(state)
-                    if state ~= nil then checked = state else checked = not checked end
-                    getgenv().SILENT_CFG[cfg] = checked; cbCheck.Visible = checked
-                    Tw(cbBg, 0.1, "Quad", "Out",
-                        { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
-                end
-
-                row.MouseButton1Click:Connect(function() ToggleState() end)
-                row.MouseEnter:Connect(function()
-                    Tw(row, 0.1, "Quad", "Out",
-                        { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+            for i, opt in ipairs(THEME_OPTIONS) do
+                local ob = NewBtn(themeDropPanel, UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 0),
+                    Color3.fromRGB(32, 32, 44),
+                    1)
+                ob.LayoutOrder = i
+                ob.ZIndex = 201
+                Corner(ob, 4)
+                local ol = NewLabel(ob, opt, 11, TEXT)
+                ol.Size = UDim2.new(1, -12, 1, 0)
+                ol.Position = UDim2.new(0, 10, 0, 0)
+                ol.ZIndex = 202
+                ob.MouseEnter:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 0.35 }) end)
+                ob.MouseLeave:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+                ob.MouseButton1Click:Connect(function()
+                    themeLbl.Text = "UI Color: " .. opt
+                    closeThemeDrop()
+                    applyUITheme(opt)
+                    NOTIFY("Theme System", "Switched to " .. opt, 2.5)
                 end)
-                row.MouseLeave:Connect(function()
-                    Tw(row, 0.1, "Quad", "Out",
-                        { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
-                end)
-
-                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                    local ns = getgenv().SILENT_CFG[cfg]
-                    if ns == nil then ns = checked end
-                    ToggleState(ns)
-                end)
-
-                return row
             end
 
-            getgenv().SILENT_CFG.Keybind = getgenv().SILENT_CFG.Keybind or Enum.KeyCode.None
-            local silentCheck = AddCardSetting(SCheckHolder, "Enable Silent Aim", getgenv().SILENT_CFG.Enabled, function(v)
-                getgenv().SILENT_CFG.Enabled = v
-            end, getgenv().SILENT_CFG.Keybind, function(k)
-                getgenv().SILENT_CFG.Keybind = k
-            end)
-
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                if silentCheck then
-                    local active = getgenv().SILENT_CFG.Enabled
-                    local cbBg = silentCheck:FindFirstChildOfClass("Frame")
-                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                    if cbCheck then cbCheck.Visible = active end
-                    if cbBg then
-                        cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                    end
-
-                    local kbBox = silentCheck:FindFirstChild("KeybindBox")
-                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
-                    if bindLbl then
-                        local keyName = "None"
-                        local kb = getgenv().SILENT_CFG.Keybind
-                        if kb then
-                            if typeof(kb) == "EnumItem" then
-                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
-                            else
-                                keyName = tostring(kb)
-                            end
-                        end
-                        bindLbl.Text = keyName
-                    end
+            themeBtn.MouseButton1Click:Connect(function()
+                themeDropOpen = not themeDropOpen
+                if themeDropOpen then
+                    themeDropPanel.Visible = true
+                    Tw(themeDropPanel, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, themeDropH) })
+                    Tw(themeArrow, 0.15, "Quad", "Out", { Rotation = 180 })
+                else
+                    closeThemeDrop()
                 end
             end)
 
-            AddSilentToggle("Wallbang", "Wallbang")
-            AddSilentToggle("Show FOV Circle", "DrawFov")
-            AddCardSlider(SSliderHolder, "Hit Chance", 0, 100, getgenv().SILENT_CFG.HitChance,
-                function(v) getgenv().SILENT_CFG.HitChance = v end)
-            AddCardSlider(SSliderHolder, "Silent FOV", 0, 400, getgenv().SILENT_CFG.FOV, function(v) getgenv().SILENT_CFG.FOV = v end)
-            AddDropdown(SSliderHolder, { "Head", "UpperTorso", "HumanoidRootPart", "Random" }, getgenv().SILENT_CFG.TargetPart,
-                function(v) getgenv().SILENT_CFG.TargetPart = v end)
+            UIS.InputBegan:Connect(function(inp, gp)
+                if gp then return end
+                if not themeDropOpen then return end
+                if inp.UserInputType ~= Enum.UserInputType.MouseButton1 and inp.UserInputType ~= Enum.UserInputType.Touch then return end
+                local mx, my = inp.Position.X, inp.Position.Y
+                local function hit(f)
+                    return mx >= f.AbsolutePosition.X and mx <= f.AbsolutePosition.X + f.AbsoluteSize.X
+                        and my >= f.AbsolutePosition.Y and my <= f.AbsolutePosition.Y + f.AbsoluteSize.Y
+                end
+                if not hit(themeDropPanel) and not hit(themeBtn) then closeThemeDrop() end
+            end)
+        end)()
 
-            local function BuildInstaKillCard()
-                getgenv().IK_CFG = getgenv().IK_CFG or { Enabled = false, Mode = "Keybind", Keybind = "G" }
-                local IKCard = NewFrame(SilentPage, UDim2.new(0.46, -5, 0, 120), UDim2.new(0.54, 0, 0, 0), PANEL)
-                Corner(IKCard, 8); Stroke(IKCard, STROKE, 1)
-                local IKTitle = NewLabel(IKCard, "Insta Kill Settings", 13, TEXT, true)
-                IKTitle.Size = UDim2.new(1, 0, 0, 30); IKTitle.TextXAlignment = Enum.TextXAlignment.Center
-                local IKCheckHolder = NewFrame(IKCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-                Instance.new("UIListLayout", IKCheckHolder).Padding = UDim.new(0, 4)
+        local bgCard = NewFrame(uiPage, UDim2.new(0.52, -4, 0, 160), UDim2.new(0.48, 1, 0, 3), PANEL)
+        Corner(bgCard, 8)
+        Stroke(bgCard, STROKE, 1)
 
-                local function AddIKToggleWithBind(label, cfg)
-                    local row = NewBtn(IKCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+        local bgTitle = NewLabel(bgCard, "Background Settings", 13, TEXT, true)
+        bgTitle.Name = "SectionTitle"
+        bgTitle.Size = UDim2.new(1, 0, 0, 30)
+        bgTitle.Position = UDim2.new(0, 0, 0, 0)
+        bgTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local bgList = Instance.new("UIListLayout")
+        bgList.Padding = UDim.new(0, 4)
+        bgList.SortOrder = Enum.SortOrder.LayoutOrder
+        bgList.Parent = NewFrame(bgCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+
+        ; (function()
+            local SilentPage = tabPages[2]
+            if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
+                local SLift = NewFrame(SilentPage, UDim2.new(0.53, -5, 0, 310), UDim2.new(0, 0, 0, 0), PANEL)
+                Corner(SLift, 8); Stroke(SLift, STROKE, 1)
+                local STitle = NewLabel(SLift, "Silent Aim Configuration", 13, TEXT, true)
+                STitle.Size = UDim2.new(1, 0, 0, 30); STitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local SCheckHolder = NewFrame(SLift, UDim2.new(1, -16, 0, 110), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                Instance.new("UIListLayout", SCheckHolder).Padding = UDim.new(0, 2)
+                local SSliderHolder = NewFrame(SLift, UDim2.new(1, -16, 0, 160), UDim2.new(0, 8, 0, 142), PANEL, 1)
+                Instance.new("UIListLayout", SSliderHolder).Padding = UDim.new(0, 6)
+
+                local function AddSilentToggle(label, cfg)
+                    local row = NewBtn(SCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
                     Corner(row, 5)
-                    local checked = getgenv().IK_CFG[cfg]
+                    local checked = getgenv().SILENT_CFG[cfg]
                     local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
                         Color3.fromRGB(36, 36, 48))
                     Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
                     local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
                     cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
                     local rowLbl = NewLabel(row, label, 13, TEXT)
-                    rowLbl.Position = UDim2.new(0, 32, 0, 0)
-                    rowLbl.Size = UDim2.new(1, IS_MOBILE and -38 or -96, 1, 0)
+                    rowLbl.Position = UDim2.new(0, 32, 0, 0); rowLbl.Size = UDim2.new(1, -40, 1, 0)
                     rowLbl.TextScaled = true
-                    local fit = Instance.new("UITextSizeConstraint")
-                    fit.MaxTextSize = 13
-                    fit.MinTextSize = 8
-                    fit.Parent = rowLbl
+                    local sFit = Instance.new("UITextSizeConstraint")
+                    sFit.MaxTextSize = 13
+                    sFit.MinTextSize = 8
+                    sFit.Parent = rowLbl
 
-                    row.MouseButton1Click:Connect(function()
-                        checked = not checked; getgenv().IK_CFG[cfg] = checked; cbCheck.Visible = checked
+                    local function ToggleState(state)
+                        if state ~= nil then checked = state else checked = not checked end
+                        getgenv().SILENT_CFG[cfg] = checked; cbCheck.Visible = checked
                         Tw(cbBg, 0.1, "Quad", "Out",
                             { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
-                    end)
+                    end
+
+                    row.MouseButton1Click:Connect(function() ToggleState() end)
                     row.MouseEnter:Connect(function()
                         Tw(row, 0.1, "Quad", "Out",
                             { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
@@ -5612,98 +5556,91 @@ do
                             { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
                     end)
 
-                    if not IS_MOBILE then
-                        local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10),
-                            Color3.fromRGB(45, 45, 55), 1)
-                        kbBox.Name = "KeybindBox"
-                        Corner(kbBox, 4); Stroke(kbBox, STROKE2, 1)
-                        local bindLbl = NewLabel(kbBox, getgenv().IK_CFG.Keybind, 10, TEXT, false, Enum.TextXAlignment.Center)
-                        bindLbl.Size = UDim2.new(1, 0, 1, 0)
+                    getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                    table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                        local ns = getgenv().SILENT_CFG[cfg]
+                        if ns == nil then ns = checked end
+                        ToggleState(ns)
+                    end)
 
-                        local waiting = false
-                        kbBox.MouseButton1Click:Connect(function()
-                            if waiting then return end
-                            waiting = true
-                            bindLbl.Text = "..."
-                            bindLbl.TextColor3 = Color3.new(1, 1, 1)
-                            Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
-
-                            local conn; conn = UIS.InputBegan:Connect(function(inp, gpe)
-                                if gpe or inp.UserInputType ~= Enum.UserInputType.Keyboard then return end
-                                waiting = false
-                                getgenv().IK_CFG.Keybind = inp.KeyCode.Name
-                                bindLbl.Text = inp.KeyCode.Name
-                                bindLbl.TextColor3 = TEXT
-                                Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-                                if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
-                                conn:Disconnect()
-                            end)
-                        end)
-                    end
+                    return row
                 end
-                AddIKToggleWithBind("Enable Insta Kill", "Enabled")
-                local ddRow = NewFrame(IKCheckHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-                local dd = AddDropdown(ddRow, { "Keybind", "Auto Kill" }, getgenv().IK_CFG.Mode, function(v)
-                    getgenv().IK_CFG.Mode = v
-                    NOTIFY("Insta Kill", "Mode: " .. v, 2)
+
+                getgenv().SILENT_CFG.Keybind = getgenv().SILENT_CFG.Keybind or Enum.KeyCode.None
+                local silentCheck = AddCardSetting(SCheckHolder, "Enable Silent Aim", getgenv().SILENT_CFG.Enabled,
+                    function(v)
+                        getgenv().SILENT_CFG.Enabled = v
+                    end, getgenv().SILENT_CFG.Keybind, function(k)
+                        getgenv().SILENT_CFG.Keybind = k
+                    end)
+
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    if silentCheck then
+                        local active = getgenv().SILENT_CFG.Enabled
+                        local cbBg = silentCheck:FindFirstChildOfClass("Frame")
+                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                        if cbCheck then cbCheck.Visible = active end
+                        if cbBg then
+                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                        end
+
+                        local kbBox = silentCheck:FindFirstChild("KeybindBox")
+                        local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                        if bindLbl then
+                            local keyName = "None"
+                            local kb = getgenv().SILENT_CFG.Keybind
+                            if kb then
+                                if typeof(kb) == "EnumItem" then
+                                    keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                                else
+                                    keyName = tostring(kb)
+                                end
+                            end
+                            bindLbl.Text = keyName
+                        end
+                    end
                 end)
-                dd.Size = UDim2.new(1, 0, 1, 0)
-            end
 
-            local function BuildGunsModsCard(parentCol)
-                getgenv().GUN_MODS_CFG = getgenv().GUN_MODS_CFG or {
-                    NoRecoil = false,
-                    NoSpread = false,
-                    RapidFire = false,
-                    Automatic = false,
-                    InfiniteAmmo = false
-                }
+                AddSilentToggle("Wallbang", "Wallbang")
+                AddSilentToggle("Show FOV Circle", "DrawFov")
+                AddCardSlider(SSliderHolder, "Hit Chance", 0, 100, getgenv().SILENT_CFG.HitChance,
+                    function(v) getgenv().SILENT_CFG.HitChance = v end)
+                AddCardSlider(SSliderHolder, "Silent FOV", 0, 400, getgenv().SILENT_CFG.FOV,
+                    function(v) getgenv().SILENT_CFG.FOV = v end)
+                AddDropdown(SSliderHolder, { "Head", "UpperTorso", "HumanoidRootPart", "Random" },
+                    getgenv().SILENT_CFG.TargetPart,
+                    function(v) getgenv().SILENT_CFG.TargetPart = v end)
 
-                local GMCard = NewFrame(parentCol or SilentPage, UDim2.new(1, 0, 0, 240), UDim2.new(0, 0, 0, 0), PANEL)
-                if not parentCol then
-                    GMCard.Size = UDim2.new(0.46, -5, 0, 240); GMCard.Position = UDim2.new(0.54, 0, 0, 0)
-                end
-                Corner(GMCard, 8); Stroke(GMCard, STROKE, 1)
+                local function BuildInstaKillCard()
+                    getgenv().IK_CFG = getgenv().IK_CFG or { Enabled = false, Mode = "Keybind", Keybind = "G" }
+                    local IKCard = NewFrame(SilentPage, UDim2.new(0.46, -5, 0, 120), UDim2.new(0.54, 0, 0, 0), PANEL)
+                    Corner(IKCard, 8); Stroke(IKCard, STROKE, 1)
+                    local IKTitle = NewLabel(IKCard, "Insta Kill Settings", 13, TEXT, true)
+                    IKTitle.Size = UDim2.new(1, 0, 0, 30); IKTitle.TextXAlignment = Enum.TextXAlignment.Center
+                    local IKCheckHolder = NewFrame(IKCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                    Instance.new("UIListLayout", IKCheckHolder).Padding = UDim.new(0, 4)
 
-                local GMTitle = NewLabel(GMCard, "Guns Mods", 13, TEXT, true)
-                GMTitle.Size = UDim2.new(1, 0, 0, 30); GMTitle.TextXAlignment = Enum.TextXAlignment.Center
+                    local function AddIKToggleWithBind(label, cfg)
+                        local row = NewBtn(IKCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                        Corner(row, 5)
+                        local checked = getgenv().IK_CFG[cfg]
+                        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                            Color3.fromRGB(36, 36, 48))
+                        Corner(cbBg, 3); Stroke(cbBg, STROKE2, 1)
+                        local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                        cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
+                        local rowLbl = NewLabel(row, label, 13, TEXT)
+                        rowLbl.Position = UDim2.new(0, 32, 0, 0)
+                        rowLbl.Size = UDim2.new(1, IS_MOBILE and -38 or -96, 1, 0)
+                        rowLbl.TextScaled = true
+                        local fit = Instance.new("UITextSizeConstraint")
+                        fit.MaxTextSize = 13
+                        fit.MinTextSize = 8
+                        fit.Parent = rowLbl
 
-                local GMCheckHolder = NewFrame(GMCard, UDim2.new(1, -16, 0, 200), UDim2.new(0, 8, 0, 32), PANEL, 1)
-                Instance.new("UIListLayout", GMCheckHolder).Padding = UDim.new(0, 4)
-
-                local function AddGMToggle(label, cfg)
-                    local isLocked = false
-                    if IsBronxDuels() and cfg ~= "NoRecoil" then
-                        isLocked = true
-                    elseif IsDuelist() and cfg == "RapidFire" then
-                        isLocked = true
-                    end
-
-                    local row = NewBtn(GMCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-                    Corner(row, 5)
-                    local checked = not isLocked and getgenv().GUN_MODS_CFG[cfg]
-                    if isLocked then
-                        getgenv().GUN_MODS_CFG[cfg] = false
-                    end
-
-                    local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
-                        isLocked and Color3.fromRGB(24, 24, 30) or Color3.fromRGB(36, 36, 48))
-                    Corner(cbBg, 3); Stroke(cbBg, isLocked and Color3.fromRGB(50, 40, 40) or STROKE2, 1)
-                    local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-                    cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
-
-                    local rowLbl = NewLabel(row, label, 13, TEXT)
-                    rowLbl.Position = UDim2.new(0, 32, 0, 0)
-                    rowLbl.Size = UDim2.new(1, -40, 1, 0)
-                    rowLbl.TextScaled = true
-                    local gFit = Instance.new("UITextSizeConstraint")
-                    gFit.MaxTextSize = 13
-                    gFit.MinTextSize = 8
-                    gFit.Parent = rowLbl
-
-                    if not isLocked then
                         row.MouseButton1Click:Connect(function()
-                            checked = not checked; getgenv().GUN_MODS_CFG[cfg] = checked; cbCheck.Visible = checked
+                            checked = not checked; getgenv().IK_CFG[cfg] = checked; cbCheck.Visible = checked
                             Tw(cbBg, 0.1, "Quad", "Out",
                                 { BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48) })
                         end)
@@ -5715,985 +5652,1110 @@ do
                             Tw(row, 0.1, "Quad", "Out",
                                 { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
                         end)
-                    else
-                        row.MouseButton1Click:Connect(function()
-                            NOTIFY("Guns Mods", label .. " esta desactivado por riesgo de ban.", 3)
-                        end)
-                    end
-                end
 
-                AddGMToggle("No Recoil", "NoRecoil")
-                AddGMToggle("No Spread", "NoSpread")
-                AddGMToggle("Rapid Fire", "RapidFire")
-                AddGMToggle("Force Automatic", "Automatic")
-                AddGMToggle("Infinite Ammo", "InfiniteAmmo")
-            end
+                        if not IS_MOBILE then
+                            local kbBox = NewBtn(row, UDim2.new(0, 50, 0, 20), UDim2.new(1, -58, 0.5, -10),
+                                Color3.fromRGB(45, 45, 55), 1)
+                            kbBox.Name = "KeybindBox"
+                            Corner(kbBox, 4); Stroke(kbBox, STROKE2, 1)
+                            local bindLbl = NewLabel(kbBox, getgenv().IK_CFG.Keybind, 10, TEXT, false,
+                                Enum.TextXAlignment.Center)
+                            bindLbl.Size = UDim2.new(1, 0, 1, 0)
 
-            if IsMurderVsSheriff() then
-                BuildInstaKillCard()
-            elseif IsHitmark() or IsBronxDuels() or IsDuelist() then
-                (function()
-                    local RightCol = NewFrame(SilentPage, UDim2.new(0.45, -5, 1, 0), UDim2.new(0, 0, 0, 0), PANEL, 1)
-                    local colLayout = Instance.new("UIListLayout", RightCol)
-                    colLayout.Padding = UDim.new(0, 10)
-                    colLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                            local waiting = false
+                            kbBox.MouseButton1Click:Connect(function()
+                                if waiting then return end
+                                waiting = true
+                                bindLbl.Text = "..."
+                                bindLbl.TextColor3 = Color3.new(1, 1, 1)
+                                Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = ACCENT })
 
-                    BuildGunsModsCard(RightCol)
-
-                    local function BuildExtrasCard()
-                        local EXCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 120), UDim2.new(0, 0, 0, 0), PANEL)
-                        Corner(EXCard, 8); Stroke(EXCard, STROKE, 1)
-
-                        local EXTitle = NewLabel(EXCard, "Extras", 13, TEXT, true)
-                        EXTitle.Size = UDim2.new(1, 0, 0, 30); EXTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-                        local EXHolder = NewFrame(EXCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-
-                        local listLayout = Instance.new("UIListLayout", EXHolder)
-                        listLayout.Padding = UDim.new(0, 4)
-                        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-                        local ddRow1 = NewFrame(EXHolder, UDim2.new(1, 0, 0, 32), nil, PANEL, 1)
-                        ddRow1.ZIndex = 5
-                        local lbl1 = NewLabel(ddRow1, "Equip KillFX", 13, TEXT)
-                        lbl1.Size = UDim2.new(0.4, 0, 1, 0)
-                        local ddContainer1 = NewFrame(ddRow1, UDim2.new(0.6, 0, 1, 0), UDim2.new(0.4, 0, 0, 0), PANEL, 1)
-                        local currentFX = getgenv().CURRENT_KILLFX or "None"
-                        local dd1 = AddDropdown(ddContainer1,
-                            { "None", "Swirl Purple", "Sparks", "Confetti", "Booster", "Virus" }, currentFX, function(v)
-                                getgenv().CURRENT_KILLFX = v
-                                if v ~= "None" then
-                                    pcall(function()
-                                        local Event = game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent
-                                        Event:FireServer({ { action = "CurrentKillFX", payload = v }, "\x02" })
-                                    end)
-                                end
+                                local conn; conn = UIS.InputBegan:Connect(function(inp, gpe)
+                                    if gpe or inp.UserInputType ~= Enum.UserInputType.Keyboard then return end
+                                    waiting = false
+                                    getgenv().IK_CFG.Keybind = inp.KeyCode.Name
+                                    bindLbl.Text = inp.KeyCode.Name
+                                    bindLbl.TextColor3 = TEXT
+                                    Tw(kbBox, 0.2, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                                    if getgenv().FLUX_UPDATE_KB_HUD then pcall(getgenv().FLUX_UPDATE_KB_HUD) end
+                                    conn:Disconnect()
+                                end)
                             end)
-                        dd1.Size = UDim2.new(1, 0, 0, 32)
-                        dd1.Position = UDim2.new(0, 0, 0.5, -16)
+                        end
+                    end
+                    AddIKToggleWithBind("Enable Insta Kill", "Enabled")
+                    local ddRow = NewFrame(IKCheckHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                    local dd = AddDropdown(ddRow, { "Keybind", "Auto Kill" }, getgenv().IK_CFG.Mode, function(v)
+                        getgenv().IK_CFG.Mode = v
+                        NOTIFY("Insta Kill", "Mode: " .. v, 2)
+                    end)
+                    dd.Size = UDim2.new(1, 0, 1, 0)
+                end
 
-                        local ddRow2 = NewFrame(EXHolder, UDim2.new(1, 0, 0, 32), nil, PANEL, 1)
-                        ddRow2.ZIndex = 4
-                        local lbl2 = NewLabel(ddRow2, "Weapon Skin", 13, TEXT)
-                        lbl2.Size = UDim2.new(0.4, 0, 1, 0)
-                        local ddContainer2 = NewFrame(ddRow2, UDim2.new(0.6, 0, 1, 0), UDim2.new(0.4, 0, 0, 0), PANEL, 1)
-                        local matSkins = { "Default", "Neon Cyan", "Neon Pink", "Neon Green", "ForceField Cyan",
-                            "ForceField Pink", "Solid Gold", "Glass", "Ice" }
-                        local currentMat = getgenv().CURRENT_VISUAL_MAT or "Default"
-                        local dd2 = AddDropdown(ddContainer2, matSkins, currentMat, function(v)
-                            getgenv().CURRENT_VISUAL_MAT = v
-                        end)
-                        dd2.Size = UDim2.new(1, 0, 0, 32)
-                        dd2.Position = UDim2.new(0, 0, 0.5, -16)
+                local function BuildGunsModsCard(parentCol)
+                    getgenv().GUN_MODS_CFG = getgenv().GUN_MODS_CFG or {
+                        NoRecoil = false,
+                        NoSpread = false,
+                        RapidFire = false,
+                        Automatic = false,
+                        InfiniteAmmo = false
+                    }
+
+                    local GMCard = NewFrame(parentCol or SilentPage, UDim2.new(1, 0, 0, 240), UDim2.new(0, 0, 0, 0),
+                        PANEL)
+                    if not parentCol then
+                        GMCard.Size = UDim2.new(0.46, -5, 0, 240); GMCard.Position = UDim2.new(0.54, 0, 0, 0)
                     end
-                    if IsHitmark() then
-                        BuildExtrasCard()
+                    Corner(GMCard, 8); Stroke(GMCard, STROKE, 1)
+
+                    local GMTitle = NewLabel(GMCard, "Guns Mods", 13, TEXT, true)
+                    GMTitle.Size = UDim2.new(1, 0, 0, 30); GMTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                    local GMCheckHolder = NewFrame(GMCard, UDim2.new(1, -16, 0, 200), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                    Instance.new("UIListLayout", GMCheckHolder).Padding = UDim.new(0, 4)
+
+                    local function AddGMToggle(label, cfg)
+                        local isLocked = false
+                        if IsBronxDuels() and cfg ~= "NoRecoil" then
+                            isLocked = true
+                        elseif IsDuelist() and cfg == "RapidFire" then
+                            isLocked = true
+                        end
+
+                        local row = NewBtn(GMCheckHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                        Corner(row, 5)
+                        local checked = not isLocked and getgenv().GUN_MODS_CFG[cfg]
+                        if isLocked then
+                            getgenv().GUN_MODS_CFG[cfg] = false
+                        end
+
+                        local cbBg = NewFrame(row, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                            isLocked and Color3.fromRGB(24, 24, 30) or Color3.fromRGB(36, 36, 48))
+                        Corner(cbBg, 3); Stroke(cbBg, isLocked and Color3.fromRGB(50, 40, 40) or STROKE2, 1)
+                        local cbCheck = NewLabel(cbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                        cbCheck.Size = UDim2.new(1, 0, 1, 0); cbCheck.Visible = checked
+
+                        local rowLbl = NewLabel(row, label, 13, TEXT)
+                        rowLbl.Position = UDim2.new(0, 32, 0, 0)
+                        rowLbl.Size = UDim2.new(1, -40, 1, 0)
+                        rowLbl.TextScaled = true
+                        local gFit = Instance.new("UITextSizeConstraint")
+                        gFit.MaxTextSize = 13
+                        gFit.MinTextSize = 8
+                        gFit.Parent = rowLbl
+
+                        if not isLocked then
+                            row.MouseButton1Click:Connect(function()
+                                checked = not checked; getgenv().GUN_MODS_CFG[cfg] = checked; cbCheck.Visible = checked
+                                Tw(cbBg, 0.1, "Quad", "Out",
+                                    {
+                                        BackgroundColor3 = checked and Color3.fromRGB(48, 50, 70) or
+                                            Color3.fromRGB(36, 36, 48)
+                                    })
+                            end)
+                            row.MouseEnter:Connect(function()
+                                Tw(row, 0.1, "Quad", "Out",
+                                    { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+                            end)
+                            row.MouseLeave:Connect(function()
+                                Tw(row, 0.1, "Quad", "Out",
+                                    { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                            end)
+                        else
+                            row.MouseButton1Click:Connect(function()
+                                NOTIFY("Guns Mods", label .. " esta desactivado por riesgo de ban.", 3)
+                            end)
+                        end
                     end
-                end)()
+
+                    AddGMToggle("No Recoil", "NoRecoil")
+                    AddGMToggle("No Spread", "NoSpread")
+                    AddGMToggle("Rapid Fire", "RapidFire")
+                    AddGMToggle("Force Automatic", "Automatic")
+                    AddGMToggle("Infinite Ammo", "InfiniteAmmo")
+                end
+
+                if IsMurderVsSheriff() then
+                    BuildInstaKillCard()
+                elseif IsHitmark() or IsBronxDuels() or IsDuelist() then
+                    (function()
+                        local RightCol = NewFrame(SilentPage, UDim2.new(0.45, -5, 1, 0), UDim2.new(0, 0, 0, 0), PANEL, 1)
+                        local colLayout = Instance.new("UIListLayout", RightCol)
+                        colLayout.Padding = UDim.new(0, 10)
+                        colLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+                        BuildGunsModsCard(RightCol)
+
+                        local function BuildExtrasCard()
+                            local EXCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 120), UDim2.new(0, 0, 0, 0), PANEL)
+                            Corner(EXCard, 8); Stroke(EXCard, STROKE, 1)
+
+                            local EXTitle = NewLabel(EXCard, "Extras", 13, TEXT, true)
+                            EXTitle.Size = UDim2.new(1, 0, 0, 30); EXTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                            local EXHolder = NewFrame(EXCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+
+                            local listLayout = Instance.new("UIListLayout", EXHolder)
+                            listLayout.Padding = UDim.new(0, 4)
+                            listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+                            local ddRow1 = NewFrame(EXHolder, UDim2.new(1, 0, 0, 32), nil, PANEL, 1)
+                            ddRow1.ZIndex = 5
+                            local lbl1 = NewLabel(ddRow1, "Equip KillFX", 13, TEXT)
+                            lbl1.Size = UDim2.new(0.4, 0, 1, 0)
+                            local ddContainer1 = NewFrame(ddRow1, UDim2.new(0.6, 0, 1, 0), UDim2.new(0.4, 0, 0, 0), PANEL,
+                                1)
+                            local currentFX = getgenv().CURRENT_KILLFX or "None"
+                            local dd1 = AddDropdown(ddContainer1,
+                                { "None", "Swirl Purple", "Sparks", "Confetti", "Booster", "Virus" }, currentFX,
+                                function(v)
+                                    getgenv().CURRENT_KILLFX = v
+                                    if v ~= "None" then
+                                        pcall(function()
+                                            local Event = game:GetService("ReplicatedStorage").BridgeNet2
+                                                .dataRemoteEvent
+                                            Event:FireServer({ { action = "CurrentKillFX", payload = v }, "\x02" })
+                                        end)
+                                    end
+                                end)
+                            dd1.Size = UDim2.new(1, 0, 0, 32)
+                            dd1.Position = UDim2.new(0, 0, 0.5, -16)
+
+                            local ddRow2 = NewFrame(EXHolder, UDim2.new(1, 0, 0, 32), nil, PANEL, 1)
+                            ddRow2.ZIndex = 4
+                            local lbl2 = NewLabel(ddRow2, "Weapon Skin", 13, TEXT)
+                            lbl2.Size = UDim2.new(0.4, 0, 1, 0)
+                            local ddContainer2 = NewFrame(ddRow2, UDim2.new(0.6, 0, 1, 0), UDim2.new(0.4, 0, 0, 0), PANEL,
+                                1)
+                            local matSkins = { "Default", "Neon Cyan", "Neon Pink", "Neon Green", "ForceField Cyan",
+                                "ForceField Pink", "Solid Gold", "Glass", "Ice" }
+                            local currentMat = getgenv().CURRENT_VISUAL_MAT or "Default"
+                            local dd2 = AddDropdown(ddContainer2, matSkins, currentMat, function(v)
+                                getgenv().CURRENT_VISUAL_MAT = v
+                            end)
+                            dd2.Size = UDim2.new(1, 0, 0, 32)
+                            dd2.Position = UDim2.new(0, 0, 0.5, -16)
+                        end
+                        if IsHitmark() then
+                            BuildExtrasCard()
+                        end
+                    end)()
+                end
+            else
+                local msg = NewLabel(SilentPage, "Silent Aim not available in this game. Use Aimbot.", 13, DIM, true,
+                    Enum.TextXAlignment.Center)
+                msg.Size = UDim2.new(1, 0, 1, 0)
             end
-        else
-            local msg = NewLabel(SilentPage, "Silent Aim not available in this game. Use Aimbot.", 13, DIM, true,
-                Enum.TextXAlignment.Center)
-            msg.Size = UDim2.new(1, 0, 1, 0)
-        end
-    end)()
+        end)()
 
-    ; (function()
-        local KAPage = tabPages[3]
-        if IsHitmark() or IsDuelist() then
+        ; (function()
+            local KAPage = tabPages[3]
+            if IsHitmark() or IsDuelist() then
+                local LeftCol = NewFrame(KAPage, UDim2.new(0.53, -5, 1, 0), nil, BG, 1)
+                LeftCol.LayoutOrder = 1
+                local LeftColLayout = Instance.new("UIListLayout", LeftCol)
+                LeftColLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                LeftColLayout.Padding = UDim.new(0, 10)
 
-            local LeftCol = NewFrame(KAPage, UDim2.new(0.53, -5, 1, 0), nil, BG, 1)
-            LeftCol.LayoutOrder = 1
-            local LeftColLayout = Instance.new("UIListLayout", LeftCol)
-            LeftColLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            LeftColLayout.Padding = UDim.new(0, 10)
+                local RightCol = NewFrame(KAPage, UDim2.new(0.45, -5, 1, 0), nil, BG, 1)
+                RightCol.LayoutOrder = 2
+                local RightColLayout = Instance.new("UIListLayout", RightCol)
+                RightColLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                RightColLayout.Padding = UDim.new(0, 10)
 
-            local RightCol = NewFrame(KAPage, UDim2.new(0.45, -5, 1, 0), nil, BG, 1)
-            RightCol.LayoutOrder = 2
-            local RightColLayout = Instance.new("UIListLayout", RightCol)
-            RightColLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            RightColLayout.Padding = UDim.new(0, 10)
+                local KCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
+                KCard.LayoutOrder = 1
+                Corner(KCard, 8); Stroke(KCard, STROKE, 1)
+                local KTitle = NewLabel(KCard, "Auto Kill Aura", 13, TEXT, true)
+                KTitle.Size = UDim2.new(1, 0, 0, 30); KTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            local KCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
-            KCard.LayoutOrder = 1
-            Corner(KCard, 8); Stroke(KCard, STROKE, 1)
-            local KTitle = NewLabel(KCard, "Auto Kill Aura", 13, TEXT, true)
-            KTitle.Size = UDim2.new(1, 0, 0, 30); KTitle.TextXAlignment = Enum.TextXAlignment.Center
+                local KHolder = NewFrame(KCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                Instance.new("UIListLayout", KHolder).Padding = UDim.new(0, 6)
 
-            local KHolder = NewFrame(KCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            Instance.new("UIListLayout", KHolder).Padding = UDim.new(0, 6)
+                getgenv().KILLAURA_CFG.Keybind = getgenv().KILLAURA_CFG.Keybind or Enum.KeyCode.None
+                local kaCheck = AddCardSetting(KHolder, "Enable Auto Kill Aura", getgenv().KILLAURA_CFG.Enabled,
+                    function(v)
+                        getgenv().KILLAURA_CFG.Enabled = v
+                    end, getgenv().KILLAURA_CFG.Keybind, function(k)
+                        getgenv().KILLAURA_CFG.Keybind = k
+                    end)
 
-            getgenv().KILLAURA_CFG.Keybind = getgenv().KILLAURA_CFG.Keybind or Enum.KeyCode.None
-            local kaCheck = AddCardSetting(KHolder, "Enable Auto Kill Aura", getgenv().KILLAURA_CFG.Enabled, function(v)
-                getgenv().KILLAURA_CFG.Enabled = v
-            end, getgenv().KILLAURA_CFG.Keybind, function(k)
-                getgenv().KILLAURA_CFG.Keybind = k
-            end)
-
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                if kaCheck then
-                    local active = getgenv().KILLAURA_CFG.Enabled
-                    local cbBg = kaCheck:FindFirstChildOfClass("Frame")
-                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                    if cbCheck then cbCheck.Visible = active end
-                    if cbBg then
-                        cbBg.BackgroundColor3 = active and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(36, 36, 48)
-                    end
-
-                    local kbBox = kaCheck:FindFirstChild("KeybindBox")
-                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
-                    if bindLbl then
-                        local keyName = "None"
-                        local kb = getgenv().KILLAURA_CFG.Keybind
-                        if kb then
-                            if typeof(kb) == "EnumItem" then
-                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
-                            else
-                                keyName = tostring(kb)
-                            end
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    if kaCheck then
+                        local active = getgenv().KILLAURA_CFG.Enabled
+                        local cbBg = kaCheck:FindFirstChildOfClass("Frame")
+                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                        if cbCheck then cbCheck.Visible = active end
+                        if cbBg then
+                            cbBg.BackgroundColor3 = active and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(36, 36, 48)
                         end
-                        bindLbl.Text = keyName
+
+                        local kbBox = kaCheck:FindFirstChild("KeybindBox")
+                        local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                        if bindLbl then
+                            local keyName = "None"
+                            local kb = getgenv().KILLAURA_CFG.Keybind
+                            if kb then
+                                if typeof(kb) == "EnumItem" then
+                                    keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                                else
+                                    keyName = tostring(kb)
+                                end
+                            end
+                            bindLbl.Text = keyName
+                        end
                     end
-                end
-            end)
-
-            local wrow = NewBtn(KHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-            Corner(wrow, 5)
-            local wcbBg = NewFrame(wrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7), Color3.fromRGB(36, 36, 48))
-            Corner(wcbBg, 3); Stroke(wcbBg, STROKE2, 1)
-            local wcbCheck = NewLabel(wcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-            wcbCheck.Size = UDim2.new(1, 0, 1, 0); wcbCheck.Visible = getgenv().KILLAURA_CFG.Wallbang
-            local wrowLbl = NewLabel(wrow, "Shoot through Walls (Wallbang)", 13, TEXT)
-            wrowLbl.Size = UDim2.new(1, -40, 1, 0); wrowLbl.Position = UDim2.new(0, 35, 0, 0)
-            wrowLbl.TextScaled = true
-            local wFit = Instance.new("UITextSizeConstraint")
-            wFit.MaxTextSize = 13
-            wFit.MinTextSize = 8
-            wFit.Parent = wrowLbl
-
-            wrow.MouseButton1Click:Connect(function()
-                getgenv().KILLAURA_CFG.Wallbang = not getgenv().KILLAURA_CFG.Wallbang
-                wcbCheck.Visible = getgenv().KILLAURA_CFG.Wallbang
-                Tw(wcbBg, 0.1, "Quad", "Out",
-                    {
-                        BackgroundColor3 = getgenv().KILLAURA_CFG.Wallbang and Color3.fromRGB(48, 50, 70) or
-                            Color3.fromRGB(36, 36, 48)
-                    })
-            end)
-
-            AddCardSlider(KHolder, "Kill Aura Radius (Studs)", 10, 1000, getgenv().KILLAURA_CFG.MaxDist, function(val)
-                getgenv().KILLAURA_CFG.MaxDist = val
-            end)
-
-            getgenv().KILLAURA_CFG.AuraType = getgenv().KILLAURA_CFG.AuraType or "Legit"
-            local ddRowType = NewFrame(KHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            local ddType = AddDropdown(ddRowType, { "Legit", "Blatant", "Tele Kill" }, getgenv().KILLAURA_CFG.AuraType,
-                function(v)
-                    getgenv().KILLAURA_CFG.AuraType = v
-                    NOTIFY("Kill Aura", "Type: " .. v, 2)
                 end)
-            ddType.Size = UDim2.new(1, 0, 1, 0)
 
-            local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
-            TCard.LayoutOrder = 2
-            Corner(TCard, 8); Stroke(TCard, STROKE, 1)
-            local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
-            TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-            local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
-            local TLayout = Instance.new("UIListLayout", THolder)
-            TLayout.Padding = UDim.new(0, 6)
-            TLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-            getgenv().TRIGGERBOT_CFG.Keybind = getgenv().TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
-            local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", getgenv().TRIGGERBOT_CFG.Enabled, function(v)
-                getgenv().TRIGGERBOT_CFG.Enabled = v
-            end, getgenv().TRIGGERBOT_CFG.Keybind, function(k)
-                getgenv().TRIGGERBOT_CFG.Keybind = k
-            end)
-            triggerCheck.LayoutOrder = 1
-
-            getgenv().TRIGGERBOT_CFG.Mode = getgenv().TRIGGERBOT_CFG.Mode or "Legit"
-            local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-            ddRowTB.LayoutOrder = 2
-            local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, getgenv().TRIGGERBOT_CFG.Mode, function(v)
-                getgenv().TRIGGERBOT_CFG.Mode = v
-                NOTIFY("Trigger Bot", "Mode: " .. v, 2)
-            end)
-            ddTB.Size = UDim2.new(1, 0, 1, 0)
-
-            getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
-            table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
-                if triggerCheck then
-                    local active = getgenv().TRIGGERBOT_CFG.Enabled
-                    local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
-                    local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
-                    if cbCheck then cbCheck.Visible = active end
-                    if cbBg then
-                        cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
-                    end
-
-                    local kbBox = triggerCheck:FindFirstChild("KeybindBox")
-                    local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
-                    if bindLbl then
-                        local keyName = "None"
-                        local kb = getgenv().TRIGGERBOT_CFG.Keybind
-                        if kb then
-                            if typeof(kb) == "EnumItem" then
-                                keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
-                            else
-                                keyName = tostring(kb)
-                            end
-                        end
-                        bindLbl.Text = keyName
-                    end
-                end
-            end)
-
-            if IsDuelist() then
-                local HCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
-                HCard.LayoutOrder = 1
-                Corner(HCard, 8); Stroke(HCard, STROKE, 1)
-                local HTitle = NewLabel(HCard, "HitBox Expander", 13, TEXT, true)
-                HTitle.Size = UDim2.new(1, 0, 0, 30); HTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-                local HHolder = NewFrame(HCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
-                local HLayout = Instance.new("UIListLayout", HHolder)
-                HLayout.Padding = UDim.new(0, 6)
-                HLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-                local hrow = NewBtn(HHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
-                hrow.LayoutOrder = 1
-                Corner(hrow, 5)
-                local hcbBg = NewFrame(hrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                local wrow = NewBtn(KHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                Corner(wrow, 5)
+                local wcbBg = NewFrame(wrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
                     Color3.fromRGB(36, 36, 48))
-                Corner(hcbBg, 3); Stroke(hcbBg, STROKE2, 1)
-                local hcbCheck = NewLabel(hcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
-                hcbCheck.Size = UDim2.new(1, 0, 1, 0); hcbCheck.Visible = getgenv().HITBOX_CFG.Enabled
-                if getgenv().HITBOX_CFG.Enabled then
-                    hcbBg.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-                end
-                local hrowLbl = NewLabel(hrow, "Enable HitBox Expander", 13, TEXT)
-                hrowLbl.Size = UDim2.new(1, -40, 1, 0); hrowLbl.Position = UDim2.new(0, 35, 0, 0)
-                hrowLbl.TextScaled = true
-                local hFit = Instance.new("UITextSizeConstraint")
-                hFit.MaxTextSize = 13
-                hFit.MinTextSize = 8
-                hFit.Parent = hrowLbl
+                Corner(wcbBg, 3); Stroke(wcbBg, STROKE2, 1)
+                local wcbCheck = NewLabel(wcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                wcbCheck.Size = UDim2.new(1, 0, 1, 0); wcbCheck.Visible = getgenv().KILLAURA_CFG.Wallbang
+                local wrowLbl = NewLabel(wrow, "Shoot through Walls (Wallbang)", 13, TEXT)
+                wrowLbl.Size = UDim2.new(1, -40, 1, 0); wrowLbl.Position = UDim2.new(0, 35, 0, 0)
+                wrowLbl.TextScaled = true
+                local wFit = Instance.new("UITextSizeConstraint")
+                wFit.MaxTextSize = 13
+                wFit.MinTextSize = 8
+                wFit.Parent = wrowLbl
 
-                hrow.MouseButton1Click:Connect(function()
-                    getgenv().HITBOX_CFG.Enabled = not getgenv().HITBOX_CFG.Enabled
-                    hcbCheck.Visible = getgenv().HITBOX_CFG.Enabled
-                    Tw(hcbBg, 0.1, "Quad", "Out",
+                wrow.MouseButton1Click:Connect(function()
+                    getgenv().KILLAURA_CFG.Wallbang = not getgenv().KILLAURA_CFG.Wallbang
+                    wcbCheck.Visible = getgenv().KILLAURA_CFG.Wallbang
+                    Tw(wcbBg, 0.1, "Quad", "Out",
                         {
-                            BackgroundColor3 = getgenv().HITBOX_CFG.Enabled and Color3.fromRGB(255, 60, 60) or
+                            BackgroundColor3 = getgenv().KILLAURA_CFG.Wallbang and Color3.fromRGB(48, 50, 70) or
                                 Color3.fromRGB(36, 36, 48)
                         })
                 end)
-                hrow.MouseEnter:Connect(function()
-                    Tw(hrow, 0.1, "Quad", "Out",
-                        { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+
+                AddCardSlider(KHolder, "Kill Aura Radius (Studs)", 10, 1000, getgenv().KILLAURA_CFG.MaxDist,
+                    function(val)
+                        getgenv().KILLAURA_CFG.MaxDist = val
+                    end)
+
+                getgenv().KILLAURA_CFG.AuraType = getgenv().KILLAURA_CFG.AuraType or "Legit"
+                local ddRowType = NewFrame(KHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                local ddType = AddDropdown(ddRowType, { "Legit", "Blatant", "Tele Kill" },
+                    getgenv().KILLAURA_CFG.AuraType,
+                    function(v)
+                        getgenv().KILLAURA_CFG.AuraType = v
+                        NOTIFY("Kill Aura", "Type: " .. v, 2)
+                    end)
+                ddType.Size = UDim2.new(1, 0, 1, 0)
+
+                local TCard = NewFrame(LeftCol, UDim2.new(1, 0, 0, 120), nil, PANEL)
+                TCard.LayoutOrder = 2
+                Corner(TCard, 8); Stroke(TCard, STROKE, 1)
+                local TTitle = NewLabel(TCard, "Trigger Bot", 13, TEXT, true)
+                TTitle.Size = UDim2.new(1, 0, 0, 30); TTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+                local THolder = NewFrame(TCard, UDim2.new(1, -16, 0, 80), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                local TLayout = Instance.new("UIListLayout", THolder)
+                TLayout.Padding = UDim.new(0, 6)
+                TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+                getgenv().TRIGGERBOT_CFG.Keybind = getgenv().TRIGGERBOT_CFG.Keybind or Enum.KeyCode.T
+                local triggerCheck = AddCardSetting(THolder, "Enable Trigger Bot", getgenv().TRIGGERBOT_CFG.Enabled,
+                    function(v)
+                        getgenv().TRIGGERBOT_CFG.Enabled = v
+                    end, getgenv().TRIGGERBOT_CFG.Keybind, function(k)
+                        getgenv().TRIGGERBOT_CFG.Keybind = k
+                    end)
+                triggerCheck.LayoutOrder = 1
+
+                getgenv().TRIGGERBOT_CFG.Mode = getgenv().TRIGGERBOT_CFG.Mode or "Legit"
+                local ddRowTB = NewFrame(THolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                ddRowTB.LayoutOrder = 2
+                local ddTB = AddDropdown(ddRowTB, { "Legit", "Blatant" }, getgenv().TRIGGERBOT_CFG.Mode, function(v)
+                    getgenv().TRIGGERBOT_CFG.Mode = v
+                    NOTIFY("Trigger Bot", "Mode: " .. v, 2)
                 end)
-                hrow.MouseLeave:Connect(function()
-                    Tw(hrow, 0.1, "Quad", "Out",
-                        { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                ddTB.Size = UDim2.new(1, 0, 1, 0)
+
+                getgenv().FLUX_UI_UPDATE_FUNCS = getgenv().FLUX_UI_UPDATE_FUNCS or {}
+                table.insert(getgenv().FLUX_UI_UPDATE_FUNCS, function()
+                    if triggerCheck then
+                        local active = getgenv().TRIGGERBOT_CFG.Enabled
+                        local cbBg = triggerCheck:FindFirstChildOfClass("Frame")
+                        local cbCheck = cbBg and cbBg:FindFirstChildOfClass("TextLabel")
+                        if cbCheck then cbCheck.Visible = active end
+                        if cbBg then
+                            cbBg.BackgroundColor3 = active and Color3.fromRGB(48, 50, 70) or Color3.fromRGB(36, 36, 48)
+                        end
+
+                        local kbBox = triggerCheck:FindFirstChild("KeybindBox")
+                        local bindLbl = kbBox and kbBox:FindFirstChild("BindLabel")
+                        if bindLbl then
+                            local keyName = "None"
+                            local kb = getgenv().TRIGGERBOT_CFG.Keybind
+                            if kb then
+                                if typeof(kb) == "EnumItem" then
+                                    keyName = (kb == Enum.KeyCode.None) and "None" or kb.Name
+                                else
+                                    keyName = tostring(kb)
+                                end
+                            end
+                            bindLbl.Text = keyName
+                        end
+                    end
                 end)
 
-                local sliderRow = AddCardSlider(HHolder, "Hitbox Size", 1, 50, getgenv().HITBOX_CFG.Size, function(val)
-                    getgenv().HITBOX_CFG.Size = val
-                end)
-                sliderRow.LayoutOrder = 2
+                if IsDuelist() then
+                    local HCard = NewFrame(RightCol, UDim2.new(1, 0, 0, 218), nil, PANEL)
+                    HCard.LayoutOrder = 1
+                    Corner(HCard, 8); Stroke(HCard, STROKE, 1)
+                    local HTitle = NewLabel(HCard, "HitBox Expander", 13, TEXT, true)
+                    HTitle.Size = UDim2.new(1, 0, 0, 30); HTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-                local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
-                ddRowPart.LayoutOrder = 3
-                local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, getgenv().HITBOX_CFG.Part, function(v)
-                    getgenv().HITBOX_CFG.Part = v
-                    NOTIFY("Hitbox Part", "Part: " .. v, 2)
-                end)
-                ddPart.Size = UDim2.new(1, 0, 1, 0)
-            end
-        else
-            local msg = NewLabel(KAPage, "Kill Aura not available in this game.", 13, DIM, true,
-                Enum.TextXAlignment.Center)
-            msg.Size = UDim2.new(1, 0, 1, 0)
-        end
-    end)()
+                    local HHolder = NewFrame(HCard, UDim2.new(1, -16, 0, 168), UDim2.new(0, 8, 0, 32), PANEL, 1)
+                    local HLayout = Instance.new("UIListLayout", HHolder)
+                    HLayout.Padding = UDim.new(0, 6)
+                    HLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    local function AddGlass(parent)
-        parent.ClipsDescendants = true
-        local g = Instance.new("ImageLabel")
-        g.Name = "GlassLayer"
-        g.Size = UDim2.new(1, 0, 1, 0)
-        g.BackgroundTransparency = 1
-        g.Image = "rbxassetid://10881905308" 
-        g.ImageTransparency = 1
-        g.ScaleType = Enum.ScaleType.Slice
-        g.SliceCenter = Rect.new(49, 49, 450, 450)
-        g.SliceScale = 0.15
-        g.ZIndex = 0
-        g.Parent = parent
-        return g
-    end
+                    local hrow = NewBtn(HHolder, UDim2.new(1, 0, 0, 34), nil, Color3.fromRGB(32, 32, 42), 1)
+                    hrow.LayoutOrder = 1
+                    Corner(hrow, 5)
+                    local hcbBg = NewFrame(hrow, UDim2.new(0, 15, 0, 15), UDim2.new(0, 10, 0.5, -7),
+                        Color3.fromRGB(36, 36, 48))
+                    Corner(hcbBg, 3); Stroke(hcbBg, STROKE2, 1)
+                    local hcbCheck = NewLabel(hcbBg, "✓", 10, ACCENT, true, Enum.TextXAlignment.Center)
+                    hcbCheck.Size = UDim2.new(1, 0, 1, 0); hcbCheck.Visible = getgenv().HITBOX_CFG.Enabled
+                    if getgenv().HITBOX_CFG.Enabled then
+                        hcbBg.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+                    end
+                    local hrowLbl = NewLabel(hrow, "Enable HitBox Expander", 13, TEXT)
+                    hrowLbl.Size = UDim2.new(1, -40, 1, 0); hrowLbl.Position = UDim2.new(0, 35, 0, 0)
+                    hrowLbl.TextScaled = true
+                    local hFit = Instance.new("UITextSizeConstraint")
+                    hFit.MaxTextSize = 13
+                    hFit.MinTextSize = 8
+                    hFit.Parent = hrowLbl
 
-    Sidebar.ClipsDescendants = true
-    RightBox.ClipsDescendants = true
-    local gSide = AddGlass(Sidebar)
-    local gRight = AddGlass(RightBox)
+                    hrow.MouseButton1Click:Connect(function()
+                        getgenv().HITBOX_CFG.Enabled = not getgenv().HITBOX_CFG.Enabled
+                        hcbCheck.Visible = getgenv().HITBOX_CFG.Enabled
+                        Tw(hcbBg, 0.1, "Quad", "Out",
+                            {
+                                BackgroundColor3 = getgenv().HITBOX_CFG.Enabled and Color3.fromRGB(255, 60, 60) or
+                                    Color3.fromRGB(36, 36, 48)
+                            })
+                    end)
+                    hrow.MouseEnter:Connect(function()
+                        Tw(hrow, 0.1, "Quad", "Out",
+                            { BackgroundTransparency = 0.9, BackgroundColor3 = Color3.fromRGB(60, 60, 80) })
+                    end)
+                    hrow.MouseLeave:Connect(function()
+                        Tw(hrow, 0.1, "Quad", "Out",
+                            { BackgroundTransparency = 0.99, BackgroundColor3 = Color3.fromRGB(32, 32, 42) })
+                    end)
 
-    local function UpdateBlur()
-        local strength = blurVal / 100
-        local glassTarget = blurActive and (1 - strength * 0.6) or 1
+                    local sliderRow = AddCardSlider(HHolder, "Hitbox Size", 1, 50, getgenv().HITBOX_CFG.Size,
+                        function(val)
+                            getgenv().HITBOX_CFG.Size = val
+                        end)
+                    sliderRow.LayoutOrder = 2
 
-        Tw(gSide, 0.1, "Linear", "Out", { ImageTransparency = glassTarget, ImageColor3 = Color3.new(0, 0, 0) })
-        Tw(gRight, 0.1, "Linear", "Out", { ImageTransparency = glassTarget, ImageColor3 = Color3.new(0, 0, 0) })
-
-        local panelTrans = blurActive and (strength * 0.7) or 0
-
-        Tw(Root, 0.1, "Linear", "Out", { BackgroundTransparency = 1 }) 
-        Tw(Sidebar, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
-        Tw(RightBox, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
-    end
-
-    ; (function()
-        local function GetImageAsset(id)
-            if typeof(id) == "string" then
-                local cleanId = id:match("%d+")
-                if cleanId then
-                    return "rbxassetid://" .. cleanId
+                    local ddRowPart = NewFrame(HHolder, UDim2.new(1, 0, 0, 32), nil, BG, 1)
+                    ddRowPart.LayoutOrder = 3
+                    local ddPart = AddDropdown(ddRowPart, { "head", "UpperTorso" }, getgenv().HITBOX_CFG.Part,
+                        function(v)
+                            getgenv().HITBOX_CFG.Part = v
+                            NOTIFY("Hitbox Part", "Part: " .. v, 2)
+                        end)
+                    ddPart.Size = UDim2.new(1, 0, 1, 0)
                 end
-            elseif typeof(id) == "number" then
-                return "rbxassetid://" .. tostring(id)
+            else
+                local msg = NewLabel(KAPage, "Kill Aura not available in this game.", 13, DIM, true,
+                    Enum.TextXAlignment.Center)
+                msg.Size = UDim2.new(1, 0, 1, 0)
             end
-            return ""
+        end)()
+
+        local function AddGlass(parent)
+            parent.ClipsDescendants = true
+            local g = Instance.new("ImageLabel")
+            g.Name = "GlassLayer"
+            g.Size = UDim2.new(1, 0, 1, 0)
+            g.BackgroundTransparency = 1
+            g.Image = "rbxassetid://10881905308"
+            g.ImageTransparency = 1
+            g.ScaleType = Enum.ScaleType.Slice
+            g.SliceCenter = Rect.new(49, 49, 450, 450)
+            g.SliceScale = 0.15
+            g.ZIndex = 0
+            g.Parent = parent
+            return g
         end
 
-        local previewImageLabel
-        UpdatePreview = function()
-            local id = getgenv().CUSTOM_BG_ID
-            if previewImageLabel then
-                local asset = GetImageAsset(id)
-                if asset ~= "" then
-                    previewImageLabel.Image = asset
-                    previewImageLabel.ImageTransparency = 0
-                else
-                    previewImageLabel.Image = ""
+        Sidebar.ClipsDescendants = true
+        RightBox.ClipsDescendants = true
+        local gSide = AddGlass(Sidebar)
+        local gRight = AddGlass(RightBox)
+
+        local function UpdateBlur()
+            local strength = blurVal / 100
+            local glassTarget = blurActive and (1 - strength * 0.6) or 1
+
+            Tw(gSide, 0.1, "Linear", "Out", { ImageTransparency = glassTarget, ImageColor3 = Color3.new(0, 0, 0) })
+            Tw(gRight, 0.1, "Linear", "Out", { ImageTransparency = glassTarget, ImageColor3 = Color3.new(0, 0, 0) })
+
+            local panelTrans = blurActive and (strength * 0.7) or 0
+
+            Tw(Root, 0.1, "Linear", "Out", { BackgroundTransparency = 1 })
+            Tw(Sidebar, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
+            Tw(RightBox, 0.1, "Linear", "Out", { BackgroundTransparency = panelTrans })
+        end
+
+        ; (function()
+            local function GetImageAsset(id)
+                if typeof(id) == "string" then
+                    local cleanId = id:match("%d+")
+                    if cleanId then
+                        return "rbxassetid://" .. cleanId
+                    end
+                elseif typeof(id) == "number" then
+                    return "rbxassetid://" .. tostring(id)
                 end
+                return ""
             end
-        end
 
-        UpdateCustomBackground = function()
-            local enabled = getgenv().CUSTOM_BG_ENABLED
-            local id = getgenv().CUSTOM_BG_ID
-            local trans = getgenv().CUSTOM_BG_TRANSPARENCY or 0
-
-            if SidebarBgImage and RightBoxBgImage then
-                if enabled and id ~= "" then
+            local previewImageLabel
+            UpdatePreview = function()
+                local id = getgenv().CUSTOM_BG_ID
+                if previewImageLabel then
                     local asset = GetImageAsset(id)
                     if asset ~= "" then
-                        SidebarBgImage.Image = asset
-                        SidebarBgImage.ImageTransparency = trans / 100
-                        SidebarBgImage.Visible = true
+                        previewImageLabel.Image = asset
+                        previewImageLabel.ImageTransparency = 0
+                    else
+                        previewImageLabel.Image = ""
+                    end
+                end
+            end
 
-                        RightBoxBgImage.Image = asset
-                        RightBoxBgImage.ImageTransparency = trans / 100
-                        RightBoxBgImage.Visible = true
+            UpdateCustomBackground = function()
+                local enabled = getgenv().CUSTOM_BG_ENABLED
+                local id = getgenv().CUSTOM_BG_ID
+                local trans = getgenv().CUSTOM_BG_TRANSPARENCY or 0
+
+                if SidebarBgImage and RightBoxBgImage then
+                    if enabled and id ~= "" then
+                        local asset = GetImageAsset(id)
+                        if asset ~= "" then
+                            SidebarBgImage.Image = asset
+                            SidebarBgImage.ImageTransparency = trans / 100
+                            SidebarBgImage.Visible = true
+
+                            RightBoxBgImage.Image = asset
+                            RightBoxBgImage.ImageTransparency = trans / 100
+                            RightBoxBgImage.Visible = true
+                        else
+                            SidebarBgImage.Visible = false
+                            RightBoxBgImage.Visible = false
+                        end
                     else
                         SidebarBgImage.Visible = false
                         RightBoxBgImage.Visible = false
                     end
-                else
-                    SidebarBgImage.Visible = false
-                    RightBoxBgImage.Visible = false
                 end
+                if UpdateBlur then UpdateBlur() end
             end
-            if UpdateBlur then UpdateBlur() end
-        end
 
-        local customBgCard = NewFrame(uiPage, UDim2.new(0.46, 0, 0, 220), UDim2.new(0, 1, 0, prefHeight + 10), PANEL)
-        Corner(customBgCard, 8)
-        Stroke(customBgCard, STROKE, 1)
+            local customBgCard = NewFrame(uiPage, UDim2.new(0.46, 0, 0, 220), UDim2.new(0, 1, 0, prefHeight + 10), PANEL)
+            Corner(customBgCard, 8)
+            Stroke(customBgCard, STROKE, 1)
 
-        local customBgTitle = NewLabel(customBgCard, "Background Image", 13, TEXT, true)
-        customBgTitle.Name = "SectionTitle"
-        customBgTitle.Size = UDim2.new(1, 0, 0, 30)
-        customBgTitle.TextXAlignment = Enum.TextXAlignment.Center
+            local customBgTitle = NewLabel(customBgCard, "Background Image", 13, TEXT, true)
+            customBgTitle.Name = "SectionTitle"
+            customBgTitle.Size = UDim2.new(1, 0, 0, 30)
+            customBgTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-        local customBgContent = NewFrame(customBgCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-        local customBgList = Instance.new("UIListLayout", customBgContent)
-        customBgList.Padding = UDim.new(0, 6)
-        customBgList.SortOrder = Enum.SortOrder.LayoutOrder
+            local customBgContent = NewFrame(customBgCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+            local customBgList = Instance.new("UIListLayout", customBgContent)
+            customBgList.Padding = UDim.new(0, 6)
+            customBgList.SortOrder = Enum.SortOrder.LayoutOrder
 
-        local tbWrap = NewFrame(customBgContent, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
-        tbWrap.LayoutOrder = 2
-        Corner(tbWrap, 5)
-        Stroke(tbWrap, STROKE2, 1)
+            local tbWrap = NewFrame(customBgContent, UDim2.new(1, 0, 0, 30), nil, Color3.fromRGB(15, 15, 20))
+            tbWrap.LayoutOrder = 2
+            Corner(tbWrap, 5)
+            Stroke(tbWrap, STROKE2, 1)
 
-        local idTextBox = Instance.new("TextBox")
-        idTextBox.Size = UDim2.new(1, -16, 1, 0)
-        idTextBox.Position = UDim2.new(0, 8, 0, 0)
-        idTextBox.BackgroundTransparency = 1
-        idTextBox.BorderSizePixel = 0
-        idTextBox.TextColor3 = TEXT
-        idTextBox.PlaceholderColor3 = DIM
-        idTextBox.PlaceholderText = "Roblox ID..."
-        idTextBox.Text = getgenv().CUSTOM_BG_ID or ""
-        idTextBox.TextSize = 11
-        idTextBox.Font = Enum.Font.Gotham
-        idTextBox.ClearTextOnFocus = false
-        idTextBox.Parent = tbWrap
+            local idTextBox = Instance.new("TextBox")
+            idTextBox.Size = UDim2.new(1, -16, 1, 0)
+            idTextBox.Position = UDim2.new(0, 8, 0, 0)
+            idTextBox.BackgroundTransparency = 1
+            idTextBox.BorderSizePixel = 0
+            idTextBox.TextColor3 = TEXT
+            idTextBox.PlaceholderColor3 = DIM
+            idTextBox.PlaceholderText = "Roblox ID..."
+            idTextBox.Text = getgenv().CUSTOM_BG_ID or ""
+            idTextBox.TextSize = 11
+            idTextBox.Font = Enum.Font.Gotham
+            idTextBox.ClearTextOnFocus = false
+            idTextBox.Parent = tbWrap
 
-        local enableBgToggle = AddCardSetting(customBgContent, "Enable Background", getgenv().CUSTOM_BG_ENABLED, function(v)
-            getgenv().CUSTOM_BG_ENABLED = v
-            getgenv().CUSTOM_BG_ID = idTextBox.Text
-            UpdatePreview()
-            UpdateCustomBackground()
-            SaveUI()
-        end)
-        enableBgToggle.LayoutOrder = 1
+            local enableBgToggle = AddCardSetting(customBgContent, "Enable Background", getgenv().CUSTOM_BG_ENABLED,
+                function(v)
+                    getgenv().CUSTOM_BG_ENABLED = v
+                    getgenv().CUSTOM_BG_ID = idTextBox.Text
+                    UpdatePreview()
+                    UpdateCustomBackground()
+                    SaveUI()
+                end)
+            enableBgToggle.LayoutOrder = 1
 
-        local previewContainer = NewFrame(customBgContent, UDim2.new(1, 0, 0, 70), nil, Color3.fromRGB(15, 15, 20))
-        previewContainer.LayoutOrder = 3
-        Corner(previewContainer, 6)
-        Stroke(previewContainer, STROKE2, 1)
+            local previewContainer = NewFrame(customBgContent, UDim2.new(1, 0, 0, 70), nil, Color3.fromRGB(15, 15, 20))
+            previewContainer.LayoutOrder = 3
+            Corner(previewContainer, 6)
+            Stroke(previewContainer, STROKE2, 1)
 
-        previewImageLabel = Instance.new("ImageLabel")
-        previewImageLabel.Size = UDim2.new(1, -8, 1, -8)
-        previewImageLabel.Position = UDim2.new(0, 4, 0, 4)
-        previewImageLabel.BackgroundTransparency = 1
-        previewImageLabel.ScaleType = Enum.ScaleType.Crop
-        Corner(previewImageLabel, 4)
-        previewImageLabel.Parent = previewContainer
+            previewImageLabel = Instance.new("ImageLabel")
+            previewImageLabel.Size = UDim2.new(1, -8, 1, -8)
+            previewImageLabel.Position = UDim2.new(0, 4, 0, 4)
+            previewImageLabel.BackgroundTransparency = 1
+            previewImageLabel.ScaleType = Enum.ScaleType.Crop
+            Corner(previewImageLabel, 4)
+            previewImageLabel.Parent = previewContainer
 
-        idTextBox.FocusLost:Connect(function()
-            getgenv().CUSTOM_BG_ID = idTextBox.Text
-            UpdatePreview()
-            if getgenv().CUSTOM_BG_ENABLED then
-                UpdateCustomBackground()
-            end
-            SaveUI()
-        end)
-
-        local opacitySlider = AddCardSlider(customBgContent, "Background Opacity", 0, 100, getgenv().CUSTOM_BG_TRANSPARENCY or 0,
-            function(v)
-                getgenv().CUSTOM_BG_TRANSPARENCY = v
-                UpdateCustomBackground()
+            idTextBox.FocusLost:Connect(function()
+                getgenv().CUSTOM_BG_ID = idTextBox.Text
+                UpdatePreview()
+                if getgenv().CUSTOM_BG_ENABLED then
+                    UpdateCustomBackground()
+                end
                 SaveUI()
             end)
-        opacitySlider.LayoutOrder = 4
-    end)()
 
-    AddCardSetting(bgList.Parent, "Enable Transparency", blurActive, function(v)
-        blurActive = v
-        UpdateBlur()
-        SaveUI()
-    end).LayoutOrder = 1
+            local opacitySlider = AddCardSlider(customBgContent, "Background Opacity", 0, 100,
+                getgenv().CUSTOM_BG_TRANSPARENCY or 0,
+                function(v)
+                    getgenv().CUSTOM_BG_TRANSPARENCY = v
+                    UpdateCustomBackground()
+                    SaveUI()
+                end)
+            opacitySlider.LayoutOrder = 4
+        end)()
 
-    AddCardSlider(bgList.Parent, "Transparency", 0, 100, blurVal, function(v)
-        blurVal = v
-        UpdateBlur()
-        SaveUI()
-    end).LayoutOrder = 3
+        AddCardSetting(bgList.Parent, "Enable Transparency", blurActive, function(v)
+            blurActive = v
+            UpdateBlur()
+            SaveUI()
+        end).LayoutOrder = 1
 
-    ; (function()
-        getgenv().FLUX_SNOW_ACTIVE = false
+        AddCardSlider(bgList.Parent, "Transparency", 0, 100, blurVal, function(v)
+            blurVal = v
+            UpdateBlur()
+            SaveUI()
+        end).LayoutOrder = 3
 
-        local function CreateFlake()
-            local f = Instance.new("Frame")
-            f.Size = UDim2.new(0, math.random(2, 3), 0, math.random(2, 3))
-            f.BackgroundColor3 = Color3.new(1, 1, 1)
-            f.BackgroundTransparency = 1 
-            f.BorderSizePixel = 0
-            Corner(f, 10)
-            f.Parent = SnowHolder
-            return f
-        end
-
-        local function RunSnow()
-            task.spawn(function()
-                while getgenv().FLUX_SNOW_ACTIVE do
-                    if getgenv().FLUX_SESSION ~= MySession then break end
-                    local f = CreateFlake()
-                    local startX = 0.05 + (math.random() * 0.9)
-                    f.Position = UDim2.new(startX, 0, 0, 0) 
-
-                    local duration = math.random(4, 7)
-                    local drift = (math.random() - 0.5) * 0.1
-                    local targetTrans = math.random(3, 6) / 10
-
-                    Tw(f, 0.5, "Linear", "Out", { BackgroundTransparency = targetTrans })
-
-                    f:TweenPosition(
-                        UDim2.new(startX + drift, 0, 0.98, 0),
-                        Enum.EasingDirection.In,
-                        Enum.EasingStyle.Linear,
-                        duration,
-                        true,
-                        function()
-
-                            local t = Tw(f, 0.4, "Linear", "Out", { BackgroundTransparency = 1 })
-                            task.wait(0.4)
-                            f:Destroy()
-                        end
-                    )
-                    task.wait(0.25)
-                end
-            end)
-        end
-
-        AddCardSetting(bgList.Parent, "Enable Snow", false, function(v)
-            getgenv().FLUX_SNOW_ACTIVE = v
-            if v then RunSnow() end
-        end).LayoutOrder = 2
-    end)()
-
-    ; (function()
-        local panicCard = NewFrame(uiPage, UDim2.new(0.52, -4, 0, 80), UDim2.new(0.48, 1, 0, 173), PANEL)
-        Corner(panicCard, 8)
-        Stroke(panicCard, STROKE, 1)
-
-        local panicTitle = NewLabel(panicCard, "Emergency Shutdown", 12, TEXT, true)
-        panicTitle.Name = "SectionTitle"
-        panicTitle.Size = UDim2.new(1, 0, 0, 30)
-        panicTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-        local unloadBtn = NewBtn(panicCard, UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 0, 34), Color3.fromRGB(36, 36, 48))
-        Corner(unloadBtn, 6)
-        Stroke(unloadBtn, STROKE2, 1)
-
-        local unloadLbl = NewLabel(unloadBtn, "CLOSE UI & STOP ALL", 11, TEXT, true, Enum.TextXAlignment.Center)
-        unloadLbl.Size = UDim2.new(1, 0, 1, 0)
-
-        unloadBtn.MouseButton1Click:Connect(function()
-            NOTIFY("System", "Unloading script...", 2)
-
-            getgenv().FLUX_SESSION = nil
+        ; (function()
             getgenv().FLUX_SNOW_ACTIVE = false
 
-            if getgenv().FLUX_CONNS then
-                for _, c in pairs(getgenv().FLUX_CONNS) do
-                    pcall(function() c:Disconnect() end)
-                end
-                getgenv().FLUX_CONNS = {}
+            local function CreateFlake()
+                local f = Instance.new("Frame")
+                f.Size = UDim2.new(0, math.random(2, 3), 0, math.random(2, 3))
+                f.BackgroundColor3 = Color3.new(1, 1, 1)
+                f.BackgroundTransparency = 1
+                f.BorderSizePixel = 0
+                Corner(f, 10)
+                f.Parent = SnowHolder
+                return f
             end
 
-            task.wait(0.3)
+            local function RunSnow()
+                task.spawn(function()
+                    while getgenv().FLUX_SNOW_ACTIVE do
+                        if getgenv().FLUX_SESSION ~= MySession then break end
+                        local f = CreateFlake()
+                        local startX = 0.05 + (math.random() * 0.9)
+                        f.Position = UDim2.new(startX, 0, 0, 0)
 
-            pcall(function() RunService:UnbindFromRenderStep("FluxAimbot") end)
-            pcall(function() RunService:UnbindFromRenderStep("ForceFOV_OMEGA") end)
-            if FOV_CIRCLE then pcall(function() FOV_CIRCLE:Destroy() end) end
+                        local duration = math.random(4, 7)
+                        local drift = (math.random() - 0.5) * 0.1
+                        local targetTrans = math.random(3, 6) / 10
 
-            if getgenv().ESP_LOOP then
-                getgenv().ESP_LOOP:Disconnect(); getgenv().ESP_LOOP = nil
-            end
-            if getgenv().ESP_CACHE then
-                for _, e in pairs(getgenv().ESP_CACHE) do
-                    pcall(function() e.FRM:Destroy() end)
-                    pcall(function() e.BOX:Destroy() end)
-                    pcall(function() e.FILL:Destroy() end)
-                    if e.CHAM then pcall(function() e.CHAM:Destroy() end) end
-                    if e.TCHAM then pcall(function() e.TCHAM:Destroy() end) end
-                end
-                getgenv().ESP_CACHE = nil
-            end
+                        Tw(f, 0.5, "Linear", "Out", { BackgroundTransparency = targetTrans })
 
-            if getgenv().FLUX_KB_HUD_GUI then
-                pcall(function() getgenv().FLUX_KB_HUD_GUI:Destroy() end)
-                getgenv().FLUX_KB_HUD_GUI = nil
-            end
-
-            if getgenv().SILENT_CFG then getgenv().SILENT_CFG.Enabled = false end
-            if silentFovCircle then pcall(function() silentFovCircle:Destroy() end) end
-
-            pcall(function() ESP_HOLDER:Destroy() end)
-            pcall(function() NotifySG:Destroy() end)
-            pcall(function() SG:Destroy() end)
-
-            for _, v in pairs(CoreGui:GetChildren()) do
-                if v.Name == "FluxUI" or v.Name == "MobileToggle" or v.Name == "NotifySG" then
-                    pcall(function() v:Destroy() end)
-                end
-            end
-            if PG and PG:FindFirstChild("MobileToggle") then
-                pcall(function() PG.MobileToggle:Destroy() end)
-            end
-        end)
-    end)()
-end
-
-; (function()
-    local srvPage = stPages[2]
-
-    local hopCard = NewFrame(srvPage, UDim2.new(0.46, 0, 0, 180), UDim2.new(0, 1, 0, 3), PANEL)
-    Corner(hopCard, 8)
-    Stroke(hopCard, STROKE, 1)
-
-    local hopTitle = NewLabel(hopCard, "Server Hop Options", 12, TEXT, true)
-    hopTitle.Name = "SectionTitle"
-    hopTitle.Size = UDim2.new(1, 0, 0, 30)
-    hopTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    local hopList = Instance.new("UIListLayout")
-    hopList.Padding = UDim.new(0, 4)
-    hopList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    hopList.Parent = NewFrame(hopCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-
-    local function SrvBtn(parent, txt, callback)
-        local b = NewBtn(parent, UDim2.new(1, 0, 0, 32), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
-        Corner(b, 6)
-        Stroke(b, STROKE2, 1)
-        local l = NewLabel(b, txt, 11, TEXT, false, Enum.TextXAlignment.Center)
-        l.Size = UDim2.new(1, 0, 1, 0)
-        b.MouseButton1Click:Connect(function()
-            NOTIFY("Server System", "Executing: " .. txt, 2)
-            callback()
-        end)
-        b.MouseEnter:Connect(function() Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) }) end)
-        b.MouseLeave:Connect(function() Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) }) end)
-    end
-
-    local function Hop(low)
-        local Http = game:GetService("HttpService")
-        local TPS = game:GetService("TeleportService")
-        local url = "https://games.roblox.com/v1/games/" ..
-            game.PlaceId .. "/servers/Public?sortOrder=" .. (low and "Asc" or "Desc") .. "&limit=100"
-        local ok, Servers = pcall(function() return Http:JSONDecode(game:HttpGet(url)) end)
-        if ok and Servers and Servers.data then
-            for _, s in pairs(Servers.data) do
-                if s.playing < s.maxPlayers and s.id ~= game.JobId then
-                    TPS:TeleportToPlaceInstance(game.PlaceId, s.id, LP)
-                    break
-                end
-            end
-        end
-    end
-
-    SrvBtn(hopList.Parent, "Rejoin Server", function()
-        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LP)
-    end)
-
-    SrvBtn(hopList.Parent, "Standard Server Hop", function()
-        Hop(false)
-    end)
-
-    SrvBtn(hopList.Parent, "Low Player Hop", function()
-        Hop(true)
-    end)
-
-    local infoCard = NewFrame(srvPage, UDim2.new(0.52, -4, 0, 180), UDim2.new(0.48, 1, 0, 3), PANEL)
-    Corner(infoCard, 8)
-    Stroke(infoCard, STROKE, 1)
-
-    local infoTitle = NewLabel(infoCard, "Server Information", 12, TEXT, true)
-    infoTitle.Name = "SectionTitle"
-    infoTitle.Size = UDim2.new(1, 0, 0, 30)
-    infoTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    local infoContent = NewFrame(infoCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
-    local infoList = Instance.new("UIListLayout")
-    infoList.Padding = UDim.new(0, 2)
-    infoList.Parent = infoContent
-
-    local function InfoRow(label, initial, ratio)
-        ratio = ratio or 0.4
-        local row = NewFrame(infoContent, UDim2.new(1, 0, 0, 22), nil, BG, 1)
-        row.ClipsDescendants = true
-        local l = NewLabel(row, label .. ":", 11, DIM)
-        l.Size = UDim2.new(ratio, 0, 1, 0)
-        local v = NewLabel(row, initial, 10, TEXT, false, Enum.TextXAlignment.Right)
-        v.Size = UDim2.new(1 - ratio, 0, 1, 0)
-        v.Position = UDim2.new(ratio, 0, 0, 0)
-        v.TextScaled = true
-        v.TextTruncate = Enum.TextTruncate.AtEnd
-        local fit = Instance.new("UITextSizeConstraint")
-        fit.MaxTextSize = 10
-        fit.MinTextSize = 7
-        fit.Parent = v
-        return v
-    end
-
-    local jobIdVal = InfoRow("JobId", game.JobId, 0.2)
-    local playersVal = InfoRow("Players",
-        #game:GetService("Players"):GetPlayers() .. "/" .. game:GetService("Players").MaxPlayers)
-    local pingVal = InfoRow("Ping", "0ms")
-    local uptimeVal = InfoRow("Time in Server", "0s")
-
-    local copyBtn = NewBtn(infoContent, UDim2.new(1, 0, 0, 28), nil, Color3.fromRGB(40, 40, 52))
-    Corner(copyBtn, 6)
-    Stroke(copyBtn, STROKE2, 1)
-    local copyLbl = NewLabel(copyBtn, "Copy JobId", 11, TEXT, true, Enum.TextXAlignment.Center)
-    copyLbl.Size = UDim2.new(1, 0, 1, 0)
-    copyBtn.MouseButton1Click:Connect(function()
-        if setclipboard then
-            setclipboard(game.JobId)
-            NOTIFY("Server Info", "JobId copied to clipboard!", 2)
-        end
-    end)
-
-    task.spawn(function()
-        while task.wait(1) and infoCard.Parent do
-            if getgenv().FLUX_SESSION ~= MySession then break end
-            playersVal.Text = #game:GetService("Players"):GetPlayers() .. "/" .. game:GetService("Players").MaxPlayers
-            local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-            pingVal.Text = ping .. "ms"
-
-            local t = math.floor(workspace.DistributedGameTime)
-            local h = math.floor(t / 3600)
-            local m = math.floor((t % 3600) / 60)
-            local s = t % 60
-            uptimeVal.Text = string.format("%02dh %02dm %02ds", h, m, s)
-        end
-    end)
-
-    local function CreateServerBrowser()
-        local srvListCard = NewFrame(srvPage, UDim2.new(0.46, 0, 0, 140), UDim2.new(0, 1, 0, 193), PANEL)
-        Corner(srvListCard, 8)
-        Stroke(srvListCard, STROKE, 1)
-
-        local srvListTitle = NewLabel(srvListCard, "Server Browser", 12, TEXT, true)
-        srvListTitle.Name = "SectionTitle"
-        srvListTitle.Size = UDim2.new(1, 0, 0, 30)
-        srvListTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-        local srvDropdown = NewFrame(srvListCard, UDim2.new(1, -24, 0, 32), UDim2.new(0, 12, 0, 38),
-            Color3.fromRGB(32, 32, 44))
-        Corner(srvDropdown, 6)
-        Stroke(srvDropdown, STROKE2, 1)
-
-        local srvSelLbl = NewLabel(srvDropdown, "Select a server...", 11, TEXT)
-        srvSelLbl.Position = UDim2.new(0, 10, 0, 0)
-        srvSelLbl.Size = UDim2.new(1, -30, 1, 0)
-
-        local srvArrow = Instance.new("ImageLabel")
-        srvArrow.Name = "Arrow"
-        srvArrow.BackgroundTransparency = 1
-        srvArrow.Size = UDim2.new(0, 12, 0, 12)
-        srvArrow.Position = UDim2.new(1, -22, 0.5, -6)
-        srvArrow.Image = "rbxassetid://6034818372"
-        srvArrow.ImageColor3 = DIM
-        srvArrow.Parent = srvDropdown
-
-        local srvDropdownBtn = NewBtn(srvDropdown, UDim2.new(1, 0, 1, 0), nil, BG, 1)
-
-        local srvPopup = NewFrame(srvDropdown, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 4), Color3.fromRGB(28, 28, 38))
-        srvPopup.ZIndex = 500
-        srvPopup.Visible = false
-        srvPopup.ClipsDescendants = true
-        Corner(srvPopup, 6)
-        Stroke(srvPopup, STROKE2, 1)
-
-        local srvScroll = NewScroll(srvPopup, UDim2.new(1, 0, 1, 0), nil, BG, 1)
-        local srvListLayout = Instance.new("UIListLayout", srvScroll)
-        srvListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-        local fetchedServers = {}
-        local srvOpen = false
-        local srvPopH = 120
-        local srvOptH = 26
-
-        local function srvClose()
-            srvOpen = false
-            Tw(srvPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
-            task.delay(0.16, function()
-                if not srvOpen then
-                    srvPopup.Visible = false
-                    srvListCard.ZIndex = 1
-                    srvDropdown.ZIndex = 1
-                    srvPopup.ZIndex = 1
-                    srvScroll.ZIndex = 1
-                end
-            end)
-            Tw(srvArrow, 0.15, "Quad", "Out", { Rotation = 0 })
-        end
-
-        local function PopulateServers(listTable)
-            for _, c in ipairs(srvScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-            if #listTable == 0 then
-                srvSelLbl.Text = "No servers found."
-                return
-            end
-            for i, sv in ipairs(listTable) do
-                local ob = NewBtn(srvScroll, UDim2.new(1, 0, 0, srvOptH), nil, Color3.fromRGB(45, 45, 60), 1)
-                ob.LayoutOrder = i
-                ob.ZIndex = 501
-                local t = string.format("%d/%d Players | Ping: %dms", sv.playing, sv.maxPlayers, sv.ping)
-                local ol = NewLabel(ob, t, 11, TEXT)
-                ol.Position = UDim2.new(0, 10, 0, 0)
-                ol.Size = UDim2.new(1, -10, 1, 0)
-                ol.ZIndex = 502
-
-                ob.MouseEnter:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 }) end)
-                ob.MouseLeave:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
-
-                ob.MouseButton1Click:Connect(function()
-                    srvSelLbl.Text = "Joining..."
-                    srvClose()
-                    pcall(function()
-                        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, sv.id, LP)
-                    end)
+                        f:TweenPosition(
+                            UDim2.new(startX + drift, 0, 0.98, 0),
+                            Enum.EasingDirection.In,
+                            Enum.EasingStyle.Linear,
+                            duration,
+                            true,
+                            function()
+                                local t = Tw(f, 0.4, "Linear", "Out", { BackgroundTransparency = 1 })
+                                task.wait(0.4)
+                                f:Destroy()
+                            end
+                        )
+                        task.wait(0.25)
+                    end
                 end)
             end
-            srvScroll.CanvasSize = UDim2.new(0, 0, 0, #listTable * srvOptH)
-            if srvOpen then
-                local targetH = math.min(#listTable * srvOptH, srvPopH)
-                Tw(srvPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, targetH) })
-            end
-        end
 
-        local function RebuildSrvPopup()
-            PopulateServers(fetchedServers)
-        end
+            AddCardSetting(bgList.Parent, "Enable Snow", false, function(v)
+                getgenv().FLUX_SNOW_ACTIVE = v
+                if v then RunSnow() end
+            end).LayoutOrder = 2
+        end)()
 
-        local function FetchServers(sortOrder)
-            local Http = game:GetService("HttpService")
-            local url = "https://games.roblox.com/v1/games/" ..
-                game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
-            local ok, res = pcall(function() return Http:JSONDecode(game:HttpGet(url)) end)
-            if ok and res and res.data then
-                local list = {}
-                for _, s in ipairs(res.data) do
-                    if s.playing < s.maxPlayers and s.id ~= game.JobId then
-                        table.insert(list, {
-                            id = s.id,
-                            playing = s.playing,
-                            maxPlayers = s.maxPlayers,
-                            ping = s.ping or 0
-                        })
+        ; (function()
+            local panicCard = NewFrame(uiPage, UDim2.new(0.52, -4, 0, 80), UDim2.new(0.48, 1, 0, 173), PANEL)
+            Corner(panicCard, 8)
+            Stroke(panicCard, STROKE, 1)
+
+            local panicTitle = NewLabel(panicCard, "Emergency Shutdown", 12, TEXT, true)
+            panicTitle.Name = "SectionTitle"
+            panicTitle.Size = UDim2.new(1, 0, 0, 30)
+            panicTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local unloadBtn = NewBtn(panicCard, UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 0, 34),
+                Color3.fromRGB(36, 36, 48))
+            Corner(unloadBtn, 6)
+            Stroke(unloadBtn, STROKE2, 1)
+
+            local unloadLbl = NewLabel(unloadBtn, "CLOSE UI & STOP ALL", 11, TEXT, true, Enum.TextXAlignment.Center)
+            unloadLbl.Size = UDim2.new(1, 0, 1, 0)
+
+            unloadBtn.MouseButton1Click:Connect(function()
+                NOTIFY("System", "Unloading script...", 2)
+
+                getgenv().FLUX_SESSION = nil
+                getgenv().FLUX_SNOW_ACTIVE = false
+
+                if getgenv().FLUX_CONNS then
+                    for _, c in pairs(getgenv().FLUX_CONNS) do
+                        pcall(function() c:Disconnect() end)
+                    end
+                    getgenv().FLUX_CONNS = {}
+                end
+
+                task.wait(0.3)
+
+                pcall(function() RunService:UnbindFromRenderStep("FluxAimbot") end)
+                pcall(function() RunService:UnbindFromRenderStep("ForceFOV_OMEGA") end)
+                if FOV_CIRCLE then pcall(function() FOV_CIRCLE:Destroy() end) end
+
+                if getgenv().ESP_LOOP then
+                    getgenv().ESP_LOOP:Disconnect(); getgenv().ESP_LOOP = nil
+                end
+                if getgenv().ESP_CACHE then
+                    for _, e in pairs(getgenv().ESP_CACHE) do
+                        pcall(function() e.FRM:Destroy() end)
+                        pcall(function() e.BOX:Destroy() end)
+                        pcall(function() e.FILL:Destroy() end)
+                        if e.CHAM then pcall(function() e.CHAM:Destroy() end) end
+                        if e.TCHAM then pcall(function() e.TCHAM:Destroy() end) end
+                    end
+                    getgenv().ESP_CACHE = nil
+                end
+
+                if getgenv().FLUX_KB_HUD_GUI then
+                    pcall(function() getgenv().FLUX_KB_HUD_GUI:Destroy() end)
+                    getgenv().FLUX_KB_HUD_GUI = nil
+                end
+
+                if getgenv().SILENT_CFG then getgenv().SILENT_CFG.Enabled = false end
+                if silentFovCircle then pcall(function() silentFovCircle:Destroy() end) end
+
+                pcall(function() ESP_HOLDER:Destroy() end)
+                pcall(function() NotifySG:Destroy() end)
+                pcall(function() SG:Destroy() end)
+
+                for _, v in pairs(CoreGui:GetChildren()) do
+                    if v.Name == "FluxUI" or v.Name == "MobileToggle" or v.Name == "NotifySG" then
+                        pcall(function() v:Destroy() end)
                     end
                 end
-                fetchedServers = list
-                return true
-            end
-            return false
-        end
-
-        local function HandleFilter(sortOrder)
-            srvSelLbl.Text = "Fetching servers..."
-            srvClose()
-            task.spawn(function()
-                local success = FetchServers(sortOrder)
-                if success then
-                    srvSelLbl.Text = "Select a server (" .. #fetchedServers .. " found)"
-                    RebuildSrvPopup()
-                else
-                    srvSelLbl.Text = "Failed to fetch servers!"
-                    fetchedServers = {}
-                    RebuildSrvPopup()
+                if PG and PG:FindFirstChild("MobileToggle") then
+                    pcall(function() PG.MobileToggle:Destroy() end)
                 end
             end)
-        end
+        end)()
+    end
 
-        local isCooldown = false
+    ; (function()
+        local srvPage = stPages[2]
 
-        local function FilterBtn(parent, size, pos, txt, callback)
-            local b = NewBtn(parent, size, pos, Color3.fromRGB(36, 36, 48))
+        local hopCard = NewFrame(srvPage, UDim2.new(0.46, 0, 0, 180), UDim2.new(0, 1, 0, 3), PANEL)
+        Corner(hopCard, 8)
+        Stroke(hopCard, STROKE, 1)
+
+        local hopTitle = NewLabel(hopCard, "Server Hop Options", 12, TEXT, true)
+        hopTitle.Name = "SectionTitle"
+        hopTitle.Size = UDim2.new(1, 0, 0, 30)
+        hopTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local hopList = Instance.new("UIListLayout")
+        hopList.Padding = UDim.new(0, 4)
+        hopList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        hopList.Parent = NewFrame(hopCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+
+        local function SrvBtn(parent, txt, callback)
+            local b = NewBtn(parent, UDim2.new(1, 0, 0, 32), UDim2.new(0, 0, 0, 0), Color3.fromRGB(36, 36, 48))
             Corner(b, 6)
             Stroke(b, STROKE2, 1)
             local l = NewLabel(b, txt, 11, TEXT, false, Enum.TextXAlignment.Center)
             l.Size = UDim2.new(1, 0, 1, 0)
             b.MouseButton1Click:Connect(function()
-                if isCooldown then return end
+                NOTIFY("Server System", "Executing: " .. txt, 2)
                 callback()
             end)
-            b.MouseEnter:Connect(function()
-                if not isCooldown then
-                    Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
-                end
-            end)
-            b.MouseLeave:Connect(function()
-                Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
-            end)
-            return b
+            b.MouseEnter:Connect(function() Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) }) end)
+            b.MouseLeave:Connect(function() Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) }) end)
         end
 
-        local lowBtn, fullBtn
-
-        local function RunFilter(sortOrder)
-            if isCooldown then return end
-            isCooldown = true
-
-            local lowLbl = lowBtn:FindFirstChildOfClass("TextLabel")
-            local fullLbl = fullBtn:FindFirstChildOfClass("TextLabel")
-
-            HandleFilter(sortOrder)
-
-            task.spawn(function()
-                for i = 3, 1, -1 do
-                    if lowLbl then lowLbl.Text = "Wait (" .. i .. "s)" end
-                    if fullLbl then fullLbl.Text = "Wait (" .. i .. "s)" end
-                    task.wait(1)
+        local function Hop(low)
+            local Http = game:GetService("HttpService")
+            local TPS = game:GetService("TeleportService")
+            local url = "https://games.roblox.com/v1/games/" ..
+                game.PlaceId .. "/servers/Public?sortOrder=" .. (low and "Asc" or "Desc") .. "&limit=100"
+            local ok, Servers = pcall(function() return Http:JSONDecode(game:HttpGet(url)) end)
+            if ok and Servers and Servers.data then
+                for _, s in pairs(Servers.data) do
+                    if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                        TPS:TeleportToPlaceInstance(game.PlaceId, s.id, LP)
+                        break
+                    end
                 end
-                if lowLbl then lowLbl.Text = "Low Servers" end
-                if fullLbl then fullLbl.Text = "Full Servers" end
-                isCooldown = false
-            end)
+            end
         end
 
-        lowBtn = FilterBtn(srvListCard, UDim2.new(0.5, -16, 0, 32), UDim2.new(0, 12, 1, -44), "Low Servers", function()
-            RunFilter("Asc")
+        SrvBtn(hopList.Parent, "Rejoin Server", function()
+            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LP)
         end)
 
-        fullBtn = FilterBtn(srvListCard, UDim2.new(0.5, -16, 0, 32), UDim2.new(0.5, 4, 1, -44), "Full Servers",
-            function()
-                RunFilter("Desc")
-            end)
+        SrvBtn(hopList.Parent, "Standard Server Hop", function()
+            Hop(false)
+        end)
 
-        srvDropdownBtn.MouseButton1Click:Connect(function()
-            srvOpen = not srvOpen
-            if srvOpen then
-                srvPopup.Visible = true
-                srvListCard.ZIndex = 100
-                srvDropdown.ZIndex = 101
-                srvPopup.ZIndex = 102
-                srvScroll.ZIndex = 103
+        SrvBtn(hopList.Parent, "Low Player Hop", function()
+            Hop(true)
+        end)
 
-                local targetH = math.min(#fetchedServers * srvOptH, srvPopH)
-                if #fetchedServers == 0 then targetH = srvOptH end
+        local infoCard = NewFrame(srvPage, UDim2.new(0.52, -4, 0, 180), UDim2.new(0.48, 1, 0, 3), PANEL)
+        Corner(infoCard, 8)
+        Stroke(infoCard, STROKE, 1)
 
-                Tw(srvPopup, 0.18, "Quad", "Out", { Size = UDim2.new(1, 0, 0, targetH) })
-                Tw(srvArrow, 0.18, "Quad", "Out", { Rotation = 180 })
-            else
+        local infoTitle = NewLabel(infoCard, "Server Information", 12, TEXT, true)
+        infoTitle.Name = "SectionTitle"
+        infoTitle.Size = UDim2.new(1, 0, 0, 30)
+        infoTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+        local infoContent = NewFrame(infoCard, UDim2.new(1, -16, 1, -40), UDim2.new(0, 8, 0, 32), BG, 1)
+        local infoList = Instance.new("UIListLayout")
+        infoList.Padding = UDim.new(0, 2)
+        infoList.Parent = infoContent
+
+        local function InfoRow(label, initial, ratio)
+            ratio = ratio or 0.4
+            local row = NewFrame(infoContent, UDim2.new(1, 0, 0, 22), nil, BG, 1)
+            row.ClipsDescendants = true
+            local l = NewLabel(row, label .. ":", 11, DIM)
+            l.Size = UDim2.new(ratio, 0, 1, 0)
+            local v = NewLabel(row, initial, 10, TEXT, false, Enum.TextXAlignment.Right)
+            v.Size = UDim2.new(1 - ratio, 0, 1, 0)
+            v.Position = UDim2.new(ratio, 0, 0, 0)
+            v.TextScaled = true
+            v.TextTruncate = Enum.TextTruncate.AtEnd
+            local fit = Instance.new("UITextSizeConstraint")
+            fit.MaxTextSize = 10
+            fit.MinTextSize = 7
+            fit.Parent = v
+            return v
+        end
+
+        local jobIdVal = InfoRow("JobId", game.JobId, 0.2)
+        local playersVal = InfoRow("Players",
+            #game:GetService("Players"):GetPlayers() .. "/" .. game:GetService("Players").MaxPlayers)
+        local pingVal = InfoRow("Ping", "0ms")
+        local uptimeVal = InfoRow("Time in Server", "0s")
+
+        local copyBtn = NewBtn(infoContent, UDim2.new(1, 0, 0, 28), nil, Color3.fromRGB(40, 40, 52))
+        Corner(copyBtn, 6)
+        Stroke(copyBtn, STROKE2, 1)
+        local copyLbl = NewLabel(copyBtn, "Copy JobId", 11, TEXT, true, Enum.TextXAlignment.Center)
+        copyLbl.Size = UDim2.new(1, 0, 1, 0)
+        copyBtn.MouseButton1Click:Connect(function()
+            if setclipboard then
+                setclipboard(game.JobId)
+                NOTIFY("Server Info", "JobId copied to clipboard!", 2)
+            end
+        end)
+
+        task.spawn(function()
+            while task.wait(1) and infoCard.Parent do
+                if getgenv().FLUX_SESSION ~= MySession then break end
+                playersVal.Text = #game:GetService("Players"):GetPlayers() ..
+                    "/" .. game:GetService("Players").MaxPlayers
+                local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+                pingVal.Text = ping .. "ms"
+
+                local t = math.floor(workspace.DistributedGameTime)
+                local h = math.floor(t / 3600)
+                local m = math.floor((t % 3600) / 60)
+                local s = t % 60
+                uptimeVal.Text = string.format("%02dh %02dm %02ds", h, m, s)
+            end
+        end)
+
+        local function CreateServerBrowser()
+            local srvListCard = NewFrame(srvPage, UDim2.new(0.46, 0, 0, 140), UDim2.new(0, 1, 0, 193), PANEL)
+            Corner(srvListCard, 8)
+            Stroke(srvListCard, STROKE, 1)
+
+            local srvListTitle = NewLabel(srvListCard, "Server Browser", 12, TEXT, true)
+            srvListTitle.Name = "SectionTitle"
+            srvListTitle.Size = UDim2.new(1, 0, 0, 30)
+            srvListTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+            local srvDropdown = NewFrame(srvListCard, UDim2.new(1, -24, 0, 32), UDim2.new(0, 12, 0, 38),
+                Color3.fromRGB(32, 32, 44))
+            Corner(srvDropdown, 6)
+            Stroke(srvDropdown, STROKE2, 1)
+
+            local srvSelLbl = NewLabel(srvDropdown, "Select a server...", 11, TEXT)
+            srvSelLbl.Position = UDim2.new(0, 10, 0, 0)
+            srvSelLbl.Size = UDim2.new(1, -30, 1, 0)
+
+            local srvArrow = Instance.new("ImageLabel")
+            srvArrow.Name = "Arrow"
+            srvArrow.BackgroundTransparency = 1
+            srvArrow.Size = UDim2.new(0, 12, 0, 12)
+            srvArrow.Position = UDim2.new(1, -22, 0.5, -6)
+            srvArrow.Image = "rbxassetid://6034818372"
+            srvArrow.ImageColor3 = DIM
+            srvArrow.Parent = srvDropdown
+
+            local srvDropdownBtn = NewBtn(srvDropdown, UDim2.new(1, 0, 1, 0), nil, BG, 1)
+
+            local srvPopup = NewFrame(srvDropdown, UDim2.new(1, 0, 0, 0), UDim2.new(0, 0, 1, 4),
+                Color3.fromRGB(28, 28, 38))
+            srvPopup.ZIndex = 500
+            srvPopup.Visible = false
+            srvPopup.ClipsDescendants = true
+            Corner(srvPopup, 6)
+            Stroke(srvPopup, STROKE2, 1)
+
+            local srvScroll = NewScroll(srvPopup, UDim2.new(1, 0, 1, 0), nil, BG, 1)
+            local srvListLayout = Instance.new("UIListLayout", srvScroll)
+            srvListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+            local fetchedServers = {}
+            local srvOpen = false
+            local srvPopH = 120
+            local srvOptH = 26
+
+            local function srvClose()
+                srvOpen = false
+                Tw(srvPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, 0) })
+                task.delay(0.16, function()
+                    if not srvOpen then
+                        srvPopup.Visible = false
+                        srvListCard.ZIndex = 1
+                        srvDropdown.ZIndex = 1
+                        srvPopup.ZIndex = 1
+                        srvScroll.ZIndex = 1
+                    end
+                end)
+                Tw(srvArrow, 0.15, "Quad", "Out", { Rotation = 0 })
+            end
+
+            local function PopulateServers(listTable)
+                for _, c in ipairs(srvScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+                if #listTable == 0 then
+                    srvSelLbl.Text = "No servers found."
+                    return
+                end
+                for i, sv in ipairs(listTable) do
+                    local ob = NewBtn(srvScroll, UDim2.new(1, 0, 0, srvOptH), nil, Color3.fromRGB(45, 45, 60), 1)
+                    ob.LayoutOrder = i
+                    ob.ZIndex = 501
+                    local t = string.format("%d/%d Players | Ping: %dms", sv.playing, sv.maxPlayers, sv.ping)
+                    local ol = NewLabel(ob, t, 11, TEXT)
+                    ol.Position = UDim2.new(0, 10, 0, 0)
+                    ol.Size = UDim2.new(1, -10, 1, 0)
+                    ol.ZIndex = 502
+
+                    ob.MouseEnter:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 0.5 }) end)
+                    ob.MouseLeave:Connect(function() Tw(ob, 0.07, "Quad", "Out", { BackgroundTransparency = 1 }) end)
+
+                    ob.MouseButton1Click:Connect(function()
+                        srvSelLbl.Text = "Joining..."
+                        srvClose()
+                        pcall(function()
+                            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, sv.id, LP)
+                        end)
+                    end)
+                end
+                srvScroll.CanvasSize = UDim2.new(0, 0, 0, #listTable * srvOptH)
+                if srvOpen then
+                    local targetH = math.min(#listTable * srvOptH, srvPopH)
+                    Tw(srvPopup, 0.15, "Quad", "Out", { Size = UDim2.new(1, 0, 0, targetH) })
+                end
+            end
+
+            local function RebuildSrvPopup()
+                PopulateServers(fetchedServers)
+            end
+
+            local function FetchServers(sortOrder)
+                local Http = game:GetService("HttpService")
+                local url = "https://games.roblox.com/v1/games/" ..
+                    game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
+                local ok, res = pcall(function() return Http:JSONDecode(game:HttpGet(url)) end)
+                if ok and res and res.data then
+                    local list = {}
+                    for _, s in ipairs(res.data) do
+                        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                            table.insert(list, {
+                                id = s.id,
+                                playing = s.playing,
+                                maxPlayers = s.maxPlayers,
+                                ping = s.ping or 0
+                            })
+                        end
+                    end
+                    fetchedServers = list
+                    return true
+                end
+                return false
+            end
+
+            local function HandleFilter(sortOrder)
+                srvSelLbl.Text = "Fetching servers..."
                 srvClose()
+                task.spawn(function()
+                    local success = FetchServers(sortOrder)
+                    if success then
+                        srvSelLbl.Text = "Select a server (" .. #fetchedServers .. " found)"
+                        RebuildSrvPopup()
+                    else
+                        srvSelLbl.Text = "Failed to fetch servers!"
+                        fetchedServers = {}
+                        RebuildSrvPopup()
+                    end
+                end)
             end
-        end)
 
-        UIS.InputBegan:Connect(function(inp, gp)
-            if not srvOpen or gp then return end
-            if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-                task.wait()
-                local mx, my = inp.Position.X, inp.Position.Y
-                local function hit(f)
-                    return mx >= f.AbsolutePosition.X and mx <= f.AbsolutePosition.X + f.AbsoluteSize.X
-                        and my >= f.AbsolutePosition.Y and my <= f.AbsolutePosition.Y + f.AbsoluteSize.Y
+            local isCooldown = false
+
+            local function FilterBtn(parent, size, pos, txt, callback)
+                local b = NewBtn(parent, size, pos, Color3.fromRGB(36, 36, 48))
+                Corner(b, 6)
+                Stroke(b, STROKE2, 1)
+                local l = NewLabel(b, txt, 11, TEXT, false, Enum.TextXAlignment.Center)
+                l.Size = UDim2.new(1, 0, 1, 0)
+                b.MouseButton1Click:Connect(function()
+                    if isCooldown then return end
+                    callback()
+                end)
+                b.MouseEnter:Connect(function()
+                    if not isCooldown then
+                        Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(45, 45, 55) })
+                    end
+                end)
+                b.MouseLeave:Connect(function()
+                    Tw(b, 0.1, "Quad", "Out", { BackgroundColor3 = Color3.fromRGB(36, 36, 48) })
+                end)
+                return b
+            end
+
+            local lowBtn, fullBtn
+
+            local function RunFilter(sortOrder)
+                if isCooldown then return end
+                isCooldown = true
+
+                local lowLbl = lowBtn:FindFirstChildOfClass("TextLabel")
+                local fullLbl = fullBtn:FindFirstChildOfClass("TextLabel")
+
+                HandleFilter(sortOrder)
+
+                task.spawn(function()
+                    for i = 3, 1, -1 do
+                        if lowLbl then lowLbl.Text = "Wait (" .. i .. "s)" end
+                        if fullLbl then fullLbl.Text = "Wait (" .. i .. "s)" end
+                        task.wait(1)
+                    end
+                    if lowLbl then lowLbl.Text = "Low Servers" end
+                    if fullLbl then fullLbl.Text = "Full Servers" end
+                    isCooldown = false
+                end)
+            end
+
+            lowBtn = FilterBtn(srvListCard, UDim2.new(0.5, -16, 0, 32), UDim2.new(0, 12, 1, -44), "Low Servers",
+                function()
+                    RunFilter("Asc")
+                end)
+
+            fullBtn = FilterBtn(srvListCard, UDim2.new(0.5, -16, 0, 32), UDim2.new(0.5, 4, 1, -44), "Full Servers",
+                function()
+                    RunFilter("Desc")
+                end)
+
+            srvDropdownBtn.MouseButton1Click:Connect(function()
+                srvOpen = not srvOpen
+                if srvOpen then
+                    srvPopup.Visible = true
+                    srvListCard.ZIndex = 100
+                    srvDropdown.ZIndex = 101
+                    srvPopup.ZIndex = 102
+                    srvScroll.ZIndex = 103
+
+                    local targetH = math.min(#fetchedServers * srvOptH, srvPopH)
+                    if #fetchedServers == 0 then targetH = srvOptH end
+
+                    Tw(srvPopup, 0.18, "Quad", "Out", { Size = UDim2.new(1, 0, 0, targetH) })
+                    Tw(srvArrow, 0.18, "Quad", "Out", { Rotation = 180 })
+                else
+                    srvClose()
                 end
-                if not hit(srvDropdown) and not hit(srvPopup) then srvClose() end
-            end
-        end)
-    end
-    CreateServerBrowser()
-end)()
+            end)
 
-Root.Size = UDim2.new(0, curW, 0, 0)
-Tw(Root, 0.28, "Back", "Out", { Size = UDim2.new(0, curW, 0, curH) })
-
-UIS.InputBegan:Connect(function(inp, gp)
-    if gp then return end
-    if inp.KeyCode == toggleKey then
-        uiVis = not uiVis
-        if uiVis then
-            Root.Visible = true
-            Tw(Root, 0.35, "Back", "Out", { Position = UDim2.new(0.5, -curW / 2, 0.5, -curH / 2) })
-        else
-            Tw(Root, 0.25, "Quad", "In", { Position = UDim2.new(0.5, -curW / 2, -1.1, 0) })
-            task.delay(0.26, function() if not uiVis then Root.Visible = false end end)
-            if PICKER_MAIN then
-                PICKER_MAIN.Visible = false
-                PICKER_OPEN = false
-            end
+            UIS.InputBegan:Connect(function(inp, gp)
+                if not srvOpen or gp then return end
+                if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                    task.wait()
+                    local mx, my = inp.Position.X, inp.Position.Y
+                    local function hit(f)
+                        return mx >= f.AbsolutePosition.X and mx <= f.AbsolutePosition.X + f.AbsoluteSize.X
+                            and my >= f.AbsolutePosition.Y and my <= f.AbsolutePosition.Y + f.AbsoluteSize.Y
+                    end
+                    if not hit(srvDropdown) and not hit(srvPopup) then srvClose() end
+                end
+            end)
         end
-        if getgenv().FLUX_KB_HUD_SYNC then getgenv().FLUX_KB_HUD_SYNC() end
-    end
-end)
+        CreateServerBrowser()
+    end)()
+
+    Root.Size = UDim2.new(0, curW, 0, 0)
+    Tw(Root, 0.28, "Back", "Out", { Size = UDim2.new(0, curW, 0, curH) })
+
+    UIS.InputBegan:Connect(function(inp, gp)
+        if gp then return end
+        if inp.KeyCode == toggleKey then
+            uiVis = not uiVis
+            if uiVis then
+                Root.Visible = true
+                Tw(Root, 0.35, "Back", "Out", { Position = UDim2.new(0.5, -curW / 2, 0.5, -curH / 2) })
+            else
+                Tw(Root, 0.25, "Quad", "In", { Position = UDim2.new(0.5, -curW / 2, -1.1, 0) })
+                task.delay(0.26, function() if not uiVis then Root.Visible = false end end)
+                if PICKER_MAIN then
+                    PICKER_MAIN.Visible = false
+                    PICKER_OPEN = false
+                end
+            end
+            if getgenv().FLUX_KB_HUD_SYNC then getgenv().FLUX_KB_HUD_SYNC() end
+        end
+    end)
+end)()
 
 if ApplyUIPreferences then ApplyUIPreferences() end
 
@@ -6718,10 +6780,11 @@ local function IsPositionVisible(origin, targetPos, targetChar, cam)
     rayParams.FilterDescendantsInstances = ignoreList
 
     local isBronx = IsBronxDuels()
+    local isMurder = IsMurderVsSheriff()
     local currentOrigin = origin
     local remainingDist = distance
     local isVis = false
-    local maxSteps = isBronx and 5 or 1
+    local maxSteps = (isBronx or isMurder) and 5 or 1
 
     for step = 1, maxSteps do
         ignoreSilentRay = true
@@ -6739,7 +6802,7 @@ local function IsPositionVisible(origin, targetPos, targetChar, cam)
             break
         end
 
-        if isBronx and (hit.CanCollide == false or hit.Transparency > 0.9 or hit.Name == "Bullet" or hit.Name == "Handle" or hit:IsA("Accessory") or hit:IsA("Tool")) then
+        if (isBronx or isMurder) and (hit.CanCollide == false or hit.Transparency > 0.9 or hit.Name == "Bullet" or hit.Name == "Handle" or hit:IsA("Accessory") or hit:IsA("Tool") or hit:IsDescendantOf(LP.Character)) then
             local currentFilter = rayParams.FilterDescendantsInstances
             table.insert(currentFilter, hit)
             rayParams.FilterDescendantsInstances = currentFilter
@@ -6874,7 +6937,6 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
                         mousemoverel(diff.X / (s * 1.5), diff.Y / (s * 1.5))
                     end
                 else
-
                     local targetCF = CFrame.lookAt(cam.CFrame.Position, aimPos)
                     if getgenv().AIMBOT_CFG.RCS then
                         targetCF = targetCF * CFrame.Angles(math.rad(-getgenv().AIMBOT_CFG.RCSAmount), 0, 0)
@@ -6891,7 +6953,16 @@ RunService:BindToRenderStep("FluxAimbot", 2002, function()
     end
 end)
 
-if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
+local gameDetected = false
+for i = 1, 15 do
+    if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
+        gameDetected = true
+        break
+    end
+    task.wait(1)
+end
+
+if gameDetected then
     silentFovCircle = Drawing.new("Circle")
     silentFovCircle.Thickness = 1.5
     silentFovCircle.NumSides = 60
@@ -6947,7 +7018,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             end
         end
 
-        if target then return target end 
+        if target then return target end
 
         local function check(char)
             if not char or char == LP.Character then return end
@@ -6958,18 +7029,16 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                     return
                 end
                 if IsBronxDuels() or IsDuelist() then
-
                     local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
                         LP.Data.Match:FindFirstChild("Enemies")
                     if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
                         if not enemiesFolder:FindFirstChild(p.Name) then
-                            return 
+                            return
                         end
                     else
-
                         if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
                             if p.Team and LP.Team and p.Team == LP.Team then
-                                return 
+                                return
                             end
                             local myTeam = LP:GetAttribute("DuelsTeam")
                             local theirTeam = p:GetAttribute("DuelsTeam")
@@ -6978,16 +7047,26 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 
                             if myMatch and theirMatch and myMatch == theirMatch then
                                 if myTeam and theirTeam and myTeam == theirTeam then
-                                    return 
+                                    return
                                 end
                             end
                         end
                     end
                 else
-                    local myTeamFolder = getgenv().MY_TEAM_CACHE
-                    local isTeammate = myTeamFolder and myTeamFolder:FindFirstChild(p.Name)
-                    if isTeammate and getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
-                        return
+                    if IsMurderVsSheriff() then
+                        if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
+                            local myTeam = LP:GetAttribute("Team")
+                            local pTeam = p:GetAttribute("Team")
+                            if myTeam and pTeam and myTeam ~= "nothing" and myTeam ~= "" and pTeam == myTeam then
+                                return
+                            end
+                        end
+                    else
+                        local myTeamFolder = getgenv().MY_TEAM_CACHE
+                        local isTeammate = myTeamFolder and myTeamFolder:FindFirstChild(p.Name)
+                        if isTeammate and getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
+                            return
+                        end
                     end
                 end
             end
@@ -7006,6 +7085,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             if IsBronxDuels() or IsDuelist() then
                 if pos.Z <= 0 then return end
             else
+                if pos.Z <= 0 then return end
                 if not getgenv().SILENT_CFG.Wallbang and not vis then return end
             end
 
@@ -7056,7 +7136,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             isGettingTarget = false
             if ok then
                 cachedTarget = res
-                cacheExpire = now + 0.05 
+                cacheExpire = now + 0.05
             else
                 warn("Error in GetSilentTarget: " .. tostring(res))
                 return nil
@@ -7068,12 +7148,12 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     end
 
     mt.__index = function(self, k)
-        local hookActive = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)
+        local hookActive = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or
+            (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)
         if not checkcaller() and hookActive then
             if typeof(self) == "Instance" and self:IsA("Camera") then
                 if k == "CFrame" or k == "cf" then
-
-                    if IsHitmark() or IsBronxDuels() or IsDuelist() then
+                    if IsHitmark() or IsBronxDuels() or IsDuelist() or IsMurderVsSheriff() then
                         return oldIndex(self, k)
                     end
 
@@ -7112,22 +7192,111 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         return oldIndex(self, k)
     end
 
+    local function RedirectRay(origin, direction)
+        local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+        if target then
+            local hitPos = nil
+            if target:IsA("BasePart") then
+                hitPos = target.Position
+            else
+                local humT = target:FindFirstChildOfClass("Humanoid")
+                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
+                if rootT then
+                    local tp = target:FindFirstChild(getgenv().SILENT_CFG.TargetPart)
+                    hitPos = tp and tp.Position or rootT.Position
+                end
+            end
+
+            if hitPos then
+                return (hitPos - origin).Unit * 10000
+            end
+        end
+        return direction
+    end
+
     mt.__namecall = function(self, ...)
         local method = getnamecallmethod()
-        local hookActive = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)
+        local hookActive = (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or
+            (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)
 
         if method == "FireServer" and typeof(self) == "Instance" and self.Name == "AD" and not checkcaller() then
             return
         end
 
-        if hookActive and method == "Raycast" and typeof(self) == "Instance" and self == workspace and not checkcaller() and not ignoreSilentRay then
-            local args = table.pack(...)
+        if hookActive and not checkcaller() and not ignoreSilentRay and typeof(self) == "Instance" and self == workspace then
+            if method == "Raycast" then
+                local args = table.pack(...)
+                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 0.5 then
+                    local chance = math.random(1, 100)
+                    if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
+                        local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
+                        if target then
+                            local hitPos = nil
+                            if target:IsA("BasePart") then
+                                hitPos = target.Position
+                            else
+                                local humT = target:FindFirstChildOfClass("Humanoid")
+                                local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
+                                    target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
 
-            if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 25 then
+                                if rootT then
+                                    local tp = target:FindFirstChild(getgenv().SILENT_CFG.TargetPart)
+                                    hitPos = tp and tp.Position or rootT.Position
+                                end
+                            end
+
+                            if hitPos then
+                                args[2] = (hitPos - args[1]).Unit * 10000
+
+                                local doWallbang = (getgenv().KILLAURA_ACTIVE_TARGET ~= nil) and
+                                    (getgenv().KILLAURA_CFG and getgenv().KILLAURA_CFG.Wallbang) or
+                                    (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Wallbang)
+                                if doWallbang then
+                                    local params = args[3]
+                                    local newParams = RaycastParams.new()
+                                    newParams.FilterType = Enum.RaycastFilterType.Include
+                                    newParams.FilterDescendantsInstances = { target }
+                                    if params and typeof(params) == "RaycastParams" then
+                                        newParams.IgnoreWater = params.IgnoreWater
+                                        newParams.CollisionGroup = params.CollisionGroup
+                                    end
+                                    args[3] = newParams
+                                end
+                            end
+                        end
+                    end
+                end
+                setnamecallmethod(method)
+                return oldNamecall(self, table.unpack(args, 1, args.n))
+            elseif method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
+                local args = table.pack(...)
+                local ray = args[1]
+                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 0.5 then
+                    local chance = math.random(1, 100)
+                    if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
+                        local newDir = RedirectRay(ray.Origin, ray.Direction)
+                        args[1] = Ray.new(ray.Origin, newDir)
+                    end
+                end
+                setnamecallmethod(method)
+                return oldNamecall(self, table.unpack(args, 1, args.n))
+            end
+        end
+
+        setnamecallmethod(method)
+        return oldNamecall(self, ...)
+    end
+
+    setreadonly(mt, true)
+
+    local oldRaycast
+    oldRaycast = hookfunction(workspace.Raycast, function(self, origin, direction, params)
+        if not checkcaller() and ((getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)) and not ignoreSilentRay then
+            if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" and direction.Magnitude > 0.5 then
                 local chance = math.random(1, 100)
                 if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
                     local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
-
                     if target then
                         local hitPos = nil
                         if target:IsA("BasePart") then
@@ -7136,22 +7305,18 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                             local humT = target:FindFirstChildOfClass("Humanoid")
                             local rootT = humT and humT.RootPart or target:FindFirstChild("Torso") or
                                 target:FindFirstChild("UpperTorso") or target:FindFirstChild("HumanoidRootPart")
-
                             if rootT then
                                 local tp = target:FindFirstChild(getgenv().SILENT_CFG.TargetPart)
                                 hitPos = tp and tp.Position or rootT.Position
                             end
                         end
-
                         if hitPos then
-
-                            args[2] = (hitPos - args[1]).Unit * 10000
+                            direction = (hitPos - origin).Unit * 10000
 
                             local doWallbang = (getgenv().KILLAURA_ACTIVE_TARGET ~= nil) and
                                 (getgenv().KILLAURA_CFG and getgenv().KILLAURA_CFG.Wallbang) or
                                 (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Wallbang)
                             if doWallbang then
-                                local params = args[3]
                                 local newParams = RaycastParams.new()
                                 newParams.FilterType = Enum.RaycastFilterType.Include
                                 newParams.FilterDescendantsInstances = { target }
@@ -7159,22 +7324,60 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
                                     newParams.IgnoreWater = params.IgnoreWater
                                     newParams.CollisionGroup = params.CollisionGroup
                                 end
-                                args[3] = newParams
+                                params = newParams
                             end
                         end
                     end
                 end
             end
-
-            setnamecallmethod(method)
-            return oldNamecall(self, table.unpack(args, 1, args.n))
         end
+        return oldRaycast(self, origin, direction, params)
+    end)
 
-        setnamecallmethod(method)
-        return oldNamecall(self, ...)
-    end
+    local oldFindPartOnRay
+    oldFindPartOnRay = hookfunction(workspace.FindPartOnRay,
+        function(self, ray, ignoreInstance, terrainCellsAreCubes, ignoreWater)
+            if not checkcaller() and ((getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)) and not ignoreSilentRay then
+                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 0.5 then
+                    local chance = math.random(1, 100)
+                    if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
+                        local newDir = RedirectRay(ray.Origin, ray.Direction)
+                        ray = Ray.new(ray.Origin, newDir)
+                    end
+                end
+            end
+            return oldFindPartOnRay(self, ray, ignoreInstance, terrainCellsAreCubes, ignoreWater)
+        end)
 
-    setreadonly(mt, true)
+    local oldFindPartOnRayWithIgnoreList
+    oldFindPartOnRayWithIgnoreList = hookfunction(workspace.FindPartOnRayWithIgnoreList,
+        function(self, ray, ignoreList, terrainCellsAreCubes, ignoreWater)
+            if not checkcaller() and ((getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)) and not ignoreSilentRay then
+                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 0.5 then
+                    local chance = math.random(1, 100)
+                    if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
+                        local newDir = RedirectRay(ray.Origin, ray.Direction)
+                        ray = Ray.new(ray.Origin, newDir)
+                    end
+                end
+            end
+            return oldFindPartOnRayWithIgnoreList(self, ray, ignoreList, terrainCellsAreCubes, ignoreWater)
+        end)
+
+    local oldFindPartOnRayWithWhitelist
+    oldFindPartOnRayWithWhitelist = hookfunction(workspace.FindPartOnRayWithWhitelist,
+        function(self, ray, whitelist, ignoreWater)
+            if not checkcaller() and ((getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)) and not ignoreSilentRay then
+                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 0.5 then
+                    local chance = math.random(1, 100)
+                    if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
+                        local newDir = RedirectRay(ray.Origin, ray.Direction)
+                        ray = Ray.new(ray.Origin, newDir)
+                    end
+                end
+            end
+            return oldFindPartOnRayWithWhitelist(self, ray, whitelist, ignoreWater)
+        end)
 
     getgenv().FLUX_GET_TARGET_ROOT_ATTACHMENT = function(target)
         if not target then return nil end
@@ -7219,7 +7422,7 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
     end
 
     getgenv().FLUX_TRY_REDIRECT_VISUALIZE_BULLET = function(oldFireServerFn, remote, ...)
-        if not (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled and getgenv().SILENT_CFG.Wallbang) then
+        if not (getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) then
             return false
         end
 
@@ -7240,13 +7443,22 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
         rayParams.FilterDescendantsInstances = { LP.Character, target, cam }
 
         local result = workspace:Raycast(cam.CFrame.Position, hitPos - cam.CFrame.Position, rayParams)
-        if not (result and result.Instance) then
-            return false
-        end
+        local hasWall = result and result.Instance
 
         local args = table.pack(...)
-        args[4] = attachment
-        args[3] = (hitPos - attachment.WorldPosition).Unit * 1000
+        if getgenv().SILENT_CFG.Wallbang then
+            args[4] = attachment
+            args[3] = (hitPos - attachment.WorldPosition).Unit * 1000
+        else
+            if hasWall then
+                return false
+            end
+            local firePoint = args[4]
+            local firePointPos = firePoint and
+                (firePoint:IsA("Attachment") and firePoint.WorldPosition or firePoint.Position) or cam.CFrame.Position
+            args[3] = (hitPos - firePointPos).Unit * 1000
+        end
+
         return true, oldFireServerFn(remote, table.unpack(args, 1, args.n))
     end
 
@@ -7259,10 +7471,30 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
             return
         end
 
-        if self.Name == "VisualizeBullet" then
+        if self.Name == "VisualizeBullet" and not IsMurderVsSheriff() then
             local handled, result = getgenv().FLUX_TRY_REDIRECT_VISUALIZE_BULLET(getgenv().FLUX_OLD_FIRESERVER, self, ...)
             if handled then
                 return result
+            end
+        end
+
+        if self.Name == "InflictTarget" and IsMurderVsSheriff() then
+            local args = table.pack(...)
+            if args[1] == "Gun" then
+                local target = GetCachedTarget()
+                if target then
+                    local targetPartName = getgenv().SILENT_CFG.TargetPart or "Head"
+                    local hitPart = target:FindFirstChild(targetPartName) or target:FindFirstChild("Head") or
+                        target:FindFirstChild("HumanoidRootPart")
+                    if hitPart then
+                        args[3] = hitPart
+                        if type(args[4]) == "table" then
+                            args[4].ExplosionPos = hitPart.Position
+                            args[4].ClientHitSize = hitPart.Size
+                        end
+                        return getgenv().FLUX_OLD_FIRESERVER(self, table.unpack(args, 1, args.n))
+                    end
+                end
             end
         end
 
@@ -7450,7 +7682,6 @@ if IsMurderVsSheriff() or IsHitmark() or IsBronxDuels() or IsDuelist() then
 end
 
 ; (function()
-
     table.insert(getgenv().FLUX_CONNS, LP.CharacterAdded:Connect(function(char)
         local hum = char:WaitForChild("Humanoid", 5)
         if hum and getgenv().LOCAL_PLAYER_CFG.SpeedEnabled and (IsMurderVsSheriff() or IsDuelist()) then
@@ -7524,7 +7755,6 @@ end
             if not root or not humanoid then return end
 
             if IsHitmark() then
-
                 flyGyro = Instance.new("BodyGyro")
                 flyGyro.P = 9e4
                 flyGyro.D = 1e3
@@ -7584,7 +7814,6 @@ end
                     flyVelo.Velocity = finalVelocity
                 end)
             else
-
                 flyPos = root.Position
                 humanoid.PlatformStand = true
 
@@ -7943,7 +8172,6 @@ end
 
             if IsHitmark() and u3 and u6 and u11 then
                 pcall(function()
-
                     if not rawget(u6, "_oldShake") then
                         u6._oldShake = u6.Shake
                         u6.Shake = function(self, ...)
@@ -7977,7 +8205,6 @@ end
                     local data = u11.WeaponData
 
                     if current and type(current) == "table" then
-
                         if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.InfiniteAmmo then
                             rawset(current, "ammo", current.clipsize or 16)
                         end
@@ -7992,7 +8219,6 @@ end
                     end
 
                     if data and type(data) == "table" then
-
                         if getgenv().GUN_MODS_CFG and getgenv().GUN_MODS_CFG.NoSpread then
                             if not rawget(data, "_oldAccuracyMin") then
                                 rawset(data, "_oldAccuracyMin", data.AccuracyMin or Vector3.new(0, 0, 0))
@@ -8267,7 +8493,6 @@ task.spawn(function()
                 if char then
                     local tool = char:FindFirstChildOfClass("Tool")
                     if tool then
-
                         if getgenv().GUN_MODS_CFG.InfiniteAmmo and tool:GetAttribute("MaxAmmo") then
                             tool:SetAttribute("Ammo", tool:GetAttribute("MaxAmmo") or 999)
                         end
@@ -8323,12 +8548,11 @@ table.insert(getgenv().FLUX_CONNS, game:GetService("SoundService").ChildAdded:Co
 end))
 
 task.spawn(function()
-    local originalProps = {} 
+    local originalProps = {}
 
     while true do
         task.wait(0.1)
         if getgenv().FLUX_SESSION ~= MySession then
-
             for part, data in pairs(originalProps) do
                 pcall(function()
                     part.Size = data.Size
@@ -8414,7 +8638,6 @@ task.spawn(function()
                 end
             end
         else
-
             for part, data in pairs(originalProps) do
                 pcall(function()
                     part.Size = data.Size
@@ -8438,7 +8661,7 @@ local function GetTriggerBotTarget()
     local mode = getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Mode or "Legit"
     local fovRadius = (getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Fov)
     if not fovRadius then
-        fovRadius = (mode == "Blatant") and 120 or 12 
+        fovRadius = (mode == "Blatant") and 120 or 12
     end
     local bestTarget = nil
     local bestDist = fovRadius
@@ -8461,7 +8684,6 @@ local function GetTriggerBotTarget()
 
         local dist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
         if dist < bestDist then
-
             if IsPositionVisible(cam.CFrame.Position, hitPart.Position, char, cam) then
                 bestTarget = char
                 bestDist = dist
@@ -8471,7 +8693,6 @@ local function GetTriggerBotTarget()
 
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LP then
-
             local isTeammate = false
             if IsBronxDuels() or IsDuelist() then
                 local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
@@ -8575,7 +8796,6 @@ task.spawn(function()
             break
         end
         if getgenv().TRIGGERBOT_CFG and getgenv().TRIGGERBOT_CFG.Enabled then
-
             local activeTool = nil
             pcall(function()
                 local char = LP.Character
@@ -8598,7 +8818,6 @@ task.spawn(function()
                 local mode = getgenv().TRIGGERBOT_CFG.Mode or "Legit"
 
                 if mode == "Legit" then
-
                     local isAuto = false
                     if activeTool then
                         isAuto = activeTool:GetAttribute("Automatic") == true
@@ -8610,8 +8829,7 @@ task.spawn(function()
                     if isAuto then
                         PressTrigger()
                     else
-
-                        ReleaseTrigger() 
+                        ReleaseTrigger()
                         local delay = getgenv().TRIGGERBOT_CFG.Delay or 0.05
                         if tick() - lastTriggerClick > delay then
                             lastTriggerClick = tick()
@@ -8666,7 +8884,6 @@ task.spawn(function()
                             end
                         end
                     else
-
                         local isAuto = false
                         if activeTool then
                             isAuto = activeTool:GetAttribute("Automatic") == true
@@ -8687,11 +8904,9 @@ task.spawn(function()
                     end
                 end
             else
-
                 ReleaseTrigger()
             end
         else
-
             ReleaseTrigger()
         end
     end
