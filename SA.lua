@@ -6995,6 +6995,9 @@ if gameDetected then
         local target = nil
         local dist = getgenv().SILENT_CFG.FOV
 
+        -- =========================================
+        -- [HITMARK - TARGET SHOOTS CHECK]
+        -- =========================================
         local tsFolder = workspace:FindFirstChild("TargetShoots")
         if tsFolder then
             for _, child in pairs(tsFolder:GetChildren()) do
@@ -7028,6 +7031,9 @@ if gameDetected then
                 if IsIgnoredPlayer(p) then
                     return
                 end
+                -- =========================================
+                -- [BRONX DUELS / DUELIST - TEAMCHECK]
+                -- =========================================
                 if IsBronxDuels() or IsDuelist() then
                     local enemiesFolder = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Match") and
                         LP.Data.Match:FindFirstChild("Enemies")
@@ -7053,6 +7059,9 @@ if gameDetected then
                         end
                     end
                 else
+                    -- =========================================
+                    -- [MURDER VS SHERIFF - TEAMCHECK]
+                    -- =========================================
                     if IsMurderVsSheriff() then
                         if getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
                             local myTeam = LP:GetAttribute("Team")
@@ -7062,6 +7071,9 @@ if gameDetected then
                             end
                         end
                     else
+                        -- =========================================
+                        -- [DEFAULT / OTHER GAMES - TEAMCHECK]
+                        -- =========================================
                         local myTeamFolder = getgenv().MY_TEAM_CACHE
                         local isTeammate = myTeamFolder and myTeamFolder:FindFirstChild(p.Name)
                         if isTeammate and getgenv().ESP_CFG and getgenv().ESP_CFG.IgnoreTeam then
@@ -7227,7 +7239,7 @@ if gameDetected then
         if hookActive and not checkcaller() and not ignoreSilentRay and typeof(self) == "Instance" and self == workspace then
             if method == "Raycast" then
                 local args = table.pack(...)
-                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 0.5 then
+                if typeof(args[1]) == "Vector3" and typeof(args[2]) == "Vector3" and args[2].Magnitude > 150 then
                     local chance = math.random(1, 100)
                     if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
                         local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
@@ -7272,7 +7284,7 @@ if gameDetected then
             elseif method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
                 local args = table.pack(...)
                 local ray = args[1]
-                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 0.5 then
+                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 150 then
                     local chance = math.random(1, 100)
                     if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
                         local newDir = RedirectRay(ray.Origin, ray.Direction)
@@ -7293,7 +7305,7 @@ if gameDetected then
     local oldRaycast
     oldRaycast = hookfunction(workspace.Raycast, function(self, origin, direction, params)
         if not checkcaller() and ((getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)) and not ignoreSilentRay then
-            if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" and direction.Magnitude > 0.5 then
+            if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" and direction.Magnitude > 150 then
                 local chance = math.random(1, 100)
                 if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
                     local target = getgenv().KILLAURA_ACTIVE_TARGET or GetCachedTarget()
@@ -7338,7 +7350,7 @@ if gameDetected then
     oldFindPartOnRay = hookfunction(workspace.FindPartOnRay,
         function(self, ray, ignoreInstance, terrainCellsAreCubes, ignoreWater)
             if not checkcaller() and ((getgenv().SILENT_CFG and getgenv().SILENT_CFG.Enabled) or (getgenv().KILLAURA_ACTIVE_TARGET ~= nil)) and not ignoreSilentRay then
-                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 0.5 then
+                if typeof(ray) == "Ray" and ray.Direction.Magnitude > 150 then
                     local chance = math.random(1, 100)
                     if chance <= (getgenv().SILENT_CFG.HitChance or 100) then
                         local newDir = RedirectRay(ray.Origin, ray.Direction)
